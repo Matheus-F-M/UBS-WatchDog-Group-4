@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace Bran.Domain.Strategy
 {
-    public class DailyLimitRule : IComplianceRule
+    public class TransactionDailyLimitRule : IComplianceRule
     {
         private readonly decimal _dailyLimit;
         public string Name => "Daily Limit Surpassed";
 
-        public DailyLimitRule(decimal dailyLimit)
+        public TransactionDailyLimitRule(decimal dailyLimit)
         {
             _dailyLimit = dailyLimit;
         }

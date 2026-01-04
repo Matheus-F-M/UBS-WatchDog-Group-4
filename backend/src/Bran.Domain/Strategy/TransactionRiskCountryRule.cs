@@ -8,12 +8,12 @@ using Bran.Domain.ContextObjects;
 
 namespace Bran.Domain.ComplianceRules
 {
-    public class RiskCountryRule : IComplianceRule
+    public class TransactionRiskCountryRule : IComplianceRule
     {
         private readonly HashSet<string> _riskCountries;
         public string Name => "Transfer to Risk Country";
 
-        public RiskCountryRule(IEnumerable<string> riskCountries)
+        public TransactionRiskCountryRule(IEnumerable<string> riskCountries)
         {
             _riskCountries = new HashSet<string>(riskCountries, StringComparer.OrdinalIgnoreCase);
         }

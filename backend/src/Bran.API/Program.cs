@@ -1,7 +1,8 @@
 //using Bran.Application.Interfaces;
-//using Bran.Infrastructure.Data;
+using Bran.Infrastructure.Persistence;
 //using Bran.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using Serilog;
 using System;
 
@@ -32,10 +33,10 @@ builder.Services.AddCors(options =>
 });
 
 // DbContext (PostgreSQL)
-/*builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContext<DbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"))
-);*/
+);
 
 // Dependency Injection
 //builder.Services.AddScoped<IClienteRepository, ClienteRepository>();

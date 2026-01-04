@@ -63,7 +63,7 @@ namespace Bran.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IReadOnlyCollection<Client>> GetByRiskLevelAsync(RiskLevel riskLevel)
+        public async Task<IReadOnlyCollection<Client>> GetByRiskLevelAsync(ClientRiskLevel riskLevel)
         {
             return await _context.Clients
                 .Where(c => c.RiskLevel == riskLevel)

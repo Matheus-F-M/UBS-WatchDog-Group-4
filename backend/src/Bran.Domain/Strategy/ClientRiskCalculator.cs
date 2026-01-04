@@ -6,11 +6,11 @@ using System.Text;
 
 namespace Bran.Domain.Strategy
 {
-    public class RiskCalculator
+    public class ClientRiskCalculator
     {
-        private readonly IEnumerable<IRiskRule> _rules;
+        private readonly IEnumerable<IClientRiskRule> _rules;
 
-        public RiskCalculator(IEnumerable<IRiskRule> rules)
+        public ClientRiskCalculator(IEnumerable<IClientRiskRule> rules)
         {
             _rules = rules;
         }

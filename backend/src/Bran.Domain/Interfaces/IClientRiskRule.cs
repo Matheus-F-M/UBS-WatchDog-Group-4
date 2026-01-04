@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Bran.Domain.Interfaces
 {
-    public interface IRiskRule
+    public interface IClientRiskRule
     {
         int CalculatePoints(Client client);
     }

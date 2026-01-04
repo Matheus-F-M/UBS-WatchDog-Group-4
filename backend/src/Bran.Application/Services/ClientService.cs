@@ -10,11 +10,11 @@ namespace Bran.Application.Services
 {
     public class ClientService
     {
-        private readonly IRiskCountriesRepository _countryRiskRepository;
+        private readonly ICountriesRepository _countryRiskRepository;
         private readonly IClientsRepository _clientRepository;
 
         public ClientService(
-            IRiskCountriesRepository countryRiskRepository,
+            ICountriesRepository countryRiskRepository,
             IClientsRepository clientRepository)
         {
             _countryRiskRepository = countryRiskRepository;
@@ -36,12 +36,12 @@ namespace Bran.Application.Services
                 type
             );
 
-            var rules = new List<IRiskRule>
+            var rules = new List<IClientRiskRule>
         {
             new ClientTypeRiskRule(),
         };
 
-            var calculator = new RiskCalculator(rules);
+            var calculator = new ClientRiskCalculator(rules);
 
             var points = calculator.Calculate(client);
 

@@ -13,7 +13,7 @@ namespace Bran.Domain.Entities
         public Guid Id { get; private set; }
         public string Name { get; private set; }
         public string Country { get; private set; }
-        public RiskLevel RiskLevel { get; private set; }
+        public ClientRiskLevel RiskLevel { get; private set; }
         public KycStatus KycStatus { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime UpdatedAt { get; private set; }
@@ -40,17 +40,17 @@ namespace Bran.Domain.Entities
         }
         public override string ToString()
         {
-            return $"Client - ID: {Id}, Name: {Name}, Country: {Country}, RiskLevel: {RiskLevel}, KycStatus: {KycStatus}, CreatedAt: {CreatedAt}, UpdatedAt: {UpdatedAt}, isPF: {isPF}";
+            return $"Client - ID: {Id}, Name: {Name}, Country: {Country}, RiskLevel: {RiskLevel}, KycStatus: {KycStatus}, CreatedAt: {CreatedAt}, UpdatedAt: {UpdatedAt}, Type: {Type}";
         }
 
         public void ApplyRiskPoints(int points)
         {
             if (points < 5)
-                RiskLevel = RiskLevel.Low;
+                RiskLevel = ClientRiskLevel.Low;
             else if (points < 10)
-                RiskLevel = RiskLevel.Medium;
+                RiskLevel = ClientRiskLevel.Medium;
             else
-                RiskLevel = RiskLevel.High;
+                RiskLevel = ClientRiskLevel.High;
         }
     }
 }

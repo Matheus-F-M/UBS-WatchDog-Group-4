@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Bran.Domain.Strategy
 {
-    public class ClientTypeRiskRule : IRiskRule
+    public class ClientTypeRiskRule : IClientRiskRule
     {
         public int CalculatePoints(Client client)
         {
