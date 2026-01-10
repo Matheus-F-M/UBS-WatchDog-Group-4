@@ -1,6 +1,9 @@
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
+  const navigate = useNavigate();
+  
   return (
     <div className="min-h-screen bg-gray-50">
 {/* Main Content Area */}
@@ -34,6 +37,7 @@ export default function HomePage() {
                   className="w-40 h-40 rounded-full flex items-center justify-center text-lg shadow-lg hover:scale-105 transition-transform"
                   title="Clientes"
                   aria-label="Clientes"
+                  onClick={() => navigate('/dashboard/clients')}
                 >
                   <span className="text-2xl">📁</span>
                 </Button>

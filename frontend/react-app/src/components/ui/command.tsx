@@ -1,3 +1,7 @@
+/* LEARNING NOTES FOR PAT
+  Use this with Popover to create a dropdown command menu
+*/
+
 import * as React from "react"
 import { Command as CommandPrimitive } from "cmdk"
 import { SearchIcon } from "lucide-react"

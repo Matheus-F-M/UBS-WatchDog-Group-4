@@ -25,7 +25,8 @@ import AuthLayout from "./pages/auth-pages/AuthLayout.tsx"; // Authlayout is for
 
 import Dashboard from "./pages/dashboard-pages/Dashboard.tsx"; // Dashboard layout
 import Home from "./pages/dashboard-pages/HomePage.tsx"; // Dashboard home page
-import ClientPage from "./pages/dashboard-pages/ClientPage.tsx";
+import ClientPage from "./pages/dashboard-pages/ClientPage.tsx"; // Client page
+import TransactionPage from "./pages/dashboard-pages/TransactionPage.tsx"; // Transaction page
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
@@ -39,6 +40,7 @@ createRoot(document.getElementById("root")!).render(
       <Route path="dashboard" element={<Dashboard />}>
         <Route index element={<Home />} />
         <Route path="clients" element={<ClientPage />} />
+        <Route path="transactions" element={<TransactionPage />} />
       </Route>
     </Routes>
   </BrowserRouter>

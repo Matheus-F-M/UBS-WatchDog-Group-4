@@ -65,7 +65,7 @@ export default function Dashboard() {
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
-                  <NavigationMenuLink href="#" className="px-2 py-1">Home</NavigationMenuLink>
+                  <NavigationMenuLink href="/dashboard" className="px-2 py-1">Home</NavigationMenuLink>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
@@ -73,7 +73,7 @@ export default function Dashboard() {
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <NavigationMenuLink href="#clientes" className="px-2 py-1">Clientes</NavigationMenuLink>
+                  <NavigationMenuLink href="/dashboard/clients" className="px-2 py-1">Clientes</NavigationMenuLink>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
