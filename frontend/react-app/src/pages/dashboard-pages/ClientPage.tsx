@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -200,59 +200,62 @@ function CurrencyCombobox({
 
 const initialClientData: Client[] = [
   {
-    id: "1",
-    nome: "João",
-    sobrenome: "Silva",
+    id: "123456",
+    nome: "Fulano",
+    sobrenome: "Ciclano",
     cpfCnpj: validateCpfCnpj("123.456.789-00")!,
     pais: "Brasil",
     kycStatus: "Aprovado",
     monthlyIncome: 5000,
     monthlyIncomeCurrency: "BRL",
   },
-  {
-    id: "2",
-    nome: "Maria",
-    sobrenome: "Santos",
-    cpfCnpj: validateCpfCnpj("987.654.321-00")!,
-    pais: "Brasil",
-    kycStatus: "Pendente",
-    monthlyIncome: 7500,
-    monthlyIncomeCurrency: "BRL",
-  },
-  {
-    id: "3",
-    nome: "Pedro",
-    sobrenome: "Oliveira",
-    cpfCnpj: validateCpfCnpj("12.345.678/0001-90")!,
-    pais: "Brasil",
-    kycStatus: "Em Análise",
-    companyCapital: 500000,
-    companyCapitalCurrency: "BRL",
-  },
-  {
-    id: "4",
-    nome: "Ana",
-    sobrenome: "Costa",
-    cpfCnpj: validateCpfCnpj("456.789.123-00")!,
-    pais: "Portugal",
-    kycStatus: "Aprovado",
-    monthlyIncome: 6000,
-    monthlyIncomeCurrency: "EUR",
-  },
-  {
-    id: "5",
-    nome: "Carlos",
-    sobrenome: "Ferreira",
-    cpfCnpj: validateCpfCnpj("321.654.987-00")!,
-    pais: "Brasil",
-    kycStatus: "Rejeitado",
-    monthlyIncome: 4500,
-    monthlyIncomeCurrency: "BRL",
-  },
 ];
 
+// API Base URL - Update this when backend is ready
+const API_BASE_URL = "/api/clients";
+
+// API helper functions
+const clientsApi = {
+  // Fetch all clients
+  getAll: async (): Promise<Client[]> => {
+    const response = await fetch(API_BASE_URL);
+    if (!response.ok) throw new Error("Failed to fetch clients");
+    return response.json();
+  },
+
+  // Create new client
+  create: async (client: Omit<Client, "id">): Promise<Client> => {
+    const response = await fetch(API_BASE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(client),
+    });
+    if (!response.ok) throw new Error("Failed to create client");
+    return response.json();
+  },
+
+  // Update client
+  update: async (id: string, client: Client): Promise<Client> => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(client),
+    });
+    if (!response.ok) throw new Error("Failed to update client");
+    return response.json();
+  },
+
+  // Delete client
+  delete: async (id: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) throw new Error("Failed to delete client");
+  },
+};
+
 export default function ClientPage() {
-  const [clientData, setClientData] = useState<Client[]>(initialClientData);
+  const [clientData, setClientData] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [editedClient, setEditedClient] = useState<Client | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -266,6 +269,28 @@ export default function ClientPage() {
     pais: "",
     kycStatus: "Pendente",
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch clients on component mount
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  const fetchClients = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const clients = await clientsApi.getAll();
+      setClientData(clients);
+    } catch (err) {
+      setError("Erro ao carregar clientes. Usando dados de exemplo.");
+      // Fallback to initial data if API fails
+      setClientData([initialClientData[0]]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleOpenSheet = (client: Client) => {
     setSelectedClient(client);
@@ -276,19 +301,31 @@ export default function ClientPage() {
   /**
    * Handles new data for current or new clients
    */
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editedClient) {
       const validated = validateCpfCnpj(editedClient.cpfCnpj);
       if (!validated) {
         alert("CPF/CNPJ inválido. Use 000.000.000-00 ou 00.000.000/0000-00");
         return;
       }
-      setClientData(
-        clientData.map((c) =>
-          c.id === editedClient.id ? { ...editedClient, cpfCnpj: validated } : c
-        )
-      );
-      setIsOpen(false);
+
+      setIsLoading(true);
+      setError(null);
+      try {
+        const updatedClient = await clientsApi.update(editedClient.id, {
+          ...editedClient,
+          cpfCnpj: validated,
+        });
+        setClientData(
+          clientData.map((c) => (c.id === updatedClient.id ? updatedClient : c))
+        );
+        setIsOpen(false);
+      } catch (err) {
+        setError("Erro ao salvar cliente");
+        alert("Erro ao salvar cliente");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -304,18 +341,28 @@ export default function ClientPage() {
   /**
    * Uses Alert Dialogue to confirm a deletion action
    */
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (clientToDelete) {
-      setClientData(clientData.filter((c) => c.id !== clientToDelete));
-      setDeleteDialogOpen(false);
-      setClientToDelete(null);
+      setIsLoading(true);
+      setError(null);
+      try {
+        await clientsApi.delete(clientToDelete);
+        setClientData(clientData.filter((c) => c.id !== clientToDelete));
+        setDeleteDialogOpen(false);
+        setClientToDelete(null);
+      } catch (err) {
+        setError("Erro ao deletar cliente");
+        alert("Erro ao deletar cliente");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   /**
    * Handles adding a new client
    */
-  const handleAddClient = () => {
+  const handleAddClient = async () => {
     if (
       !newClient.nome ||
       !newClient.sobrenome ||
@@ -332,35 +379,41 @@ export default function ClientPage() {
       return;
     }
 
-    const nextId = (
-      Math.max(...clientData.map((c) => parseInt(c.id))) + 1
-    ).toString();
-    const clientToAdd: Client = {
-      id: nextId,
-      nome: newClient.nome,
-      sobrenome: newClient.sobrenome,
-      cpfCnpj: validated,
-      pais: newClient.pais,
-      kycStatus: newClient.kycStatus || "Pendente",
-      ...(newClient.monthlyIncome !== undefined && {
-        monthlyIncome: newClient.monthlyIncome,
-        monthlyIncomeCurrency: newClient.monthlyIncomeCurrency,
-      }),
-      ...(newClient.companyCapital !== undefined && {
-        companyCapital: newClient.companyCapital,
-        companyCapitalCurrency: newClient.companyCapitalCurrency,
-      }),
-    };
+    setIsLoading(true);
+    setError(null);
+    try {
+      const clientToAdd: Omit<Client, "id"> = {
+        nome: newClient.nome,
+        sobrenome: newClient.sobrenome,
+        cpfCnpj: validated,
+        pais: newClient.pais,
+        kycStatus: newClient.kycStatus || "Pendente",
+        ...(newClient.monthlyIncome !== undefined && {
+          monthlyIncome: newClient.monthlyIncome,
+          monthlyIncomeCurrency: newClient.monthlyIncomeCurrency,
+        }),
+        ...(newClient.companyCapital !== undefined && {
+          companyCapital: newClient.companyCapital,
+          companyCapitalCurrency: newClient.companyCapitalCurrency,
+        }),
+      };
 
-    setClientData([...clientData, clientToAdd]);
-    setAddDialogOpen(false);
-    setNewClient({
-      nome: "",
-      sobrenome: "",
-      cpfCnpj: "" as CpfCnpj,
-      pais: "",
-      kycStatus: "Pendente",
-    });
+      const createdClient = await clientsApi.create(clientToAdd);
+      setClientData([...clientData, createdClient]);
+      setAddDialogOpen(false);
+      setNewClient({
+        nome: "",
+        sobrenome: "",
+        cpfCnpj: "" as CpfCnpj,
+        pais: "",
+        kycStatus: "Pendente",
+      });
+    } catch (err) {
+      setError("Erro ao criar cliente");
+      alert("Erro ao criar cliente");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -369,70 +422,87 @@ export default function ClientPage() {
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Clientes</h2>
 
-          <div className="mb-4">
-            <Button onClick={() => setAddDialogOpen(true)}>
+          {error && (
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-800">
+              {error}
+            </div>
+          )}
+
+          <div className="mb-4 flex gap-2">
+            <Button onClick={() => setAddDialogOpen(true)} disabled={isLoading}>
               Adicionar Cliente
             </Button>
+            {isLoading && (
+              <span className="text-sm text-gray-500 self-center">
+                Carregando...
+              </span>
+            )}
           </div>
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Nome</TableHead>
-                <TableHead>Sobrenome</TableHead>
-                <TableHead>CPF/CNPJ</TableHead>
-                <TableHead>País</TableHead>
-                <TableHead>KYC Status</TableHead>
-                <TableHead>Ações</TableHead>
-                <TableHead>Remover</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {clientData.map((client) => (
-                <TableRow key={client.id}>
-                  <TableCell>{client.id}</TableCell>
-                  <TableCell>{client.nome}</TableCell>
-                  <TableCell>{client.sobrenome}</TableCell>
-                  <TableCell>{client.cpfCnpj}</TableCell>
-                  <TableCell>{client.pais}</TableCell>
-                  <TableCell
-                    className={
-                      client.kycStatus === "Aprovado"
-                        ? "text-green-600 font-semibold"
-                        : client.kycStatus === "Pendente"
-                        ? "text-yellow-600"
-                        : client.kycStatus === "Em Análise"
-                        ? "text-blue-600"
-                        : client.kycStatus === "Rejeitado"
-                        ? "text-red-600 font-semibold"
-                        : "text-gray-600"
-                    }
-                  >
-                    {client.kycStatus}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleOpenSheet(client)}
-                    >
-                      Ver/Editar
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(client.id)}
-                    >
-                      ❌
-                    </Button>
-                  </TableCell>
+          {isLoading && clientData.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              Carregando clientes...
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Sobrenome</TableHead>
+                  <TableHead>CPF/CNPJ</TableHead>
+                  <TableHead>País</TableHead>
+                  <TableHead>KYC Status</TableHead>
+                  <TableHead>Ações</TableHead>
+                  <TableHead>Remover</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {clientData.map((client) => (
+                  <TableRow key={client.id}>
+                    <TableCell>{client.id}</TableCell>
+                    <TableCell>{client.nome}</TableCell>
+                    <TableCell>{client.sobrenome}</TableCell>
+                    <TableCell>{client.cpfCnpj}</TableCell>
+                    <TableCell>{client.pais}</TableCell>
+                    <TableCell
+                      className={
+                        client.kycStatus === "Aprovado"
+                          ? "text-green-600 font-semibold"
+                          : client.kycStatus === "Pendente"
+                          ? "text-yellow-600"
+                          : client.kycStatus === "Em Análise"
+                          ? "text-blue-600"
+                          : client.kycStatus === "Rejeitado"
+                          ? "text-red-600 font-semibold"
+                          : "text-gray-600"
+                      }
+                    >
+                      {client.kycStatus}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleOpenSheet(client)}
+                      >
+                        Ver/Editar
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(client.id)}
+                      >
+                        ❌
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </div>
       </div>
 
@@ -599,14 +669,17 @@ export default function ClientPage() {
             </div>
           )}
 
-
           <SheetFooter className="flex justify-between">
-            
-            <Button onClick={handleSave}>
-                Salvar alterações
+
+            <Button onClick={handleSave} disabled={isLoading}>
+              {isLoading ? "Salvando..." : "Salvar alterações"}
             </Button>
 
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+              disabled={isLoading}
+            >
               Cancelar
             </Button>
 
@@ -618,9 +691,11 @@ export default function ClientPage() {
                   setIsOpen(false);
                 }
               }}
+              disabled={isLoading}
             >
               Remover Cliente
             </Button>
+            
           </SheetFooter>
         </SheetContent>
       </Sheet>
@@ -808,10 +883,16 @@ export default function ClientPage() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAddDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setAddDialogOpen(false)}
+              disabled={isLoading}
+            >
               Cancelar
             </Button>
-            <Button onClick={handleAddClient}>Adicionar</Button>
+            <Button onClick={handleAddClient} disabled={isLoading}>
+              {isLoading ? "Adicionando..." : "Adicionar"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
