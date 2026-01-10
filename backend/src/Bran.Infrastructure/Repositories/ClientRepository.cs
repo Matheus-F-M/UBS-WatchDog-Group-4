@@ -46,7 +46,7 @@ namespace Bran.Infrastructure.Repositories
 
         public async Task DeleteAsync(Guid clientId)
         {
-            var client = await GetByIdAsync(clientId);
+            var client = await _context.Clients.FindAsync(clientId);
             if (client != null)
             {
                 _context.Clients.Remove(client);

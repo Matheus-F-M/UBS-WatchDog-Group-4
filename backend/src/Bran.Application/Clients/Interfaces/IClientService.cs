@@ -13,5 +13,6 @@ namespace Bran.Application.Clients.Interfaces
         Task<Client?> UpdateAsync(Guid clientId, string name, string country, ClientType type, double income);
         Task<Client?> GetByIdAsync(Guid clientId);
         Task<IReadOnlyCollection<Client>> GetAllAsync();
+        Task<bool> DeleteAsync(Guid clientId);
     }
 }

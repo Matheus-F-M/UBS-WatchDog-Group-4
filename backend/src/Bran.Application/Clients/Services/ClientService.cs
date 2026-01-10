@@ -64,5 +64,17 @@ namespace Bran.Application.Clients.Services
         {
             return await _clientRepository.GetAllAsync();
         }
+
+        public async Task<bool> DeleteAsync(Guid clientId)
+        {
+            var exists = await _clientRepository.ExistsAsync(clientId);
+
+            if (!exists)
+                return false;
+
+            await _clientRepository.DeleteAsync(clientId);
+
+            return true;
+        }
     }
 }
