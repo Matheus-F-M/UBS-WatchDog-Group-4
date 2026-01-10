@@ -28,6 +28,25 @@ namespace Bran.API.Controllers
 
             return Ok(client);
         }
+
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> Update(
+            Guid id,
+            [FromBody] UpdateClientRequest request)
+        {
+            var client = await _clientService.UpdateAsync(
+                id,
+                request.Name,
+                request.Country,
+                request.Type,
+                request.Income
+            );
+
+            if (client is null)
+                return NotFound();
+
+            return Ok(client);
+        }
     }
 
 }

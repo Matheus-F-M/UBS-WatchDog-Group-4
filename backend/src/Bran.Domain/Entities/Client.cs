@@ -54,5 +54,14 @@ namespace Bran.Domain.Entities
             else
                 RiskLevel = ClientRiskLevel.High;
         }
+
+        public void UpdateBasicInfo(string name, string country, ClientType type, double income)
+        {
+            Name = name;
+            Country = country;
+            Type = type;
+            Income = income;
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 }
