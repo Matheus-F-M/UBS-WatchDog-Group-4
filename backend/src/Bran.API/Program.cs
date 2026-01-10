@@ -1,6 +1,8 @@
-//using Bran.Application.Interfaces;
+using Bran.Application.Clients.Interfaces;
+using Bran.Application.Clients.Services;
+using Bran.Domain.Interfaces;
 using Bran.Infrastructure.Persistence;
-//using Bran.Infrastructure.Repositories;
+using Bran.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Serilog;
@@ -32,14 +34,19 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod());
 });
 
-// DbContext (PostgreSQL)
-builder.Services.AddDbContext<DbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection"))
-);
+//Application
+builder.Services.AddScoped<IClientService, ClientService>();
 
-// Dependency Injection
-//builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
+//Repositories
+builder.Services.AddScoped<IClientsRepository, ClientRepository>();
+builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
+
+// Dependency Injection/DbContext (PostgreSQL)
+builder.Services.AddDbContext<BranDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    )
+);
 
 var app = builder.Build();
 

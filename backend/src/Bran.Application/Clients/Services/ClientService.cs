@@ -1,14 +1,12 @@
-﻿using Bran.Domain.Entities;
+﻿using Bran.Application.Clients.Interfaces;
+using Bran.Domain.Entities;
 using Bran.Domain.Interfaces;
 using Bran.Domain.Strategy;
 using Bran.Domain.ValueObjects;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Bran.Application.Services
+namespace Bran.Application.Clients.Services
 {
-    public class ClientService
+    public class ClientService : IClientService
     {
         private readonly ICountriesRepository _countryRiskRepository;
         private readonly IClientsRepository _clientRepository;
@@ -26,20 +24,20 @@ namespace Bran.Application.Services
             string document,
             ClientType type,
             string country,
-            decimal income)
+            double income)
         {
-
             var client = new Client(
                 name,
                 country,
                 document,
-                type
+                type,
+                income
             );
 
             var rules = new List<IClientRiskRule>
-        {
-            new ClientTypeRiskRule(),
-        };
+            {
+                new ClientTypeRiskRule(),
+            };
 
             var calculator = new ClientRiskCalculator(rules);
 
@@ -52,5 +50,4 @@ namespace Bran.Application.Services
             return client;
         }
     }
-
 }
