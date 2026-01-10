@@ -21,12 +21,15 @@ namespace Bran.Infrastructure.Repositories
 
         public async Task<Client?> GetByIdAsync(Guid clientId)
         {
-            return await _context.Clients.FindAsync(clientId);
+            return await _context.Clients
+                .FirstOrDefaultAsync(c => c.Id == clientId);
         }
 
         public async Task<IReadOnlyCollection<Client>> GetAllAsync()
         {
-            return await _context.Clients.ToListAsync();
+            return await _context.Clients
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task AddAsync(Client client)

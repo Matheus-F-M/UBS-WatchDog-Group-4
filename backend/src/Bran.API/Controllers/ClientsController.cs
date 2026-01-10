@@ -30,22 +30,54 @@ namespace Bran.API.Controllers
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(
-            Guid id,
-            [FromBody] UpdateClientRequest request)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateClientRequest request)
         {
-            var client = await _clientService.UpdateAsync(
-                id,
-                request.Name,
-                request.Country,
-                request.Type,
-                request.Income
-            );
+            var client = await _clientService.UpdateAsync(id, request.Name, request.Country, request.Type, request.Income);
+
+            if (client is null) return NotFound();
+
+            return Ok(client);
+        }
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var client = await _clientService.GetByIdAsync(id);
 
             if (client is null)
                 return NotFound();
 
-            return Ok(client);
+            var response = new ClientResponse
+            {
+                Id = client.Id,
+                Name = client.Name,
+                Country = client.Country,
+                Type = client.Type,
+                Income = client.Income,
+                RiskLevel = client.RiskLevel,
+                KycStatus = client.KycStatus
+            };
+
+            return Ok(response);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var clients = await _clientService.GetAllAsync();
+
+            var response = clients.Select(client => new ClientResponse
+            {
+                Id = client.Id,
+                Name = client.Name,
+                Country = client.Country,
+                Type = client.Type,
+                Income = client.Income,
+                RiskLevel = client.RiskLevel,
+                KycStatus = client.KycStatus
+            });
+
+            return Ok(response);
         }
     }
 

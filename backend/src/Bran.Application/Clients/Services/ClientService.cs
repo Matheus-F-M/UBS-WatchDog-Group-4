@@ -54,5 +54,15 @@ namespace Bran.Application.Clients.Services
 
             return client;
         }
+
+        public async Task<Client?> GetByIdAsync(Guid clientId)
+        {
+            return await _clientRepository.GetByIdAsync(clientId);
+        }
+
+        public async Task<IReadOnlyCollection<Client>> GetAllAsync()
+        {
+            return await _clientRepository.GetAllAsync();
+        }
     }
 }
