@@ -58,6 +58,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
+/* 00000000000000000000000000000000000000000
+   ------------ CODE STARTS HERE -----------
+   00000000000000000000000000000000000000000 */
+
 // Create branded types for CPF and CNPJ
 type CPF = string & { __brand: "CPF" };
 type CNPJ = string & { __brand: "CNPJ" };
@@ -78,7 +82,10 @@ type Client = {
   // There are two types of currency for clarity reasons
 };
 
-// CPF/CNPJ Validation functions
+/* -----------------------------------------
+   ----- CPF/CNPJ Validation functions -----
+   ----------------------------------------- */
+  
 /**
  * Checks if the given value is a valid CPF.
  * @param value String
@@ -105,8 +112,77 @@ function validateCpfCnpj(value: string): CpfCnpj | null {
   if (isCNPJ(value)) return value as CNPJ;
   return null;
 }
+/* -----------------------------------------
+   ------------------ END ------------------
+   ----------------------------------------- */
 
-// Currency list
+const initialClientData: Client[] = [
+  {
+    id: "123456",
+    nome: "Fulano",
+    sobrenome: "Ciclano",
+    cpfCnpj: validateCpfCnpj("123.456.789-00")!,
+    pais: "Brasil",
+    kycStatus: "Aprovado",
+    monthlyIncome: 5000,
+    monthlyIncomeCurrency: "BRL",
+  },
+];
+
+
+/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+   -------- API IMPLEMENTATION HERE --------
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
+
+// API Base URL - Update this when backend is ready
+const API_BASE_URL = "/api/clients";
+
+// API helper functions
+const clientsApi = {
+  // Fetch all clients
+  getAll: async (): Promise<Client[]> => {
+    const response = await fetch(API_BASE_URL);
+    if (!response.ok) throw new Error("Failed to fetch clients");
+    return response.json();
+  },
+
+  // Create new client
+  create: async (client: Omit<Client, "id">): Promise<Client> => {
+    const response = await fetch(API_BASE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(client),
+    });
+    if (!response.ok) throw new Error("Failed to create client");
+    return response.json();
+  },
+
+  // Update client
+  update: async (id: string, client: Client): Promise<Client> => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(client),
+    });
+    if (!response.ok) throw new Error("Failed to update client");
+    return response.json();
+  },
+
+  // Delete client
+  delete: async (id: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) throw new Error("Failed to delete client");
+  },
+};
+/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+   ------------------ END ------------------
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
+
+/* -----------------------------------------
+   ---------- Currency functions -----------
+   ----------------------------------------- */
 const currencies = [
   { value: "BRL", label: "BRL - Brazilian Real" },
   { value: "USD", label: "USD - US Dollar" },
@@ -197,62 +273,14 @@ function CurrencyCombobox({
     </Popover>
   );
 }
+/* -----------------------------------------
+   ------------------ END ------------------
+   ----------------------------------------- */
 
-const initialClientData: Client[] = [
-  {
-    id: "123456",
-    nome: "Fulano",
-    sobrenome: "Ciclano",
-    cpfCnpj: validateCpfCnpj("123.456.789-00")!,
-    pais: "Brasil",
-    kycStatus: "Aprovado",
-    monthlyIncome: 5000,
-    monthlyIncomeCurrency: "BRL",
-  },
-];
 
-// API Base URL - Update this when backend is ready
-const API_BASE_URL = "/api/clients";
-
-// API helper functions
-const clientsApi = {
-  // Fetch all clients
-  getAll: async (): Promise<Client[]> => {
-    const response = await fetch(API_BASE_URL);
-    if (!response.ok) throw new Error("Failed to fetch clients");
-    return response.json();
-  },
-
-  // Create new client
-  create: async (client: Omit<Client, "id">): Promise<Client> => {
-    const response = await fetch(API_BASE_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(client),
-    });
-    if (!response.ok) throw new Error("Failed to create client");
-    return response.json();
-  },
-
-  // Update client
-  update: async (id: string, client: Client): Promise<Client> => {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(client),
-    });
-    if (!response.ok) throw new Error("Failed to update client");
-    return response.json();
-  },
-
-  // Delete client
-  delete: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
-      method: "DELETE",
-    });
-    if (!response.ok) throw new Error("Failed to delete client");
-  },
-};
+/* 00000000000000000000000000000000000000000
+   ---------- CLIENT PAGE START ------------
+   00000000000000000000000000000000000000000 */
 
 export default function ClientPage() {
   const [clientData, setClientData] = useState<Client[]>([]);
@@ -277,6 +305,9 @@ export default function ClientPage() {
     fetchClients();
   }, []);
 
+  /**
+   * Fetches client data from the API and handles loading and error states.
+   */
   const fetchClients = async () => {
     setIsLoading(true);
     setError(null);
@@ -292,6 +323,10 @@ export default function ClientPage() {
     }
   };
 
+  /**
+   * Opens the side sheet when trying to view/edit a client.
+   * @param client Client
+   */
   const handleOpenSheet = (client: Client) => {
     setSelectedClient(client);
     setEditedClient({ ...client });
@@ -299,7 +334,7 @@ export default function ClientPage() {
   };
 
   /**
-   * Handles new data for current or new clients
+   * Saves the edited client data within the sheet to the API and updates the table
    */
   const handleSave = async () => {
     if (editedClient) {
@@ -359,9 +394,9 @@ export default function ClientPage() {
     }
   };
 
-  /**
-   * Handles adding a new client
-   */
+  /** -----------------------------------------
+   *  ------ Handles adding a new client ------
+      ----------------------------------------- */
   const handleAddClient = async () => {
     if (
       !newClient.nome ||
@@ -373,6 +408,7 @@ export default function ClientPage() {
       return;
     }
 
+    // Catch invalid CPF/CNPJ
     const validated = validateCpfCnpj(newClient.cpfCnpj);
     if (!validated) {
       alert("CPF/CNPJ inválido. Use 000.000.000-00 ou 00.000.000/0000-00");
@@ -415,6 +451,9 @@ export default function ClientPage() {
       setIsLoading(false);
     }
   };
+  /*  -----------------------------------------
+      ------------------ END ------------------
+      ----------------------------------------- */
 
   return (
     <div className="p-8">
