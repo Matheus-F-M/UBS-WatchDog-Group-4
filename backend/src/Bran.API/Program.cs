@@ -1,5 +1,7 @@
 using Bran.Application.Clients.Interfaces;
 using Bran.Application.Clients.Services;
+using Bran.Application.Countries.Interfaces;
+using Bran.Application.Countries.Services;
 using Bran.Domain.Interfaces;
 using Bran.Infrastructure.Persistence;
 using Bran.Infrastructure.Repositories;
@@ -36,6 +38,7 @@ builder.Services.AddCors(options =>
 
 //Application
 builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<ICountryService, CountryService>();
 
 //Repositories
 builder.Services.AddScoped<IClientsRepository, ClientRepository>();
@@ -62,6 +65,20 @@ app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 
 app.UseCors("AllowReact");
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
+app.UseCors("FrontendPolicy");
 
 app.UseAuthorization();
 
