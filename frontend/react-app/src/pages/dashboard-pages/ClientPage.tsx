@@ -1,5 +1,21 @@
+/* IF WE HAD MORE TIME
+  1) The filter dialog could allow for multiple names/ids/KYC statuses/etc.
+
+*/
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  type Client,
+  type CPF,
+  type CNPJ,
+  type CpfCnpj,
+  isCPF,
+  isCNPJ,
+  validateCpfCnpj,
+  currencies,
+  formatCurrency,
+} from "@/types/globalTypes";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -63,61 +79,7 @@ import {
    ------------ CODE STARTS HERE -----------
    00000000000000000000000000000000000000000 */
 
-// Create branded types for CPF and CNPJ
-type CPF = string & { __brand: "CPF" };
-type CNPJ = string & { __brand: "CNPJ" };
-type CpfCnpj = CPF | CNPJ;
-
-// Define the Client type
-type Client = {
-  id: string;
-  nome: string;
-  sobrenome: string;
-  cpfCnpj: CpfCnpj;
-  pais: string;
-  kycStatus: "Aprovado" | "Pendente" | "Em Análise" | "Rejeitado";
-  nivelDeRisco: "Baixo" | "Medio" | "Alto"; // Risk level calculated by backend API
-  monthlyIncome?: number; // For CPF clients
-  companyCapital?: number; // For CNPJ clients
-  monthlyIncomeCurrency?: string; // Currency for monthly income
-  companyCapitalCurrency?: string; // Currency for company capital
-  // There are two types of currency for clarity reasons
-};
-
-/* -----------------------------------------
-   ----- CPF/CNPJ Validation functions -----
-   ----------------------------------------- */
-  
-/**
- * Checks if the given value is a valid CPF.
- * @param value String
- * @returns boolean
- */
-function isCPF(value: string): value is CPF {
-  return /^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(value);
-}
-/**
- * Checks if the given value is a valid CNPJ.
- * @param value String
- * @returns boolean
- */
-function isCNPJ(value: string): value is CNPJ {
-  return /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(value);
-}
-/**
- * Uses isCPF and isCNPJ to validate input and renforce types.
- * @param value String
- * @returns CpfCnpj | null
- */
-function validateCpfCnpj(value: string): CpfCnpj | null {
-  if (isCPF(value)) return value as CPF;
-  if (isCNPJ(value)) return value as CNPJ;
-  return null;
-}
-
-/* -----------------------------------------
-   ------------------ END ------------------
-   ----------------------------------------- */
+// Types and functions are imported from @/types/globalTypes
 
 const initialClientData: Client[] = [
   {
@@ -185,50 +147,8 @@ const clientsApi = {
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
 /* -----------------------------------------
-   ---------- Currency functions -----------
+   ---------- Currency Combobox ------------
    ----------------------------------------- */
-const currencies = [
-  { value: "BRL", label: "BRL - Brazilian Real" },
-  { value: "USD", label: "USD - US Dollar" },
-  { value: "EUR", label: "EUR - Euro" },
-  { value: "GBP", label: "GBP - British Pound" },
-  { value: "JPY", label: "JPY - Japanese Yen" },
-  { value: "CNY", label: "CNY - Chinese Yuan" },
-  { value: "CHF", label: "CHF - Swiss Franc" },
-  { value: "CAD", label: "CAD - Canadian Dollar" },
-  { value: "AUD", label: "AUD - Australian Dollar" },
-  { value: "INR", label: "INR - Indian Rupee" },
-  { value: "MXN", label: "MXN - Mexican Peso" },
-  { value: "ARS", label: "ARS - Argentine Peso" },
-  { value: "CLP", label: "CLP - Chilean Peso" },
-  { value: "COP", label: "COP - Colombian Peso" },
-  { value: "PEN", label: "PEN - Peruvian Sol" },
-  { value: "UYU", label: "UYU - Uruguayan Peso" },
-  { value: "ZAR", label: "ZAR - South African Rand" },
-  { value: "RUB", label: "RUB - Russian Ruble" },
-  { value: "KRW", label: "KRW - South Korean Won" },
-  { value: "SGD", label: "SGD - Singapore Dollar" },
-  { value: "HKD", label: "HKD - Hong Kong Dollar" },
-  { value: "NZD", label: "NZD - New Zealand Dollar" },
-  { value: "SEK", label: "SEK - Swedish Krona" },
-  { value: "NOK", label: "NOK - Norwegian Krone" },
-  { value: "DKK", label: "DKK - Danish Krone" },
-  { value: "PLN", label: "PLN - Polish Zloty" },
-  { value: "TRY", label: "TRY - Turkish Lira" },
-  { value: "THB", label: "THB - Thai Baht" },
-  { value: "MYR", label: "MYR - Malaysian Ringgit" },
-  { value: "IDR", label: "IDR - Indonesian Rupiah" },
-];
-
-/**
- * Formats a number to 2 decimal places, rounding down to the nearest hundredth.
- * @param value Number to format
- * @returns Formatted string with 2 decimal places
- */
-function formatCurrency(value: number): string {
-  const roundedDown = Math.floor(value * 100) / 100;
-  return roundedDown.toFixed(2);
-}
 
 /**
  * Creates a Currency Combobox using Popover and Command components.
