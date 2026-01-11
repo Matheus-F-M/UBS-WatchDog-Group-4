@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bran.Domain.ValueObjects
 {
-    public enum RiskLevel
+    public enum ClientRiskLevel
     {
         Low = 0,
         Medium = 1,

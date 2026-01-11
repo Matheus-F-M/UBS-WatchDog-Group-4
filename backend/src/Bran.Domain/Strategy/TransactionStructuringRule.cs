@@ -7,7 +7,7 @@ using Bran.Domain.ContextObjects;
 
 namespace Bran.Domain.ComplianceRules
 {
-    public class StructuringRule : IComplianceRule
+    public class TransactionStructuringRule : IComplianceRule
     {
         private readonly decimal _thresholdAmount;
         private readonly int _minTransactionCount;
@@ -15,7 +15,7 @@ namespace Bran.Domain.ComplianceRules
 
         public string Name => "Structuring Detected";
 
-        public StructuringRule(decimal thresholdAmount, int minTransactionCount, int daysWindow)
+        public TransactionStructuringRule(decimal thresholdAmount, int minTransactionCount, int daysWindow)
         {
             _thresholdAmount = thresholdAmount;
             _minTransactionCount = minTransactionCount;
