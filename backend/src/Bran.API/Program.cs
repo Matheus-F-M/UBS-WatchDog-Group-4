@@ -51,6 +51,18 @@ builder.Services.AddDbContext<BranDbContext>(options =>
     )
 );
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
 
 // ---------------- PIPELINE ----------------
@@ -65,18 +77,6 @@ app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 
 app.UseCors("AllowReact");
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("FrontendPolicy",
-        policy =>
-        {
-            policy
-                .WithOrigins("http://localhost:5173")
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        });
-});
 
 app.UseCors("FrontendPolicy");
 
