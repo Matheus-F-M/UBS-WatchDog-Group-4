@@ -15,6 +15,8 @@ namespace Bran.Domain.Interfaces
         Task AddAsync(Country country, CancellationToken ct = default);
         Task DeleteAsync(string countryName, CancellationToken ct = default);
         CountryRiskLevel GetRiskLevel(string countryCode);
+        Task<IReadOnlyCollection<Country>> GetAllAsync();
+        Task<Country?> GetByCodeAsync(string code);
 
     }
 }
