@@ -98,8 +98,7 @@ export const clientSchema = z.object({
   pais: z.string().min(1, "País obrigatório"), // <<<< STRING: OK
   kycStatus: z.enum(["Aprovado", "Pendente", "Em Análise", "Rejeitado"]), // <<<< STRING ENUM: Remover "Em Análise"
   nivelDeRisco: z.enum(["Baixo", "Medio", "Alto"]), // <<<< STRING ENUM: OK
-  monthlyIncome: moneyAmountSchema.optional(), // <<<< OK mas coletar essa informação do back ("income")
-  companyCapital: moneyAmountSchema.optional(), // <<<< OK mas coletar essa informação do back ("income")
+  income: moneyAmountSchema.optional(), // <<<< OK mas coletar essa informação do back ("income")
   // monthlyIncomeCurrency: currencySchema.optional(), // <<<< This will come from the backend later
   // companyCapitalCurrency: currencySchema.optional(), // <<<< This will come from the backend later
 });

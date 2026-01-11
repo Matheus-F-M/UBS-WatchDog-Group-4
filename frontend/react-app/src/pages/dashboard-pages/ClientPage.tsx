@@ -90,8 +90,8 @@ const initialClientData: Client[] = [
     pais: "Brasil",
     kycStatus: "Aprovado",
     nivelDeRisco: "Baixo",
-    monthlyIncome: 5000.7,
-    // monthlyIncomeCurrency: "BRL",
+    income: 5000.7,
+    // incomeCurrency: "BRL",
   },
 ];
 
@@ -103,13 +103,63 @@ const initialClientData: Client[] = [
 // API Base URL - Update this when backend is ready
 const API_BASE_URL = "http://localhost:5131/api/v1/clients";
 
+/**
+ * Maps a backend client object to the Client type used in the frontend.
+ * @param backendClient any : the client in the backend database
+ * @returns Client : the mapped client to the parameters used in the frontend
+ */
+  const mapBackendClient = (backendClient: any): Client => {
+console.log("Full Backend Client Object:", backendClient);
+console.log("Backend Government ID:", backendClient.governmentId);
+      return {
+      id: backendClient.id || "none",
+      nome: backendClient.name || "none",
+      cpfCnpj: validateCpfCnpj(backendClient.governmentId) || "000.000.000-00",
+      pais: backendClient.country || "none",
+      kycStatus: (backendClient.kycStatus === 0)? "Pendente"
+        : (backendClient.kycStatus === 1)? "Aprovado"
+        : (backendClient.kycStatus === 2)? "Rejeitado"
+        : "Pendente",
+      nivelDeRisco: (backendClient.riskLevel === 0)? "Baixo"
+        : (backendClient.riskLevel === 1)? "Medio"
+        : (backendClient.riskLevel === 2)? "Alto"
+        : "Medio",
+      income: backendClient.income,
+    }
+  }
+
+/**
+ * Maps a frontend client object to the backend client format.
+ * @param client Client : frontend client
+ * @returns any : backend client
+ */
+const reverseMapBackendClient = (client: Client): any => {
+  return {
+    id: client.id,
+    name: client.nome,
+    governmentId: client.cpfCnpj,
+    country: client.pais,
+    kycStatus: (client.kycStatus === "Pendente")? 0
+      : (client.kycStatus === "Aprovado")? 1
+      : (client.kycStatus === "Rejeitado")? 2
+      : 0,
+    riskLevel: (client.nivelDeRisco === "Baixo")? 0
+      : (client.nivelDeRisco === "Medio")? 1
+      : (client.nivelDeRisco === "Alto")? 2
+      : 1,
+    income: client.income,
+  }
+}
+
 // API helper functions
 const clientsApi = {
   // Fetch all clients
   getAll: async (): Promise<Client[]> => {
     const response = await fetch(API_BASE_URL);
     if (!response.ok) throw new Error("Failed to fetch clients");
-    return response.json();
+const rawData = await response.json();
+console.log("Raw API Response from getAll:", rawData);
+    return rawData.map(mapBackendClient);
   },
 
   // Create new client
@@ -117,10 +167,10 @@ const clientsApi = {
     const response = await fetch(API_BASE_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(client),
+      body: JSON.stringify(reverseMapBackendClient(client as Client)),
     });
     if (!response.ok) throw new Error("Failed to create client");
-    return response.json();
+    return mapBackendClient(await response.json());
   },
 
   // Update client
@@ -128,10 +178,11 @@ const clientsApi = {
     const response = await fetch(`${API_BASE_URL}/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(client),
+      body: JSON.stringify(reverseMapBackendClient(client as Client)),
     });
     if (!response.ok) throw new Error("Failed to update client");
-    return response.json();
+    const rawClient = await response.json();
+    return mapBackendClient(rawClient);
   },
 
   // Delete client
@@ -217,7 +268,7 @@ function CurrencyCombobox({
    00000000000000000000000000000000000000000 */
 
 export default function ClientPage() {
-  const [clientData, setClientData] = useState<Client[]>([]);
+  const [clientData, setClientData] = useState<Client[]>([]); // Where all the information of our customers are
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [editedClient, setEditedClient] = useState<Client | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -268,37 +319,13 @@ export default function ClientPage() {
   // END Column visibility state
   // --------------------------------------
 
-/* ---------------------------------------
+/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    ------- Fetch Clients from API --------
-   --------------------------------------- */
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
   // Fetch clients on component mount
   useEffect(() => {
     fetchClients();
   }, []);
-
-/**
- * Maps a backend client object to the Client type used in the frontend.
- * @param backendClient any : the client in the backend database
- * @returns Client : the mapped client to the parameters used in the frontend
- */
-  const mapBackendClient = (backendClient: any): Client => {
-    return {
-      id: backendClient.id || "none",
-      nome: backendClient.name || "none",
-      cpfCnpj: backendClient.cpfCnpj || "000.000.000-00",
-      pais: backendClient.country || "none",
-      kycStatus: (backendClient.kycStatus === 0)? "Pendente"
-        : (backendClient.kycStatus === 1)? "Aprovado"
-        : (backendClient.kycStatus === 2)? "Rejeitado"
-        : "Pendente",
-      nivelDeRisco: (backendClient.riskLevel === 0)? "Baixo"
-        : (backendClient.riskLevel === 1)? "Medio"
-        : (backendClient.riskLevel === 2)? "Alto"
-        : "Medio",
-      monthlyIncome: backendClient.income,
-      companyCapital: backendClient.income,
-    }
-  }
 
   /**
    * Fetches client data from the API and handles loading and error states.
@@ -307,9 +334,7 @@ export default function ClientPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const rawClients = await clientsApi.getAll();
-      const mappedClients = rawClients.map(mapBackendClient);
-      setClientData(mappedClients);
+      setClientData(await clientsApi.getAll());
     } catch (err) {
       setError("Erro ao carregar clientes. Usando dados de exemplo.");
       // Fallback to initial data if API fails
@@ -318,9 +343,9 @@ export default function ClientPage() {
       setIsLoading(false);
     }
   };
-/* ---------------------------------------
+/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    ------------ END FETCHING -------------
-   --------------------------------------- */
+   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
   /**
    * Opens the side sheet when trying to view/edit a client.
@@ -423,13 +448,9 @@ export default function ClientPage() {
         cpfCnpj: validated,
         pais: newClient.pais,
         kycStatus: newClient.kycStatus || "Pendente",
-        ...(newClient.monthlyIncome !== undefined && {
-          monthlyIncome: newClient.monthlyIncome,
-          // monthlyIncomeCurrency: newClient.monthlyIncomeCurrency,
-        }),
-        ...(newClient.companyCapital !== undefined && {
-          companyCapital: newClient.companyCapital,
-          // companyCapitalCurrency: newClient.companyCapitalCurrency,
+        ...(newClient.income !== undefined && {
+          income: newClient.income,
+          // incomeCurrency: newClient.incomeCurrency,
         }),
         nivelDeRisco: newClient.nivelDeRisco || "Medio", // <<<< TODO using backend api
       };
@@ -503,7 +524,6 @@ export default function ClientPage() {
                 <TableRow>
                   {visibleColumns.id && <TableHead>ID</TableHead>}
                   {visibleColumns.nome && <TableHead>Nome</TableHead>}
-                  {/*visibleColumns.sobrenome && <TableHead>Sobrenome</TableHead>*/}
                   {visibleColumns.cpfCnpj && <TableHead>CPF/CNPJ</TableHead>}
                   {visibleColumns.pais && <TableHead>País</TableHead>}
                   {visibleColumns.capital && <TableHead>Capital</TableHead>}
@@ -519,16 +539,14 @@ export default function ClientPage() {
                 {clientData
                   .filter((client) => {
                     const nomeSearch = nameFilter.toLowerCase();
-                    const sobrenomeSearch = sobrenomeFilter.toLowerCase();
                     const idSearch = idFilter.toLowerCase();
                     const cpfCnpjSearch = cpfCnpjFilter.toLowerCase();
                     const paisSearch = paisFilter.toLowerCase();
                     const capitalSearch = capitalFilter.toLowerCase();
                     
-                    // Check if capital filter matches monthlyIncome or companyCapital
+                    // Check if capital filter matches income or income
                     const capitalMatch = capitalSearch === "" || 
-                      (client.monthlyIncome?.toString().toLowerCase().includes(capitalSearch)) ||
-                      (client.companyCapital?.toString().toLowerCase().includes(capitalSearch));
+                      (client.income?.toString().toLowerCase().includes(capitalSearch));
                     
                     // Check KYC Status filter
                     const kycMatch = kycStatusFilter === "" || client.kycStatus === kycStatusFilter;
@@ -552,17 +570,16 @@ console.log('Filtering Client:', client),
                   <TableRow key={client.id}>
                     {visibleColumns.id && <TableCell>{client.id}</TableCell>}
                     {visibleColumns.nome && <TableCell>{client.nome}</TableCell>}
-                    {/* {visibleColumns.sobrenome && <TableCell>{client.sobrenome}</TableCell>} */}
                     {visibleColumns.cpfCnpj && <TableCell>{client.cpfCnpj}</TableCell>}
                     {visibleColumns.pais && <TableCell>{client.pais}</TableCell>}
-                    {/* Re Add = ${client.monthlyIncomeCurrency || ''} as a condition*/}
-                    {/* Re Add = ${client.companyCapitalCurrency || ''} as a condition*/}
+                    {/* Re Add = ${client.incomeCurrency || ''} as a condition*/}
+                    {/* Re Add = ${client.incomeCurrency || ''} as a condition*/}
                     {visibleColumns.capital && (
                       <TableCell>
-                        {isCPF(client.cpfCnpj) && client.monthlyIncome
-                          ? `${formatCurrency(client.monthlyIncome)}/month`
-                          : isCNPJ(client.cpfCnpj) && client.companyCapital
-                          ? `${formatCurrency(client.companyCapital)}`
+                        {isCPF(client.cpfCnpj) && client.income
+                          ? `${formatCurrency(client.income)}/month`
+                          : isCNPJ(client.cpfCnpj) && client.income
+                          ? `${formatCurrency(client.income)}`
                           : '-'}
                       </TableCell>
                     )}
@@ -694,15 +711,15 @@ console.log('Filtering Client:', client),
               {isCPF(editedClient.cpfCnpj) && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="monthlyIncome">Renda Mensal</Label>
+                    <Label htmlFor="income">Renda Mensal</Label>
                     <Input
-                      id="monthlyIncome"
+                      id="income"
                       type="number"
-                      value={editedClient.monthlyIncome || ""}
+                      value={editedClient.income || ""}
                       onChange={(e) =>
                         setEditedClient({
                           ...editedClient,
-                          monthlyIncome: e.target.value
+                          income: e.target.value
                             ? parseFloat(e.target.value)
                             : undefined,
                         })
@@ -711,15 +728,15 @@ console.log('Filtering Client:', client),
                     />
                   </div>
                   {/* <div className="space-y-2">
-                    <Label htmlFor="monthlyIncomeCurrency">
+                    <Label htmlFor="incomeCurrency">
                       Moeda da Renda Mensal
                     </Label>
                     <CurrencyCombobox
-                      value={editedClient.monthlyIncomeCurrency || ""}
+                      value={editedClient.incomeCurrency || ""}
                       onChange={(val) =>
                         setEditedClient({
                           ...editedClient,
-                          monthlyIncomeCurrency: val,
+                          incomeCurrency: val,
                         })
                       }
                     />
@@ -730,15 +747,15 @@ console.log('Filtering Client:', client),
               {isCNPJ(editedClient.cpfCnpj) && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="companyCapital">Capital Social</Label>
+                    <Label htmlFor="income">Capital Social</Label>
                     <Input
-                      id="companyCapital"
+                      id="income"
                       type="number"
-                      value={editedClient.companyCapital || ""}
+                      value={editedClient.income || ""}
                       onChange={(e) =>
                         setEditedClient({
                           ...editedClient,
-                          companyCapital: e.target.value
+                          income: e.target.value
                             ? parseFloat(e.target.value)
                             : undefined,
                         })
@@ -747,15 +764,15 @@ console.log('Filtering Client:', client),
                     />
                   </div>
                   {/* <div className="space-y-2">
-                    <Label htmlFor="companyCapitalCurrency">
+                    <Label htmlFor="incomeCurrency">
                       Moeda do Capital Social
                     </Label>
                     <CurrencyCombobox
-                      value={editedClient.companyCapitalCurrency || ""}
+                      value={editedClient.incomeCurrency || ""}
                       onChange={(val) =>
                         setEditedClient({
                           ...editedClient,
-                          companyCapitalCurrency: val,
+                          incomeCurrency: val,
                         })
                       }
                     />
@@ -935,15 +952,15 @@ console.log('Filtering Client:', client),
             {newClient.cpfCnpj && isCPF(newClient.cpfCnpj as string) && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="new-monthlyIncome">Renda Mensal</Label>
+                  <Label htmlFor="new-income">Renda Mensal</Label>
                   <Input
-                    id="new-monthlyIncome"
+                    id="new-income"
                     type="number"
-                    value={newClient.monthlyIncome || ""}
+                    value={newClient.income || ""}
                     onChange={(e) =>
                       setNewClient({
                         ...newClient,
-                        monthlyIncome: e.target.value
+                        income: e.target.value
                           ? parseFloat(e.target.value)
                           : undefined,
                       })
@@ -952,13 +969,13 @@ console.log('Filtering Client:', client),
                   />
                 </div>
                 {/* <div className="space-y-2">
-                  <Label htmlFor="new-monthlyIncomeCurrency">
+                  <Label htmlFor="new-incomeCurrency">
                     Moeda da Renda Mensal
                   </Label>
                   <CurrencyCombobox
-                    value={newClient.monthlyIncomeCurrency || ""}
+                    value={newClient.incomeCurrency || ""}
                     onChange={(val) =>
-                      setNewClient({ ...newClient, monthlyIncomeCurrency: val })
+                      setNewClient({ ...newClient, incomeCurrency: val })
                     }
                   />
                 </div> */}
@@ -968,15 +985,15 @@ console.log('Filtering Client:', client),
             {newClient.cpfCnpj && isCNPJ(newClient.cpfCnpj as string) && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="new-companyCapital">Capital Social</Label>
+                  <Label htmlFor="new-income">Capital Social</Label>
                   <Input
-                    id="new-companyCapital"
+                    id="new-income"
                     type="number"
-                    value={newClient.companyCapital || ""}
+                    value={newClient.income || ""}
                     onChange={(e) =>
                       setNewClient({
                         ...newClient,
-                        companyCapital: e.target.value
+                        income: e.target.value
                           ? parseFloat(e.target.value)
                           : undefined,
                       })
@@ -985,15 +1002,15 @@ console.log('Filtering Client:', client),
                   />
                 </div>
                 {/* <div className="space-y-2">
-                  <Label htmlFor="new-companyCapitalCurrency">
+                  <Label htmlFor="new-incomeCurrency">
                     Moeda do Capital Social
                   </Label>
                   <CurrencyCombobox
-                    value={newClient.companyCapitalCurrency || ""}
+                    value={newClient.incomeCurrency || ""}
                     onChange={(val) =>
                       setNewClient({
                         ...newClient,
-                        companyCapitalCurrency: val,
+                        incomeCurrency: val,
                       })
                     }
                   />
