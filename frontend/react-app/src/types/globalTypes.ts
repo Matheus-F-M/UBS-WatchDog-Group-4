@@ -65,7 +65,7 @@ export function formatCurrency(value: number): string {
 }
 
 /* -----------------------------------------
-   -------------- CURRENCY -----------------
+   -------------- CURRENCY -----------------    <<<< This will come from the backend later
    ----------------------------------------- */
 
 // Define currencies array (can be exported and reused)
@@ -91,17 +91,17 @@ export type Currency = z.infer<typeof currencySchema>;
 
 // Client schema
 export const clientSchema = z.object({
-  id: z.string(),
-  nome: z.string().min(1, "Nome obrigatório"),
-  sobrenome: z.string().min(1, "Sobrenome obrigatório"),
-  cpfCnpj: cpfCnpjSchema,
-  pais: z.string().min(1, "País obrigatório"),
-  kycStatus: z.enum(["Aprovado", "Pendente", "Em Análise", "Rejeitado"]),
-  nivelDeRisco: z.enum(["Baixo", "Medio", "Alto"]),
-  monthlyIncome: moneyAmountSchema.optional(),
-  companyCapital: moneyAmountSchema.optional(),
-  monthlyIncomeCurrency: currencySchema.optional(),
-  companyCapitalCurrency: currencySchema.optional(),
+  id: z.string(), // <<<< STRING: OK
+  nome: z.string().min(1, "Nome obrigatório"), // <<<< STRING: OK
+  // sobrenome: z.string().min(1, "Sobrenome obrigatório"), // <<<< Remover Sobrenome
+  cpfCnpj: cpfCnpjSchema, // <<<< STRING: OK
+  pais: z.string().min(1, "País obrigatório"), // <<<< STRING: OK
+  kycStatus: z.enum(["Aprovado", "Pendente", "Em Análise", "Rejeitado"]), // <<<< STRING ENUM: Remover "Em Análise"
+  nivelDeRisco: z.enum(["Baixo", "Medio", "Alto"]), // <<<< STRING ENUM: OK
+  monthlyIncome: moneyAmountSchema.optional(), // <<<< OK mas coletar essa informação do back ("income")
+  companyCapital: moneyAmountSchema.optional(), // <<<< OK mas coletar essa informação do back ("income")
+  // monthlyIncomeCurrency: currencySchema.optional(), // <<<< This will come from the backend later
+  // companyCapitalCurrency: currencySchema.optional(), // <<<< This will come from the backend later
 });
 
 // Infer TypeScript type from Zod schema

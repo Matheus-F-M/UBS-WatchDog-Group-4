@@ -85,13 +85,13 @@ const initialClientData: Client[] = [
   {
     id: "123456",
     nome: "Fulano",
-    sobrenome: "Ciclano",
+    // sobrenome: "Ciclano",
     cpfCnpj: validateCpfCnpj("123.456.789-00")!,
     pais: "Brasil",
     kycStatus: "Aprovado",
     nivelDeRisco: "Baixo",
     monthlyIncome: 5000.7,
-    monthlyIncomeCurrency: "BRL",
+    // monthlyIncomeCurrency: "BRL",
   },
 ];
 
@@ -101,7 +101,7 @@ const initialClientData: Client[] = [
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
 // API Base URL - Update this when backend is ready
-const API_BASE_URL = "/api/clients";
+const API_BASE_URL = "http://localhost:5131/api/v1/clients";
 
 // API helper functions
 const clientsApi = {
@@ -227,7 +227,7 @@ export default function ClientPage() {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [newClient, setNewClient] = useState<Partial<Client>>({
     nome: "",
-    sobrenome: "",
+    // sobrenome: "",
     cpfCnpj: "" as CpfCnpj,
     pais: "",
     kycStatus: "Pendente",
@@ -268,10 +268,37 @@ export default function ClientPage() {
   // END Column visibility state
   // --------------------------------------
 
+/* ---------------------------------------
+   ------- Fetch Clients from API --------
+   --------------------------------------- */
   // Fetch clients on component mount
   useEffect(() => {
     fetchClients();
   }, []);
+
+/**
+ * Maps a backend client object to the Client type used in the frontend.
+ * @param backendClient any : the client in the backend database
+ * @returns Client : the mapped client to the parameters used in the frontend
+ */
+  const mapBackendClient = (backendClient: any): Client => {
+    return {
+      id: backendClient.id || "none",
+      nome: backendClient.name || "none",
+      cpfCnpj: backendClient.cpfCnpj || "000.000.000-00",
+      pais: backendClient.country || "none",
+      kycStatus: (backendClient.kycStatus === 0)? "Pendente"
+        : (backendClient.kycStatus === 1)? "Aprovado"
+        : (backendClient.kycStatus === 2)? "Rejeitado"
+        : "Pendente",
+      nivelDeRisco: (backendClient.riskLevel === 0)? "Baixo"
+        : (backendClient.riskLevel === 1)? "Medio"
+        : (backendClient.riskLevel === 2)? "Alto"
+        : "Medio",
+      monthlyIncome: backendClient.income,
+      companyCapital: backendClient.income,
+    }
+  }
 
   /**
    * Fetches client data from the API and handles loading and error states.
@@ -280,8 +307,9 @@ export default function ClientPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const clients = await clientsApi.getAll();
-      setClientData(clients);
+      const rawClients = await clientsApi.getAll();
+      const mappedClients = rawClients.map(mapBackendClient);
+      setClientData(mappedClients);
     } catch (err) {
       setError("Erro ao carregar clientes. Usando dados de exemplo.");
       // Fallback to initial data if API fails
@@ -290,6 +318,9 @@ export default function ClientPage() {
       setIsLoading(false);
     }
   };
+/* ---------------------------------------
+   ------------ END FETCHING -------------
+   --------------------------------------- */
 
   /**
    * Opens the side sheet when trying to view/edit a client.
@@ -368,7 +399,7 @@ export default function ClientPage() {
   const handleAddClient = async () => {
     if (
       !newClient.nome ||
-      !newClient.sobrenome ||
+      // !newClient.sobrenome ||
       !newClient.cpfCnpj ||
       !newClient.pais
     ) {
@@ -388,19 +419,19 @@ export default function ClientPage() {
     try {
       const clientToAdd: Omit<Client, "id"> = {
         nome: newClient.nome,
-        sobrenome: newClient.sobrenome,
+        // sobrenome: newClient.sobrenome,
         cpfCnpj: validated,
         pais: newClient.pais,
         kycStatus: newClient.kycStatus || "Pendente",
         ...(newClient.monthlyIncome !== undefined && {
           monthlyIncome: newClient.monthlyIncome,
-          monthlyIncomeCurrency: newClient.monthlyIncomeCurrency,
+          // monthlyIncomeCurrency: newClient.monthlyIncomeCurrency,
         }),
         ...(newClient.companyCapital !== undefined && {
           companyCapital: newClient.companyCapital,
-          companyCapitalCurrency: newClient.companyCapitalCurrency,
+          // companyCapitalCurrency: newClient.companyCapitalCurrency,
         }),
-        nivelDeRisco: newClient.nivelDeRisco || "Medio", // TODO using backend api
+        nivelDeRisco: newClient.nivelDeRisco || "Medio", // <<<< TODO using backend api
       };
 
       const createdClient = await clientsApi.create(clientToAdd);
@@ -408,7 +439,7 @@ export default function ClientPage() {
       setAddDialogOpen(false);
       setNewClient({
         nome: "",
-        sobrenome: "",
+        // sobrenome: "",
         cpfCnpj: "" as CpfCnpj,
         pais: "",
         kycStatus: "Pendente",
@@ -472,7 +503,7 @@ export default function ClientPage() {
                 <TableRow>
                   {visibleColumns.id && <TableHead>ID</TableHead>}
                   {visibleColumns.nome && <TableHead>Nome</TableHead>}
-                  {visibleColumns.sobrenome && <TableHead>Sobrenome</TableHead>}
+                  {/*visibleColumns.sobrenome && <TableHead>Sobrenome</TableHead>*/}
                   {visibleColumns.cpfCnpj && <TableHead>CPF/CNPJ</TableHead>}
                   {visibleColumns.pais && <TableHead>País</TableHead>}
                   {visibleColumns.capital && <TableHead>Capital</TableHead>}
@@ -506,11 +537,12 @@ export default function ClientPage() {
                     const riscoMatch = nivelDeRiscoFilter === "" || client.nivelDeRisco === nivelDeRiscoFilter;
                     
                     return (
-                      client.id.toLowerCase().includes(idSearch) &&
-                      client.nome.toLowerCase().includes(nomeSearch) &&
-                      client.sobrenome.toLowerCase().includes(sobrenomeSearch) &&
-                      client.cpfCnpj.toLowerCase().includes(cpfCnpjSearch) &&
-                      client.pais.toLowerCase().includes(paisSearch) &&
+console.log('Filtering Client:', client),
+                      client.id?.toLowerCase().includes(idSearch) &&
+                      client.nome?.toLowerCase().includes(nomeSearch) &&
+                      // client.sobrenome.toLowerCase().includes(sobrenomeSearch) &&
+                      client.cpfCnpj?.toLowerCase().includes(cpfCnpjSearch) &&
+                      client.pais?.toLowerCase().includes(paisSearch) &&
                       capitalMatch &&
                       kycMatch &&
                       riscoMatch
@@ -520,15 +552,17 @@ export default function ClientPage() {
                   <TableRow key={client.id}>
                     {visibleColumns.id && <TableCell>{client.id}</TableCell>}
                     {visibleColumns.nome && <TableCell>{client.nome}</TableCell>}
-                    {visibleColumns.sobrenome && <TableCell>{client.sobrenome}</TableCell>}
+                    {/* {visibleColumns.sobrenome && <TableCell>{client.sobrenome}</TableCell>} */}
                     {visibleColumns.cpfCnpj && <TableCell>{client.cpfCnpj}</TableCell>}
                     {visibleColumns.pais && <TableCell>{client.pais}</TableCell>}
+                    {/* Re Add = ${client.monthlyIncomeCurrency || ''} as a condition*/}
+                    {/* Re Add = ${client.companyCapitalCurrency || ''} as a condition*/}
                     {visibleColumns.capital && (
                       <TableCell>
                         {isCPF(client.cpfCnpj) && client.monthlyIncome
-                          ? `${client.monthlyIncomeCurrency || ''} ${formatCurrency(client.monthlyIncome)}/month`
+                          ? `${formatCurrency(client.monthlyIncome)}/month`
                           : isCNPJ(client.cpfCnpj) && client.companyCapital
-                          ? `${client.companyCapitalCurrency || ''} ${formatCurrency(client.companyCapital)}`
+                          ? `${formatCurrency(client.companyCapital)}`
                           : '-'}
                       </TableCell>
                     )}
@@ -618,7 +652,7 @@ export default function ClientPage() {
                 />
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="sobrenome">Sobrenome</Label>
                 <Input
                   id="sobrenome"
@@ -630,7 +664,7 @@ export default function ClientPage() {
                     })
                   }
                 />
-              </div>
+              </div> */}
 
               <div className="space-y-2">
                 <Label htmlFor="cpfCnpj">CPF/CNPJ</Label>
@@ -676,7 +710,7 @@ export default function ClientPage() {
                       placeholder="0.00"
                     />
                   </div>
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <Label htmlFor="monthlyIncomeCurrency">
                       Moeda da Renda Mensal
                     </Label>
@@ -689,7 +723,7 @@ export default function ClientPage() {
                         })
                       }
                     />
-                  </div>
+                  </div> */}
                 </>
               )}
 
@@ -712,7 +746,7 @@ export default function ClientPage() {
                       placeholder="0.00"
                     />
                   </div>
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <Label htmlFor="companyCapitalCurrency">
                       Moeda do Capital Social
                     </Label>
@@ -725,7 +759,7 @@ export default function ClientPage() {
                         })
                       }
                     />
-                  </div>
+                  </div> */}
                 </>
               )}
 
@@ -746,9 +780,6 @@ export default function ClientPage() {
                   </NativeSelectOption>
                   <NativeSelectOption value="Pendente">
                     Pendente
-                  </NativeSelectOption>
-                  <NativeSelectOption value="Em Análise">
-                    Em Análise
                   </NativeSelectOption>
                   <NativeSelectOption value="Rejeitado">
                     Rejeitado
@@ -862,7 +893,7 @@ export default function ClientPage() {
               />
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="new-sobrenome">Sobrenome *</Label>
               <Input
                 id="new-sobrenome"
@@ -871,7 +902,7 @@ export default function ClientPage() {
                   setNewClient({ ...newClient, sobrenome: e.target.value })
                 }
               />
-            </div>
+            </div> */}
 
             <div className="space-y-2">
               <Label htmlFor="new-cpfCnpj">CPF/CNPJ *</Label>
@@ -920,7 +951,7 @@ export default function ClientPage() {
                     placeholder="0.00"
                   />
                 </div>
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="new-monthlyIncomeCurrency">
                     Moeda da Renda Mensal
                   </Label>
@@ -930,7 +961,7 @@ export default function ClientPage() {
                       setNewClient({ ...newClient, monthlyIncomeCurrency: val })
                     }
                   />
-                </div>
+                </div> */}
               </>
             )}
 
@@ -953,7 +984,7 @@ export default function ClientPage() {
                     placeholder="0.00"
                   />
                 </div>
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="new-companyCapitalCurrency">
                     Moeda do Capital Social
                   </Label>
@@ -966,7 +997,7 @@ export default function ClientPage() {
                       })
                     }
                   />
-                </div>
+                </div> */}
               </>
             )}
 
@@ -987,9 +1018,6 @@ export default function ClientPage() {
                 </NativeSelectOption>
                 <NativeSelectOption value="Pendente">
                   Pendente
-                </NativeSelectOption>
-                <NativeSelectOption value="Em Análise">
-                  Em Análise
                 </NativeSelectOption>
                 <NativeSelectOption value="Rejeitado">
                   Rejeitado
