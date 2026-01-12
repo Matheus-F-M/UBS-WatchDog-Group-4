@@ -1,0 +1,47 @@
+
+REQUISITOS FRONTEND
+1. **Login**
+    - Login com um usuário e senha (mock).
+2. **Tela de Clientes**
+    - Lista com filtros básicos + formulário de cadastro
+3. **Tela de Transações**
+    - Cadastro de transação + histórico por cliente.
+4. **Tela de Alertas**
+    - Lista de alertas com filtros por status/severidade.
+    - Botão para atualizar status do alerta.
+5. **Tela de Relatório**
+    - Resumo por cliente (gráfico de barras/pizza + tabela).
+      
+      
+      {/* These are the Authentication Routes */}
+      <Route element={<AuthLayout />}>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Route>
+
+      {/* These are the Dashboard Routes */}
+      <Route path="dashboard" element={<Dashboard />}>
+        <Route index element={<Home />} />
+        <Route path="user-settings" element={<UserSettings />} />
+        <Route path="compliance-settings" element={<ComplianceSettings />} />
+        
+        {/* These are the where the information of all Clients are */}
+        <Route path="clients" element={<Clients />}>
+          <Route index element={<ClientsList />} />
+
+-> Se der tempo, implementar um pop-out window para caso o usuário
+   queira abrir multiplas janelas com informações de multiplos clientes.
+          <Route path=":clientId" element={<ClientDetails />} />
+        </Route>
+
+        {/* These are the where the information of all Transactions and Alerts are */}
+        <Route path="transactions" element={<Transactions />}>
+          <Route index element={<TransactionHome />} />
+          <Route path="new-transaction" element={<NewTransaction />} />
+          <Route path="all-transactions" element={<AllTransactions />} />
+          <Route path="all-transactions/:transactionId" element={<TransactionDetails />} />
+          <Route path="alerts" element={<Alerts />} />
+          <Route path="alerts/:alertId" element={<AlertDetails />} />
+        </Route>
+
+      </Route>
