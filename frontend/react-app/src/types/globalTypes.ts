@@ -212,8 +212,6 @@ export const clientSchema = z.object({
   kycStatus: z.enum(["Aprovado", "Pendente", "Em Análise", "Rejeitado"]), // <<<< STRING ENUM: Remover "Em Análise"
   nivelDeRisco: z.enum(["Baixo", "Medio", "Alto"]), // <<<< STRING ENUM: OK
   income: moneyAmountSchema.optional(), // <<<< NUMBER: OK mas coletar essa informação do back ("income")
-  // monthlyIncomeCurrency: currencySchema.optional(), // <<<< This will come from the backend later
-  // companyCapitalCurrency: currencySchema.optional(), // <<<< This will come from the backend later
 });
 
 // Infer TypeScript type from Zod schema
@@ -224,14 +222,14 @@ export type Client = z.infer<typeof clientSchema>;
    ----------------------------------------- */
 
 export const transactionSchema = z.object({
-  id: z.string(), // STRING: TODO backend check
-  idCliente: z.string(), // STRING: TODO backend check
-  tipo: z.enum(["Depósito", "Saque", "Transferência"]), // ENUM<STRING>: TODO backend check
-  valor: moneyAmountSchema, // NUMBER: TODO backend check
-  moeda: currencySchema, // STRING: TODO backend check
-  contraparte: z.string().min(1, "Contraparte obrigatória"), // STRING (ID): TODO backend check [] ALERT: Conflito quando adicionando um novo cliente e no fetching
-  data: dateSchema, // STRING: TODO backend check
-  hora: timeSchema, // STRING: TODO backend check
+  id: z.string(), // STRING: OK
+  idCliente: z.string(), // STRING: OK
+  tipo: z.enum(["Depósito", "Saque", "Transferência"]), // ENUM<STRING>: OK
+  valor: moneyAmountSchema, // NUMBER: OK
+  moeda: currencySchema, // STRING: OK
+  contraparte: z.string().min(1, "Contraparte obrigatória"), // STRING (ID CONTRAPARTE): OK
+  data: dateSchema, // STRING: !! Colocar Data e Hora em uma string - talvez vc vai receber um tipo específico que não é string.
+  hora: timeSchema, // STRING: !! Colocar Data e Hora em uma string - talvez vc vai receber um tipo específico que não é string.
 });
 
 // Infer TypeScript type from Zod schema

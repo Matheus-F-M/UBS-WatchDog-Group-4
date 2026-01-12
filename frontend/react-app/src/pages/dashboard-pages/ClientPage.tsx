@@ -93,7 +93,6 @@ const initialClientData: Client[] = [
     kycStatus: "Aprovado",
     nivelDeRisco: "Baixo",
     income: 5000.7,
-    // incomeCurrency: "BRL",
   },
 ];
 
@@ -364,7 +363,6 @@ export default function ClientPage() {
         kycStatus: newClient.kycStatus || "Pendente",
         ...(newClient.income !== undefined && {
           income: newClient.income,
-          // incomeCurrency: newClient.incomeCurrency,
         }),
         nivelDeRisco: newClient.nivelDeRisco || "Medio", // <<<< TODO using backend api
       };
@@ -484,14 +482,12 @@ console.log('Filtering Client:', client),
                     {visibleColumns.nome && <TableCell>{client.nome}</TableCell>}
                     {visibleColumns.cpfCnpj && <TableCell>{client.cpfCnpj}</TableCell>}
                     {visibleColumns.pais && <TableCell>{client.pais}</TableCell>}
-                    {/* Re Add = ${client.incomeCurrency || ''} as a condition*/}
-                    {/* Re Add = ${client.incomeCurrency || ''} as a condition*/}
                     {visibleColumns.capital && (
                       <TableCell>
                         {isCPF(client.cpfCnpj) && client.income
-                          ? `${formatCurrency(client.income)}/month`
+                          ? `R$${formatCurrency(client.income)}/month`
                           : isCNPJ(client.cpfCnpj) && client.income
-                          ? `${formatCurrency(client.income)}`
+                          ? `R$${formatCurrency(client.income)}`
                           : '-'}
                       </TableCell>
                     )}
@@ -625,20 +621,6 @@ console.log('Filtering Client:', client),
                       placeholder="0.00"
                     />
                   </div>
-                  {/* <div className="space-y-2">
-                    <Label htmlFor="incomeCurrency">
-                      Moeda da Renda Mensal
-                    </Label>
-                    <CurrencyCombobox
-                      value={editedClient.incomeCurrency || ""}
-                      onChange={(val) =>
-                        setEditedClient({
-                          ...editedClient,
-                          incomeCurrency: val,
-                        })
-                      }
-                    />
-                  </div> */}
                 </>
               )}
 
@@ -661,20 +643,6 @@ console.log('Filtering Client:', client),
                       placeholder="0.00"
                     />
                   </div>
-                  {/* <div className="space-y-2">
-                    <Label htmlFor="incomeCurrency">
-                      Moeda do Capital Social
-                    </Label>
-                    <CurrencyCombobox
-                      value={editedClient.incomeCurrency || ""}
-                      onChange={(val) =>
-                        setEditedClient({
-                          ...editedClient,
-                          incomeCurrency: val,
-                        })
-                      }
-                    />
-                  </div> */}
                 </>
               )}
 
@@ -855,17 +823,6 @@ console.log('Filtering Client:', client),
                     placeholder="0.00"
                   />
                 </div>
-                {/* <div className="space-y-2">
-                  <Label htmlFor="new-incomeCurrency">
-                    Moeda da Renda Mensal
-                  </Label>
-                  <CurrencyCombobox
-                    value={newClient.incomeCurrency || ""}
-                    onChange={(val) =>
-                      setNewClient({ ...newClient, incomeCurrency: val })
-                    }
-                  />
-                </div> */}
               </>
             )}
 
@@ -888,20 +845,6 @@ console.log('Filtering Client:', client),
                     placeholder="0.00"
                   />
                 </div>
-                {/* <div className="space-y-2">
-                  <Label htmlFor="new-incomeCurrency">
-                    Moeda do Capital Social
-                  </Label>
-                  <CurrencyCombobox
-                    value={newClient.incomeCurrency || ""}
-                    onChange={(val) =>
-                      setNewClient({
-                        ...newClient,
-                        incomeCurrency: val,
-                      })
-                    }
-                  />
-                </div> */}
               </>
             )}
 

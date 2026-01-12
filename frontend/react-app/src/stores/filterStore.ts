@@ -42,6 +42,22 @@ interface ClientVisibleColumns {
   nivelDeRisco: boolean;
 }
 
+interface AlertFilters {
+  id: string;
+  idCliente: string;
+  idTransacao: string;
+  severidade: string;
+  status: string;
+}
+
+interface AlertVisibleColumns {
+  id: boolean;
+  idCliente: boolean;
+  idTransacao: boolean;
+  severidade: boolean;
+  status: boolean;
+}
+
 interface FilterState {
   // Transaction filters
   transactionFilters: TransactionFilters;
@@ -50,6 +66,10 @@ interface FilterState {
   // Client filters
   clientFilters: ClientFilters;
   clientVisibleColumns: ClientVisibleColumns;
+  
+  // Alert filters
+  alertFilters: AlertFilters;
+  alertVisibleColumns: AlertVisibleColumns;
   
   // Actions
   setTransactionFilter: (key: keyof TransactionFilters, value: string) => void;
@@ -61,6 +81,11 @@ interface FilterState {
   setClientColumnVisibility: (column: keyof ClientVisibleColumns, visible: boolean) => void;
   toggleClientColumn: (column: keyof ClientVisibleColumns) => void;
   resetClientFilters: () => void;
+  
+  setAlertFilter: (key: keyof AlertFilters, value: string) => void;
+  setAlertColumnVisibility: (column: keyof AlertVisibleColumns, visible: boolean) => void;
+  toggleAlertColumn: (column: keyof AlertVisibleColumns) => void;
+  resetAlertFilters: () => void;
 }
 
 const initialTransactionFilters: TransactionFilters = {
@@ -104,6 +129,22 @@ const initialClientColumns: ClientVisibleColumns = {
   nivelDeRisco: true,
 };
 
+const initialAlertFilters: AlertFilters = {
+  id: '',
+  idCliente: '',
+  idTransacao: '',
+  severidade: '',
+  status: '',
+};
+
+const initialAlertColumns: AlertVisibleColumns = {
+  id: true,
+  idCliente: true,
+  idTransacao: true,
+  severidade: true,
+  status: true,
+};
+
 export const useFilterStore = create<FilterState>()(
   persist(
     (set) => ({
@@ -114,6 +155,10 @@ export const useFilterStore = create<FilterState>()(
       // Initial client state
       clientFilters: initialClientFilters,
       clientVisibleColumns: initialClientColumns,
+      
+      // Initial alert state
+      alertFilters: initialAlertFilters,
+      alertVisibleColumns: initialAlertColumns,
       
       // Transaction actions
       setTransactionFilter: (key, value) =>
@@ -161,6 +206,30 @@ export const useFilterStore = create<FilterState>()(
       resetClientFilters: () =>
         set({
           clientFilters: initialClientFilters,
+        }),
+      
+      // Alert actions
+      setAlertFilter: (key, value) =>
+        set((state) => ({
+          alertFilters: { ...state.alertFilters, [key]: value },
+        })),
+        
+      setAlertColumnVisibility: (column, visible) =>
+        set((state) => ({
+          alertVisibleColumns: { ...state.alertVisibleColumns, [column]: visible },
+        })),
+        
+      toggleAlertColumn: (column) =>
+        set((state) => ({
+          alertVisibleColumns: {
+            ...state.alertVisibleColumns,
+            [column]: !state.alertVisibleColumns[column],
+          },
+        })),
+        
+      resetAlertFilters: () =>
+        set({
+          alertFilters: initialAlertFilters,
         }),
     }),
     {
