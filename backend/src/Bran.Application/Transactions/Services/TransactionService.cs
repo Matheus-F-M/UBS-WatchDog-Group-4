@@ -59,5 +59,10 @@ namespace Bran.Application.Transactions.Services
         {
             return await _transactionsRepository.GetAllAsync();
         }
+
+        public async Task<Transaction?> GetByIdAsync(Guid id)
+        {
+            return await _transactionsRepository.GetByIdAsync(id);
+        }
     }
 }

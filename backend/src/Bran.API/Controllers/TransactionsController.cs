@@ -54,5 +54,28 @@ namespace Bran.API.Controllers
 
             return Ok(response);
         }
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetTransactionById(Guid id)
+        {
+            var transaction = await _transactionService.GetByIdAsync(id);
+
+            if (transaction is null)
+                return NotFound();
+
+            var response = new TransactionResponse
+            {
+                Id = transaction.Id,
+                ClientId= transaction.ClientId,
+                TransactionType = transaction.TransactionType,
+                Amount = transaction.Amount,
+                Currency = transaction.Currency,
+                CounterpartyId = transaction.CounterpartyId,
+                DateHour = transaction.DateHour,
+                Country = transaction.Country
+            };
+
+            return Ok(response);
+        }
     }
 }
