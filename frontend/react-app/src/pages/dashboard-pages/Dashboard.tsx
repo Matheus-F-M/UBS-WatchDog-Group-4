@@ -1,6 +1,6 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import useAuthStore from "@/lib/authStore";
+import useAuthStore from "@/stores/authStore";
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -77,7 +77,7 @@ export default function Dashboard() {
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <NavigationMenuLink href="#transacoes" className="px-2 py-1">Transações</NavigationMenuLink>
+                  <NavigationMenuLink href="/dashboard/transactions" className="px-2 py-1">Transações</NavigationMenuLink>
                 </NavigationMenuItem>
 
               </NavigationMenuList>

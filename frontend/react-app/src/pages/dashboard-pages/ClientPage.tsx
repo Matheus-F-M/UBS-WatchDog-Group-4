@@ -3,8 +3,11 @@
 
 */
 
+import { clientsApi } from "@/api/clientAPI";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useFilterStore } from "@/stores/filterStore";
 import {
   type Client,
   type CPF,
@@ -85,7 +88,6 @@ const initialClientData: Client[] = [
   {
     id: "123456",
     nome: "Fulano",
-    // sobrenome: "Ciclano",
     cpfCnpj: validateCpfCnpj("123.456.789-00")!,
     pais: "Brasil",
     kycStatus: "Aprovado",
@@ -96,106 +98,7 @@ const initialClientData: Client[] = [
 ];
 
 
-/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-   -------- API IMPLEMENTATION HERE --------
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
-// API Base URL - Update this when backend is ready
-const API_BASE_URL = "http://localhost:5131/api/v1/clients";
-
-/**
- * Maps a backend client object to the Client type used in the frontend.
- * @param backendClient any : the client in the backend database
- * @returns Client : the mapped client to the parameters used in the frontend
- */
-  const mapBackendClient = (backendClient: any): Client => {
-console.log("Full Backend Client Object:", backendClient);
-console.log("Backend Government ID:", backendClient.governmentId);
-      return {
-      id: backendClient.id || "none",
-      nome: backendClient.name || "none",
-      cpfCnpj: validateCpfCnpj(backendClient.governmentId) || "000.000.000-00",
-      pais: backendClient.country || "none",
-      kycStatus: (backendClient.kycStatus === 0)? "Pendente"
-        : (backendClient.kycStatus === 1)? "Aprovado"
-        : (backendClient.kycStatus === 2)? "Rejeitado"
-        : "Pendente",
-      nivelDeRisco: (backendClient.riskLevel === 0)? "Baixo"
-        : (backendClient.riskLevel === 1)? "Medio"
-        : (backendClient.riskLevel === 2)? "Alto"
-        : "Medio",
-      income: backendClient.income,
-    }
-  }
-
-/**
- * Maps a frontend client object to the backend client format.
- * @param client Client : frontend client
- * @returns any : backend client
- */
-const reverseMapBackendClient = (client: Client): any => {
-  return {
-    id: client.id,
-    name: client.nome,
-    governmentId: client.cpfCnpj,
-    country: client.pais,
-    kycStatus: (client.kycStatus === "Pendente")? 0
-      : (client.kycStatus === "Aprovado")? 1
-      : (client.kycStatus === "Rejeitado")? 2
-      : 0,
-    riskLevel: (client.nivelDeRisco === "Baixo")? 0
-      : (client.nivelDeRisco === "Medio")? 1
-      : (client.nivelDeRisco === "Alto")? 2
-      : 1,
-    income: client.income,
-  }
-}
-
-// API helper functions
-const clientsApi = {
-  // Fetch all clients
-  getAll: async (): Promise<Client[]> => {
-    const response = await fetch(API_BASE_URL);
-    if (!response.ok) throw new Error("Failed to fetch clients");
-const rawData = await response.json();
-console.log("Raw API Response from getAll:", rawData);
-    return rawData.map(mapBackendClient);
-  },
-
-  // Create new client
-  create: async (client: Omit<Client, "id">): Promise<Client> => {
-    const response = await fetch(API_BASE_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(reverseMapBackendClient(client as Client)),
-    });
-    if (!response.ok) throw new Error("Failed to create client");
-    return mapBackendClient(await response.json());
-  },
-
-  // Update client
-  update: async (id: string, client: Client): Promise<Client> => {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(reverseMapBackendClient(client as Client)),
-    });
-    if (!response.ok) throw new Error("Failed to update client");
-    const rawClient = await response.json();
-    return mapBackendClient(rawClient);
-  },
-
-  // Delete client
-  delete: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/${id}`, {
-      method: "DELETE",
-    });
-    if (!response.ok) throw new Error("Failed to delete client");
-  },
-};
-/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-   ------------------ END ------------------
-   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
 /* -----------------------------------------
    ---------- Currency Combobox ------------
@@ -268,6 +171,7 @@ function CurrencyCombobox({
    00000000000000000000000000000000000000000 */
 
 export default function ClientPage() {
+  const [searchParams] = useSearchParams();
   const [clientData, setClientData] = useState<Client[]>([]); // Where all the information of our customers are
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [editedClient, setEditedClient] = useState<Client | null>(null);
@@ -278,7 +182,6 @@ export default function ClientPage() {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [newClient, setNewClient] = useState<Partial<Client>>({
     nome: "",
-    // sobrenome: "",
     cpfCnpj: "" as CpfCnpj,
     pais: "",
     kycStatus: "Pendente",
@@ -288,32 +191,44 @@ export default function ClientPage() {
   const [error, setError] = useState<string | null>(null);
 
   // --------------------------------------
-  // Column visibility state
-  // We are using this in the filter dialog
+  // Get filters and columns from Zustand store
   // --------------------------------------
-  const [visibleColumns, setVisibleColumns] = useState({
-    id: true,
-    nome: true,
-    sobrenome: true,
-    cpfCnpj: true,
-    pais: true,
-    capital: true,
-    kycStatus: true,
-    nivelDeRisco: true,
-  });
-  const [nameFilter, setNameFilter] = useState("");
-  const [sobrenomeFilter, setSobrenomeFilter] = useState("");
-  const [idFilter, setIdFilter] = useState("");
-  const [cpfCnpjFilter, setCpfCnpjFilter] = useState("");
-  const [paisFilter, setPaisFilter] = useState("");
-  const [capitalFilter, setCapitalFilter] = useState("");
-  const [kycStatusFilter, setKycStatusFilter] = useState("");
-  const [nivelDeRiscoFilter, setNivelDeRiscoFilter] = useState("");
+  const {
+    clientFilters,
+    clientVisibleColumns: visibleColumns,
+    setClientFilter,
+    toggleClientColumn,
+    resetClientFilters,
+  } = useFilterStore();
+
+  // Destructure filters for easier access
+  const nameFilter = clientFilters.nome;
+  const idFilter = clientFilters.id;
+  const cpfCnpjFilter = clientFilters.cpfCnpj;
+  const paisFilter = clientFilters.pais;
+  const capitalFilter = clientFilters.capital;
+  const kycStatusFilter = clientFilters.kycStatus;
+  const nivelDeRiscoFilter = clientFilters.nivelDeRisco;
+
+  // Check for parameters coming from URL to pre-fill filters
+  useEffect(() => {
+    const cpfCnpjParam = searchParams.get('cpfCnpj');
+    const idParam = searchParams.get('id');
+    
+    if (cpfCnpjParam) {
+      setClientFilter('cpfCnpj', cpfCnpjParam);
+    }
+    
+    if (idParam) {
+      setClientFilter('id', idParam);
+    }
+  }, [searchParams, setClientFilter]);
+
   /**
    * Toggles the visibility of a table column
    */
   const toggleColumn = (column: keyof typeof visibleColumns) => {
-    setVisibleColumns(prev => ({ ...prev, [column]: !prev[column] }));
+    toggleClientColumn(column);
   };
   // --------------------------------------
   // END Column visibility state
@@ -322,6 +237,7 @@ export default function ClientPage() {
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    ------- Fetch Clients from API --------
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
+
   // Fetch clients on component mount
   useEffect(() => {
     fetchClients();
@@ -424,7 +340,6 @@ export default function ClientPage() {
   const handleAddClient = async () => {
     if (
       !newClient.nome ||
-      // !newClient.sobrenome ||
       !newClient.cpfCnpj ||
       !newClient.pais
     ) {
@@ -444,7 +359,6 @@ export default function ClientPage() {
     try {
       const clientToAdd: Omit<Client, "id"> = {
         nome: newClient.nome,
-        // sobrenome: newClient.sobrenome,
         cpfCnpj: validated,
         pais: newClient.pais,
         kycStatus: newClient.kycStatus || "Pendente",
@@ -460,7 +374,6 @@ export default function ClientPage() {
       setAddDialogOpen(false);
       setNewClient({
         nome: "",
-        // sobrenome: "",
         cpfCnpj: "" as CpfCnpj,
         pais: "",
         kycStatus: "Pendente",
@@ -558,7 +471,6 @@ export default function ClientPage() {
 console.log('Filtering Client:', client),
                       client.id?.toLowerCase().includes(idSearch) &&
                       client.nome?.toLowerCase().includes(nomeSearch) &&
-                      // client.sobrenome.toLowerCase().includes(sobrenomeSearch) &&
                       client.cpfCnpj?.toLowerCase().includes(cpfCnpjSearch) &&
                       client.pais?.toLowerCase().includes(paisSearch) &&
                       capitalMatch &&
@@ -668,20 +580,6 @@ console.log('Filtering Client:', client),
                   }
                 />
               </div>
-
-              {/* <div className="space-y-2">
-                <Label htmlFor="sobrenome">Sobrenome</Label>
-                <Input
-                  id="sobrenome"
-                  value={editedClient.sobrenome}
-                  onChange={(e) =>
-                    setEditedClient({
-                      ...editedClient,
-                      sobrenome: e.target.value,
-                    })
-                  }
-                />
-              </div> */}
 
               <div className="space-y-2">
                 <Label htmlFor="cpfCnpj">CPF/CNPJ</Label>
@@ -910,17 +808,6 @@ console.log('Filtering Client:', client),
               />
             </div>
 
-            {/* <div className="space-y-2">
-              <Label htmlFor="new-sobrenome">Sobrenome *</Label>
-              <Input
-                id="new-sobrenome"
-                value={newClient.sobrenome || ""}
-                onChange={(e) =>
-                  setNewClient({ ...newClient, sobrenome: e.target.value })
-                }
-              />
-            </div> */}
-
             <div className="space-y-2">
               <Label htmlFor="new-cpfCnpj">CPF/CNPJ *</Label>
               <Input
@@ -1079,7 +966,7 @@ console.log('Filtering Client:', client),
               <Input
                 placeholder="Digite o ID..."
                 value={idFilter}
-                onChange={(e) => setIdFilter(e.target.value)}
+                onChange={(e) => setClientFilter('id', e.target.value)}
               />
             </div>
 
@@ -1088,7 +975,7 @@ console.log('Filtering Client:', client),
               <Input
                 placeholder="Digite o CPF ou CNPJ..."
                 value={cpfCnpjFilter}
-                onChange={(e) => setCpfCnpjFilter(e.target.value)}
+                onChange={(e) => setClientFilter('cpfCnpj', e.target.value)}
               />
             </div>
 
@@ -1097,7 +984,7 @@ console.log('Filtering Client:', client),
               <Input
                 placeholder="Digite o país..."
                 value={paisFilter}
-                onChange={(e) => setPaisFilter(e.target.value)}
+                onChange={(e) => setClientFilter('pais', e.target.value)}
               />
             </div>
 
@@ -1106,7 +993,7 @@ console.log('Filtering Client:', client),
               <Input
                 placeholder="Digite o valor do capital..."
                 value={capitalFilter}
-                onChange={(e) => setCapitalFilter(e.target.value)}
+                onChange={(e) => setClientFilter('capital', e.target.value)}
               />
             </div>
 {/* Side by Side KYC Status and Nível de Risco Filters */}
@@ -1118,7 +1005,7 @@ console.log('Filtering Client:', client),
                   <NativeSelect
                     id="kycStatusFilter"
                     value={kycStatusFilter}
-                    onChange={(e) => setKycStatusFilter(e.target.value)}
+                    onChange={(e) => setClientFilter('kycStatus', e.target.value)}
                   >
                     <NativeSelectOption value="">Todos</NativeSelectOption>
                     <NativeSelectOption value="Pendente">Pendente</NativeSelectOption>
@@ -1132,7 +1019,7 @@ console.log('Filtering Client:', client),
                   <NativeSelect
                     id="nivelDeRiscoFilter"
                     value={nivelDeRiscoFilter}
-                    onChange={(e) => setNivelDeRiscoFilter(e.target.value)}
+                    onChange={(e) => setClientFilter('nivelDeRisco', e.target.value)}
                   >
                     <NativeSelectOption value="">Todos</NativeSelectOption>
                     <NativeSelectOption value="Baixo">Baixo</NativeSelectOption>
@@ -1149,12 +1036,7 @@ console.log('Filtering Client:', client),
                 <Input
                   placeholder="Digite o nome..."
                   value={nameFilter}
-                  onChange={(e) => setNameFilter(e.target.value)}
-                />
-                <Input
-                  placeholder="Digite o sobrenome..."
-                  value={sobrenomeFilter}
-                  onChange={(e) => setSobrenomeFilter(e.target.value)}
+                  onChange={(e) => setClientFilter('nome', e.target.value)}
                 />
               </div>
             </div>
@@ -1180,16 +1062,6 @@ console.log('Filtering Client:', client),
                 />
                 <label htmlFor="col-nome" className="text-sm cursor-pointer">
                   Nome
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="col-sobrenome"
-                  checked={visibleColumns.sobrenome}
-                  onCheckedChange={() => toggleColumn('sobrenome')}
-                />
-                <label htmlFor="col-sobrenome" className="text-sm cursor-pointer">
-                  Sobrenome
                 </label>
               </div>
               <div className="flex items-center space-x-2">
@@ -1247,6 +1119,12 @@ console.log('Filtering Client:', client),
         </div>
 
           <DialogFooter>
+            <Button 
+              variant="secondary" 
+              onClick={() => resetClientFilters()}
+            >
+              Restaurar Padrão
+            </Button>
             <Button variant="outline" onClick={() => setFilterDialogOpen(false)}>
               Fechar
             </Button>

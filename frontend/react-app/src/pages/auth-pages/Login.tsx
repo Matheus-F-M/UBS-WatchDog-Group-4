@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useNavigate, Link } from "react-router-dom";
-import useAuthStore, { type AuthState } from "../../lib/authStore";
+import useAuthStore, { type AuthState } from "../../stores/authStore";
 import {
   Card,
   CardHeader,
