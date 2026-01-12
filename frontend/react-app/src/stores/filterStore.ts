@@ -4,22 +4,23 @@ import { persist } from 'zustand/middleware';
 interface TransactionFilters {
   id: string;
   idCliente: string;
+  nomeCliente: string;
   tipo: string;
   valor: string;
   moeda: string;
   contraparte: string;
-  data: string;
+  dataHora: string;
 }
 
 interface TransactionVisibleColumns {
   id: boolean;
   idCliente: boolean;
+  nomeCliente: boolean;
   tipo: boolean;
   valor: boolean;
   moeda: boolean;
   contraparte: boolean;
-  hora: boolean;
-  data: boolean;
+  dataHora: boolean;
 }
 
 interface ClientFilters {
@@ -91,22 +92,23 @@ interface FilterState {
 const initialTransactionFilters: TransactionFilters = {
   id: '',
   idCliente: '',
+  nomeCliente: '',
   tipo: '',
   valor: '',
   moeda: '',
   contraparte: '',
-  data: '',
+  dataHora: '',
 };
 
 const initialTransactionColumns: TransactionVisibleColumns = {
   id: true,
   idCliente: true,
+  nomeCliente: true,
   tipo: true,
   valor: true,
   moeda: true,
   contraparte: true,
-  hora: true,
-  data: true,
+  dataHora: true,
 };
 
 const initialClientFilters: ClientFilters = {

@@ -1,15 +1,19 @@
-import { API_CLIENT_BASE_URL } from "@/api/clientAPI";
+import { API_CLIENT_BASE_URL, clientsApi } from "@/api/clientAPI";
 import { transactionsApi } from "@/api/transactionAPI";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useFilterStore } from "@/stores/filterStore";
 import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import {
   type Transaction,
   type Currency,
@@ -32,24 +36,13 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from "@/components/ui/alert-dialog";
 
 /* 00000000000000000000000000000000000000000
    ------------ CODE STARTS HERE -----------
    00000000000000000000000000000000000000000 */
 
 // Initial transaction data for fallback
-const initialTransactionData: Transaction[] = [
+const initialTransactiondata: Transaction[] = [
   {
     id: "1",
     idCliente: "2bb1758e-6589-4a24-af8a-d28861fa3f36",
@@ -62,11 +55,13 @@ const initialTransactionData: Transaction[] = [
 ];
 
 export default function TransactionPage() {
-  const [transactionData, setTransactionData] = useState<Transaction[]>([]);
+  const [transactiondata, setTransactiondata] = useState<Transaction[]>([]);
+  const [clientNames, setClientNames] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [cpfCnpjCliente, setCpfCnpjCliente] = useState<string>("");
   const [newTransaction, setNewTransaction] = useState<Partial<Transaction>>({
     idCliente: "",
@@ -107,11 +102,29 @@ export default function TransactionPage() {
     setIsLoading(true);
     setError(null);
     try {
-      setTransactionData(await transactionsApi.getAll());
+      const transactions = await transactionsApi.getAll();
+      setTransactiondata(transactions);
+      
+      // Fetch client names for all unique client IDs
+      const uniqueClientIds = [...new Set(transactions.map(t => t.idCliente))];
+      const names: Record<string, string> = {};
+      
+      await Promise.all(
+        uniqueClientIds.map(async (clientId) => {
+          try {
+            const client = await clientsApi.getId(clientId);
+            names[clientId] = client.nome;
+          } catch (err) {
+            names[clientId] = "Desconhecido";
+          }
+        })
+      );
+      
+      setClientNames(names);
     } catch (err) {
       setError("Erro ao carregar transações. Usando dados de exemplo.");
       // Fallback to initial data if API fails
-      setTransactionData([initialTransactionData[0]]);
+      setTransactiondata([initialTransactiondata[0]]);
     } finally {
       setIsLoading(false);
     }
@@ -179,7 +192,7 @@ export default function TransactionPage() {
       };
 
       const createdTransaction = await transactionsApi.create(transactionToAdd);
-      setTransactionData([...transactionData, createdTransaction]);
+      setTransactiondata([...transactiondata, createdTransaction]);
       setAddDialogOpen(false);
       setCpfCnpjCliente("");
       setNewTransaction({
@@ -237,7 +250,7 @@ export default function TransactionPage() {
 {/* -----------------Table----------------- */}
 {/* --------------------------------------- */}
 
-          {isLoading && transactionData.length === 0 ? (
+          {isLoading && transactiondata.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               Carregando transações...
             </div>
@@ -247,29 +260,34 @@ export default function TransactionPage() {
                 <TableRow>
                   {visibleColumns.id && <TableHead>ID</TableHead>}
                   {visibleColumns.idCliente && <TableHead>ID Cliente</TableHead>}
+                  {visibleColumns.nomeCliente && <TableHead>Cliente</TableHead>}
                   {visibleColumns.tipo && <TableHead>Tipo</TableHead>}
                   {visibleColumns.valor && <TableHead>Valor</TableHead>}
                   {visibleColumns.moeda && <TableHead>Moeda</TableHead>}
                   {visibleColumns.contraparte && <TableHead>Contraparte</TableHead>}
-                  {visibleColumns.data && <TableHead>Data e Hora</TableHead>}
+                  {visibleColumns.dataHora && <TableHead>Data e Hora</TableHead>}
                 </TableRow>
               </TableHeader>
 
 {/* --------------Table Body--------------- */}
               <TableBody>
-                {transactionData
+                {transactiondata
                   .filter((transaction) => {
                     const idSearch = transactionFilters.id.toLowerCase();
                     const idClienteSearch = transactionFilters.idCliente.toLowerCase();
+                    const nomeClienteSearch = (transactionFilters.nomeCliente || "").toLowerCase();
                     const tipoSearch = transactionFilters.tipo.toLowerCase();
                     const valorSearch = transactionFilters.valor.toLowerCase();
                     const moedaSearch = transactionFilters.moeda.toLowerCase();
                     const contraparteSearch = transactionFilters.contraparte.toLowerCase();
-                    const dataSearch = transactionFilters.data.toLowerCase();
+                    const dataSearch = (transactionFilters.dataHora || "").toLowerCase();
+
+                    const clientName = (clientNames[transaction.idCliente] || "").toLowerCase();
 
                     return (
                       transaction.id.toLowerCase().includes(idSearch) &&
                       transaction.idCliente.toLowerCase().includes(idClienteSearch) &&
+                      clientName.includes(nomeClienteSearch) &&
                       transaction.tipo.toLowerCase().includes(tipoSearch) &&
                       transaction.valor.toString().includes(valorSearch) &&
                       transaction.moeda.toLowerCase().includes(moedaSearch) &&
@@ -281,6 +299,7 @@ export default function TransactionPage() {
                     <TableRow key={transaction.id}>
                       {visibleColumns.id && <TableCell>{transaction.id}</TableCell>}
                       {visibleColumns.idCliente && <TableCell>{transaction.idCliente}</TableCell>}
+                      {visibleColumns.nomeCliente && <TableCell>{clientNames[transaction.idCliente] || "Carregando..."}</TableCell>}
                       {visibleColumns.tipo && <TableCell>{transaction.tipo}</TableCell>}
                       {visibleColumns.valor && (
                         <TableCell className="font-medium">
@@ -289,7 +308,7 @@ export default function TransactionPage() {
                       )}
                       {visibleColumns.moeda && <TableCell>{transaction.moeda}</TableCell>}
                       {visibleColumns.contraparte && <TableCell>{transaction.contraparte}</TableCell>}
-                      {visibleColumns.data && <TableCell>{transaction.dataHora}</TableCell>}
+                      {visibleColumns.dataHora && <TableCell>{transaction.dataHora}</TableCell>}
                     </TableRow>
                   ))}
               </TableBody>
@@ -444,6 +463,15 @@ export default function TransactionPage() {
             </div>
 
             <div>
+              <h3 className="mb-3 text-sm font-semibold">Filtrar por Nome do Cliente</h3>
+              <Input
+                placeholder="Digite o nome do cliente..."
+                value={transactionFilters.nomeCliente || ""}
+                onChange={(e) => setTransactionFilter('nomeCliente', e.target.value)}
+              />
+            </div>
+
+            <div>
               <h3 className="mb-3 text-sm font-semibold">Filtrar por Tipo</h3>
               <NativeSelect
                 value={transactionFilters.tipo}
@@ -489,11 +517,11 @@ export default function TransactionPage() {
             </div>
 
             <div>
-              <h3 className="mb-3 text-sm font-semibold">Filtrar por Data</h3>
+              <h3 className="mb-3 text-sm font-semibold">Filtrar por Data e Hora</h3>
               <Input
-                placeholder="Digite a data..."
-                value={transactionFilters.data}
-                onChange={(e) => setTransactionFilter('data', e.target.value)}
+                placeholder="Digite a data e hora..."
+                value={transactionFilters.dataHora}
+                onChange={(e) => setTransactionFilter('dataHora', e.target.value)}
               />
             </div>
 
@@ -562,22 +590,12 @@ export default function TransactionPage() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="col-hora"
-                    checked={visibleColumns.hora}
-                    onCheckedChange={() => toggleColumn('hora')}
+                    id="col-dataHora"
+                    checked={visibleColumns.dataHora}
+                    onCheckedChange={() => toggleColumn('dataHora')}
                   />
-                  <label htmlFor="col-hora" className="text-sm cursor-pointer">
-                    Hora
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="col-data"
-                    checked={visibleColumns.data}
-                    onCheckedChange={() => toggleColumn('data')}
-                  />
-                  <label htmlFor="col-data" className="text-sm cursor-pointer">
-                    Data
+                  <label htmlFor="col-dataHora" className="text-sm cursor-pointer">
+                    Data e Hora
                   </label>
                 </div>
               </div>
