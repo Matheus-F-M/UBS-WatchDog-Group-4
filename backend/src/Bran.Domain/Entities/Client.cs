@@ -19,10 +19,11 @@ namespace Bran.Domain.Entities
         public DateTime UpdatedAt { get; private set; }
         public string GovernmentId { get; private set; }
         public ClientType Type { get; private set; }
+        public double Income { get; private set; }
         
         protected Client() { }
 
-        public Client(string name, string country, string governmentId, ClientType type)
+        public Client(string name, string country, string governmentId, ClientType type, double income)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Name cannot be null or empty.", nameof(name));
@@ -37,6 +38,7 @@ namespace Bran.Domain.Entities
             UpdatedAt = DateTime.UtcNow;
             GovernmentId = governmentId;
             Type = type;
+            Income = income;
         }
         public override string ToString()
         {
@@ -51,6 +53,15 @@ namespace Bran.Domain.Entities
                 RiskLevel = ClientRiskLevel.Medium;
             else
                 RiskLevel = ClientRiskLevel.High;
+        }
+
+        public void UpdateBasicInfo(string name, string country, ClientType type, double income)
+        {
+            Name = name;
+            Country = country;
+            Type = type;
+            Income = income;
+            UpdatedAt = DateTime.UtcNow;
         }
     }
 }

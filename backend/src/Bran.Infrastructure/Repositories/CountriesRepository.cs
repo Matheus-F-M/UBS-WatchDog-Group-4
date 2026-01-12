@@ -54,5 +54,20 @@ namespace Bran.Infrastructure.Repositories
 
             return country?.RiskLevel ?? CountryRiskLevel.Low;
         }
+
+        public async Task<IReadOnlyCollection<Country>> GetAllAsync()
+        {
+            return await _context.Countries
+                .AsNoTracking()
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+        }
+
+        public async Task<Country?> GetByCodeAsync(string code)
+        {
+            return await _context.Countries
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.CountryCode == code);
+        }
     }
 }

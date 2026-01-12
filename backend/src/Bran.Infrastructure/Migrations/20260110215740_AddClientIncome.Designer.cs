@@ -3,6 +3,7 @@ using System;
 using Bran.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Bran.Infrastructure.Migrations
 {
     [DbContext(typeof(BranDbContext))]
-    partial class BranDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260110215740_AddClientIncome")]
+    partial class AddClientIncome
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -143,29 +146,6 @@ namespace Bran.Infrastructure.Migrations
                             Name = "Myanmar",
                             RiskLevel = 10
                         });
-                });
-
-            modelBuilder.Entity("Bran.Domain.Entities.Currency", b =>
-                {
-                    b.Property<string>("Code")
-                        .HasMaxLength(3)
-                        .HasColumnType("character varying(3)");
-
-                    b.Property<decimal>("DailyRate")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Code");
-
-                    b.ToTable("Currencies");
                 });
 
             modelBuilder.Entity("Bran.Domain.Entities.Transaction", b =>

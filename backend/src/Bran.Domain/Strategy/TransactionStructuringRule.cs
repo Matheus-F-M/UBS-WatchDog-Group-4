@@ -9,7 +9,7 @@ namespace Bran.Domain.ComplianceRules
 {
     public class TransactionStructuringRule : IComplianceRule
     {
-        private readonly decimal _thresholdAmount;
+        private readonly double _thresholdAmount;
         private readonly int _minTransactionCount;
         private readonly int _daysWindow;
 
