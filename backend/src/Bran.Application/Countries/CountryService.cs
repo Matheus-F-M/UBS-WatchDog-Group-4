@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bran.Application.Countries.Services
+namespace Bran.Application.Countries
 {
     public class CountryService : ICountryService
     {

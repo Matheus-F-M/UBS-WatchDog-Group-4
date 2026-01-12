@@ -43,6 +43,13 @@ namespace Bran.Infrastructure.Repositories
                 .Where(t => t.DateHour >= startDate && t.DateHour <= endDate)
                 .ToListAsync();
         }
+        public async Task<IReadOnlyCollection<Transaction>> GetByClientAndPeriodAsync(Guid clientId, DateTime startDate, DateTime endDate)
+        {
+                        return await _dbContext.Transactions
+                .Where(t => t.ClientId == clientId && t.DateHour >= startDate && t.DateHour <= endDate)
+                .ToListAsync();
+
+        }
 
         public async Task AddAsync(Transaction transaction)
         {

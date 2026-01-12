@@ -62,7 +62,13 @@ namespace Bran.Infrastructure.Repositories {
         public async Task<IReadOnlyCollection<Alert>> GetByDateRangeAsync(DateTime startUtc, DateTime endUtc) 
         { 
             return await _context.Set<Alert>().Where(a => a.CreatedAt >= startUtc && a.CreatedAt <= endUtc).ToListAsync(); 
-        } 
+        }
+        public async Task<IReadOnlyCollection<Alert>> GetByClientAndPeriodAsync(Guid clientId, DateTime startDate, DateTime endDate)
+        {
+            return await _context.Set<Alert>()
+                .Where(a => a.ClientId == clientId && a.CreatedAt >= startDate && a.CreatedAt <= endDate)
+                .ToListAsync();
+        }
         public async Task UpdateAsync(Alert alert) 
         { 
             _context.Set<Alert>().Update(alert); 

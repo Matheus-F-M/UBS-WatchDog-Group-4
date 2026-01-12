@@ -1,8 +1,8 @@
+using Bran.Application.Clients;
 using Bran.Application.Clients.Interfaces;
-using Bran.Application.Clients.Services;
+using Bran.Application.Countries;
 using Bran.Application.Countries.Interfaces;
-using Bran.Application.Countries.Services;
-using Bran.Application.Currencies.Service;
+using Bran.Application.Currencies;
 using Bran.Application.Services;
 using Bran.Application.Transactions.Services;
 using Bran.Domain.Interfaces;
