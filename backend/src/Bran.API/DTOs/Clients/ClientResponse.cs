@@ -11,5 +11,6 @@ namespace Bran.API.DTOs.Clients
         public double Income { get; set; }
         public ClientRiskLevel RiskLevel { get; set; }
         public KycStatus KycStatus { get; set; }
+        public string GovernmentId { get; set; }
     }
 }

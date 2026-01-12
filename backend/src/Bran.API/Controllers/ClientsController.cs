@@ -55,7 +55,8 @@ namespace Bran.API.Controllers
                 Type = client.Type,
                 Income = client.Income,
                 RiskLevel = client.RiskLevel,
-                KycStatus = client.KycStatus
+                KycStatus = client.KycStatus,
+                GovernmentId = client.GovernmentId,
             };
 
             return Ok(response);
