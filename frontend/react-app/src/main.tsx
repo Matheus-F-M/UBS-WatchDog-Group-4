@@ -27,6 +27,7 @@ import Dashboard from "./pages/dashboard-pages/Dashboard.tsx"; // Dashboard layo
 import Home from "./pages/dashboard-pages/HomePage.tsx"; // Dashboard home page
 import ClientPage from "./pages/dashboard-pages/ClientPage.tsx"; // Client page
 import TransactionPage from "./pages/dashboard-pages/TransactionPage.tsx"; // Transaction page
+import AlertPage from "./pages/dashboard-pages/AlertPage.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
@@ -41,6 +42,7 @@ createRoot(document.getElementById("root")!).render(
         <Route index element={<Home />} />
         <Route path="clients" element={<ClientPage />} />
         <Route path="transactions" element={<TransactionPage />} />
+        <Route path="alerts" element={<AlertPage />} />
       </Route>
     </Routes>
   </BrowserRouter>

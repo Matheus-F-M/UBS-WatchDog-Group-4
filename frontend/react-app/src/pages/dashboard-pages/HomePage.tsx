@@ -21,6 +21,7 @@ export default function HomePage() {
                   className="w-40 h-40 rounded-full flex items-center justify-center text-lg shadow-lg hover:scale-105 transition-transform"
                   title="Alertas"
                   aria-label="Alertas"
+                  onClick={() => navigate('/dashboard/alerts')}
                 >
                   <span className="text-2xl">📊</span>
                 </Button>

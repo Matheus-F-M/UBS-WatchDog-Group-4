@@ -69,7 +69,7 @@ export default function Dashboard() {
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <NavigationMenuLink href="#alertas" className="px-2 py-1">Alertas</NavigationMenuLink>
+                  <NavigationMenuLink href="/dashboard/alerts" className="px-2 py-1">Alertas</NavigationMenuLink>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
@@ -79,6 +79,7 @@ export default function Dashboard() {
                 <NavigationMenuItem>
                   <NavigationMenuLink href="/dashboard/transactions" className="px-2 py-1">Transações</NavigationMenuLink>
                 </NavigationMenuItem>
+
 
               </NavigationMenuList>
             </NavigationMenu>

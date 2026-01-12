@@ -236,3 +236,18 @@ export const transactionSchema = z.object({
 
 // Infer TypeScript type from Zod schema
 export type Transaction = z.infer<typeof transactionSchema>;
+
+/* -----------------------------------------
+      ------------- ALERT ---------------
+   ----------------------------------------- */
+
+export const alertSchema = z.object({
+  id: z.string(), // STRING: TODO backend check
+  idCliente: z.string(), // STRING: TODO backend check
+  idTransacao: z.string(), // STRING: TODO backend check
+  severidade: z.enum(["Baixa", "Média", "Alta", "Crítico"]), // STRING ENUM: TODO backend check
+  status: z.enum(["Novo","Em Análise", "Resolvido"]), // STRING ENUM: TODO backend check
+});
+
+// Infer TypeScript type from Zod schema
+export type Alert = z.infer<typeof alertSchema>;

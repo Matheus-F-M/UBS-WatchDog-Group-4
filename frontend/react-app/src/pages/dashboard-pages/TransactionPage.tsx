@@ -139,6 +139,28 @@ export default function TransactionPage() {
       setIsLoading(false);
     }
   };
+    /**
+   * Fetches client ID from CPF/CNPJ by calling the clients API
+   * @param cpfCnpj string - CPF/CNPJ of the client
+   * @returns Promise<string | null> - Client ID or null if not found
+   */
+  const fetchClientIdFromCpfCnpj = async (cpfCnpj: string): Promise<string | null> => {
+    try {
+      const response = await fetch(API_CLIENT_BASE_URL);
+      if (!response.ok) throw new Error("Failed to fetch clients");
+      const clients = await response.json();
+      
+      // Find client with matching CPF/CNPJ (documentNumber in backend)
+      const matchingClient = clients.find(
+        (client: any) => client.governmentId === cpfCnpj
+      );
+      
+      return matchingClient ? matchingClient.id : null;
+    } catch (err) {
+      console.error("Error fetching client ID:", err);
+      return null;
+    }
+  };
   /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
      ------------ END FETCHING -------------
      XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
@@ -169,29 +191,6 @@ export default function TransactionPage() {
   const handleViewClientById = (clientId: string) => {
     const url = `/dashboard/clients?id=${encodeURIComponent(clientId)}`;
     window.open(url, '_blank');
-  };
-
-  /**
-   * Fetches client ID from CPF/CNPJ by calling the clients API
-   * @param cpfCnpj string - CPF/CNPJ of the client
-   * @returns Promise<string | null> - Client ID or null if not found
-   */
-  const fetchClientIdFromCpfCnpj = async (cpfCnpj: string): Promise<string | null> => {
-    try {
-      const response = await fetch(API_CLIENT_BASE_URL);
-      if (!response.ok) throw new Error("Failed to fetch clients");
-      const clients = await response.json();
-      
-      // Find client with matching CPF/CNPJ (documentNumber in backend)
-      const matchingClient = clients.find(
-        (client: any) => client.governmentId === cpfCnpj
-      );
-      
-      return matchingClient ? matchingClient.id : null;
-    } catch (err) {
-      console.error("Error fetching client ID:", err);
-      return null;
-    }
   };
 
   /**
