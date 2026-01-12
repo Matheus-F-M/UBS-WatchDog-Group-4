@@ -25,7 +25,7 @@ namespace Bran.Application.Transactions.Services
         public async Task<Transaction> CreateAsync(
             Guid clientId,
             TransactionType transactionType,
-            decimal amount,
+            double amount,
             string currency,
             Guid counterpartyId,
             DateTime dateHour,

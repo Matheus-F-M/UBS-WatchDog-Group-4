@@ -12,7 +12,7 @@ namespace Bran.Domain.Entities
         public Guid Id { get; private set; }
         public Guid ClientId { get; private set; }
         public TransactionType TransactionType { get; private set; }
-        public decimal Amount { get; private set; }
+        public double Amount { get; private set; }
         public string Currency { get; private set; }
         public Guid CounterpartyId { get; private set; }
         public DateTime DateHour { get; private set; }
@@ -20,7 +20,7 @@ namespace Bran.Domain.Entities
 
         protected Transaction() { }
 
-        public Transaction(Guid clientId, TransactionType transactionType, decimal amount, string currency, Guid counterpartyId, DateTime dateHour, string country)
+        public Transaction(Guid clientId, TransactionType transactionType, double amount, string currency, Guid counterpartyId, DateTime dateHour, string country)
         {
             if (amount <= 0)
                 throw new ArgumentException("Amount must be greater than zero.", nameof(amount));
