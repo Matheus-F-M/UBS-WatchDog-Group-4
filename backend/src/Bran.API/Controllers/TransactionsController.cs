@@ -1,5 +1,7 @@
-﻿using Bran.API.DTOs.Transactions;
+﻿using Bran.API.DTOs.Clients;
+using Bran.API.DTOs.Transactions;
 using Bran.Application.Clients.Interfaces;
+using Bran.Application.Clients.Services;
 using Bran.Application.Transactions.Services;
 using Bran.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -31,6 +33,26 @@ namespace Bran.API.Controllers
             );
 
             return Ok(transaction);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllTransactions()
+        {
+            var transactions = await _transactionService.GetTransactionsAsync();
+
+            var response = transactions.Select(transaction => new TransactionResponse
+            {
+                Id = transaction.Id,
+                ClientId = transaction.ClientId,
+                TransactionType = transaction.TransactionType,
+                Amount = transaction.Amount,
+                Currency = transaction.Currency,
+                CounterpartyId = transaction.CounterpartyId,
+                DateHour = transaction.DateHour,
+                Country = transaction.Country
+            });
+
+            return Ok(response);
         }
     }
 }

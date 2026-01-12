@@ -9,13 +9,13 @@ namespace Bran.Domain.ComplianceRules
 {
     public class TransactionStructuringRule : IComplianceRule
     {
-        private readonly decimal _thresholdAmount;
+        private readonly double _thresholdAmount;
         private readonly int _minTransactionCount;
         private readonly int _daysWindow;
 
         public string Name => "Structuring Detected";
 
-        public TransactionStructuringRule(decimal thresholdAmount, int minTransactionCount, int daysWindow)
+        public TransactionStructuringRule(double thresholdAmount, int minTransactionCount, int daysWindow)
         {
             _thresholdAmount = thresholdAmount;
             _minTransactionCount = minTransactionCount;

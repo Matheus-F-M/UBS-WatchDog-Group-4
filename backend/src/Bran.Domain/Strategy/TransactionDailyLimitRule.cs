@@ -12,10 +12,10 @@ namespace Bran.Domain.Strategy
 {
     public class TransactionDailyLimitRule : IComplianceRule
     {
-        private readonly decimal _dailyLimit;
+        private readonly double _dailyLimit;
         public string Name => "Daily Limit Surpassed";
 
-        public TransactionDailyLimitRule(decimal dailyLimit)
+        public TransactionDailyLimitRule(double dailyLimit)
         {
             _dailyLimit = dailyLimit;
         }

@@ -54,5 +54,10 @@ namespace Bran.Application.Transactions.Services
 
             return transaction;
         }
+
+        public async Task<IReadOnlyCollection<Transaction>> GetTransactionsAsync()
+        {
+            return await _transactionsRepository.GetAllAsync();
+        }
     }
 }
