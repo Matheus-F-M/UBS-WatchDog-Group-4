@@ -1,4 +1,4 @@
-import { validateDate, validateTime, type Transaction } from "@/types/globalTypes";
+import { type Transaction } from "@/types/globalTypes";
 
 
 export const API_TRANSACTION_BASE_URL = "http://localhost:5131/api/v1/transactions";
@@ -13,8 +13,6 @@ export const API_TRANSACTION_BASE_URL = "http://localhost:5131/api/v1/transactio
  * @returns Transaction : the mapped transaction to the parameters used in the frontend
  */
 export const mapBackendTransaction = (backendTransaction: any): Transaction => {
-  const validatedDate = validateDate(backendTransaction.date);
-  const validatedTime = validateTime(backendTransaction.time);
 
   return {
     id: backendTransaction.id || "none",
@@ -26,8 +24,7 @@ export const mapBackendTransaction = (backendTransaction: any): Transaction => {
     valor: backendTransaction.amount || 0,
     moeda: backendTransaction.currency || "BRL",
     contraparte: backendTransaction.counterparty || "none",
-    data: validatedDate || validateDate("2024-01-01")!,
-    hora: validatedTime || validateTime("00:00:00")!,
+    dataHora: backendTransaction.dateTime || "2024-01-01 00:00:00",
   };
 };
 
@@ -47,8 +44,7 @@ export const reverseMapBackendTransaction = (transaction: Transaction): any => {
     amount: transaction.valor,
     currency: transaction.moeda,
     counterparty: transaction.contraparte,
-    date: transaction.data,
-    time: transaction.hora,
+    dateTime: transaction.dataHora,
   };
 };
 
@@ -71,25 +67,6 @@ export const transactionsApi = {
     });
     if (!response.ok) throw new Error("Failed to create transaction");
     return mapBackendTransaction(await response.json());
-  },
-
-  // Update transaction
-  update: async (id: string, transaction: Transaction): Promise<Transaction> => {
-    const response = await fetch(`${API_TRANSACTION_BASE_URL}/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(reverseMapBackendTransaction(transaction)),
-    });
-    if (!response.ok) throw new Error("Failed to update transaction");
-    return mapBackendTransaction(await response.json());
-  },
-
-  // Delete transaction
-  delete: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_TRANSACTION_BASE_URL}/${id}`, {
-      method: "DELETE",
-    });
-    if (!response.ok) throw new Error("Failed to delete transaction");
   },
 };
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

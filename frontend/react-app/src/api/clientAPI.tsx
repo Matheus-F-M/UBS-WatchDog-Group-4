@@ -81,6 +81,15 @@ export const clientsApi = {
     return rawData.map(mapBackendClient);
   },
 
+  // Get client by ID
+  getId: async (id: string): Promise<Client> => {
+    const response = await fetch(`${API_CLIENT_BASE_URL}/${id}`);
+    if (!response.ok) throw new Error(`Failed to fetch client with id ${id}`);
+    const rawClient = await response.json();
+    console.log("Raw API Response from getId:", rawClient);
+    return mapBackendClient(rawClient);
+  },
+
   // Create new client
   create: async (client: Omit<Client, "id">): Promise<Client> => {
     const response = await fetch(API_CLIENT_BASE_URL, {

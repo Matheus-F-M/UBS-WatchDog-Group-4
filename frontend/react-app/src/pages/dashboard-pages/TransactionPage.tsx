@@ -12,13 +12,7 @@ import {
 } from "@/components/ui/native-select";
 import {
   type Transaction,
-  type DateString,
-  type TimeString,
   type Currency,
-  validateDate,
-  validateTime,
-  formatDate,
-  formatTime,
   formatCurrency,
 } from "@/types/globalTypes";
 import {
@@ -49,15 +43,6 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
-import {
-  Sheet,
-  SheetTrigger,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter,
-} from "@/components/ui/sheet";
 
 /* 00000000000000000000000000000000000000000
    ------------ CODE STARTS HERE -----------
@@ -72,8 +57,7 @@ const initialTransactionData: Transaction[] = [
     valor: 10000.50,
     moeda: "BRL",
     contraparte: "000.000.000-00",
-    data: validateDate("2024-01-15")!,
-    hora: validateTime("14:30:00")!,
+    dataHora: "2024-01-15 14:30:00",
   },
 ];
 
@@ -83,21 +67,14 @@ export default function TransactionPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-  const [editedTransaction, setEditedTransaction] = useState<Transaction | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const [cpfCnpjCliente, setCpfCnpjCliente] = useState<string>("");
   const [newTransaction, setNewTransaction] = useState<Partial<Transaction>>({
     idCliente: "",
     tipo: "Depósito",
     valor: undefined,
     moeda: "BRL",
     contraparte: "",
-    data: "" as DateString,
-    hora: "" as TimeString,
   });
-  const [cpfCnpjCliente, setCpfCnpjCliente] = useState<string>("");
 
   // Get filters and columns from Zustand store
   const {
@@ -165,104 +142,6 @@ export default function TransactionPage() {
      ------------ END FETCHING -------------
      XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
-  /**
-   * Opens the side sheet when trying to view/edit a transaction.
-   * @param transaction Transaction
-   */
-  const handleOpenSheet = (transaction: Transaction) => {
-    setSelectedTransaction(transaction);
-    setEditedTransaction({ ...transaction });
-    setIsOpen(true);
-  };
-
-  /**
-   * Opens the ClientPage in a new tab with the contraparte CPF/CNPJ pre-filled in the filter
-   * @param contraparte string - CPF/CNPJ of the counterparty
-   */
-  const handleViewClient = (contraparte: string) => {
-    const url = `/dashboard/clients?cpfCnpj=${encodeURIComponent(contraparte)}`;
-    window.open(url, '_blank');
-  };
-
-  /**
-   * Opens the ClientPage in a new tab with the client ID pre-filled in the filter
-   * @param clientId string - ID of the client
-   */
-  const handleViewClientById = (clientId: string) => {
-    const url = `/dashboard/clients?id=${encodeURIComponent(clientId)}`;
-    window.open(url, '_blank');
-  };
-
-  /**
-   * Saves the edited transaction data within the sheet to the API and updates the table
-   */
-  const handleSave = async () => {
-    if (editedTransaction) {
-      // Validate date and time
-      const validatedDate = validateDate(editedTransaction.data as string);
-      const validatedTime = validateTime(editedTransaction.hora as string);
-      
-      if (!validatedDate) {
-        alert("Data inválida. Use YYYY-MM-DD ou DD/MM/YYYY");
-        return;
-      }
-      
-      if (!validatedTime) {
-        alert("Hora inválida. Use HH:MM:SS ou HH:MM (formato 24h)");
-        return;
-      }
-
-      setIsLoading(true);
-      setError(null);
-      try {
-        const updatedTransaction = await transactionsApi.update(editedTransaction.id, {
-          ...editedTransaction,
-          data: validatedDate,
-          hora: validatedTime,
-        });
-        setTransactionData(
-          transactionData.map((t) => (t.id === updatedTransaction.id ? updatedTransaction : t))
-        );
-        setIsOpen(false);
-      } catch (err) {
-        setError("Erro ao salvar transação");
-        alert("Erro ao salvar transação");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  /**
-   * Handles the deletion of transaction data
-   * @param transactionId String
-   */
-  const handleDelete = (transactionId: string) => {
-    setTransactionToDelete(transactionId);
-    setDeleteDialogOpen(true);
-  };
-
-  /**
-   * Uses Alert Dialogue to confirm a deletion action to delete in the backend
-   */
-  const confirmDelete = async () => {
-    if (transactionToDelete) {
-      setIsLoading(true);
-      setError(null);
-      try {
-        await transactionsApi.delete(transactionToDelete);
-        setTransactionData(transactionData.filter((t) => t.id !== transactionToDelete));
-        setDeleteDialogOpen(false);
-        setTransactionToDelete(null);
-      } catch (err) {
-        setError("Erro ao deletar transação. Transação não foi encontrada na base de dados.");
-        alert("Erro ao deletar transação. Transação não foi encontrada.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
   /** -----------------------------------------
    *  ----- Handles adding a new transaction ----
       ----------------------------------------- */
@@ -272,25 +151,9 @@ export default function TransactionPage() {
       !newTransaction.tipo ||
       !newTransaction.valor ||
       !newTransaction.moeda ||
-      !newTransaction.contraparte ||
-      !newTransaction.data ||
-      !newTransaction.hora
+      !newTransaction.contraparte
     ) {
       alert("Preencha todos os campos obrigatórios");
-      return;
-    }
-
-    // Validate date and time
-    const validatedDate = validateDate(newTransaction.data as string);
-    const validatedTime = validateTime(newTransaction.hora as string);
-    
-    if (!validatedDate) {
-      alert("Data inválida. Use YYYY-MM-DD ou DD/MM/YYYY");
-      return;
-    }
-    
-    if (!validatedTime) {
-      alert("Hora inválida. Use HH:MM:SS ou HH:MM (formato 24h)");
       return;
     }
 
@@ -311,9 +174,8 @@ export default function TransactionPage() {
         tipo: newTransaction.tipo as Transaction["tipo"],
         valor: newTransaction.valor,
         moeda: newTransaction.moeda as Currency,
-        contraparte: newTransaction.contraparte, // ALERT: Quando adicionamos, usamos o CPF ou CNPJ. Esse valor vai conflitar com o fetch pois o fetch retorna o id.
-        data: validatedDate,
-        hora: validatedTime,
+        contraparte: newTransaction.contraparte,
+        dataHora: new Date().toISOString().slice(0, 19).replace('T', ' '), // Auto-generate timestamp
       };
 
       const createdTransaction = await transactionsApi.create(transactionToAdd);
@@ -326,8 +188,6 @@ export default function TransactionPage() {
         valor: undefined,
         moeda: "BRL",
         contraparte: "",
-        data: "" as DateString,
-        hora: "" as TimeString,
       });
     } catch (err) {
       setError("Erro ao criar transação");
@@ -391,10 +251,7 @@ export default function TransactionPage() {
                   {visibleColumns.valor && <TableHead>Valor</TableHead>}
                   {visibleColumns.moeda && <TableHead>Moeda</TableHead>}
                   {visibleColumns.contraparte && <TableHead>Contraparte</TableHead>}
-                  {visibleColumns.hora && <TableHead>Hora</TableHead>}
-                  {visibleColumns.data && <TableHead>Data</TableHead>}
-                  <TableHead className="w-32">Ações</TableHead>
-                  <TableHead className="w-24">Remover</TableHead>
+                  {visibleColumns.data && <TableHead>Data e Hora</TableHead>}
                 </TableRow>
               </TableHeader>
 
@@ -417,7 +274,7 @@ export default function TransactionPage() {
                       transaction.valor.toString().includes(valorSearch) &&
                       transaction.moeda.toLowerCase().includes(moedaSearch) &&
                       transaction.contraparte.toLowerCase().includes(contraparteSearch) &&
-                      transaction.data.toLowerCase().includes(dataSearch)
+                      transaction.dataHora.toLowerCase().includes(dataSearch)
                     );
                   })
                   .map((transaction) => (
@@ -432,26 +289,7 @@ export default function TransactionPage() {
                       )}
                       {visibleColumns.moeda && <TableCell>{transaction.moeda}</TableCell>}
                       {visibleColumns.contraparte && <TableCell>{transaction.contraparte}</TableCell>}
-                      {visibleColumns.hora && <TableCell>{formatTime(transaction.hora)}</TableCell>}
-                      {visibleColumns.data && <TableCell>{formatDate(transaction.data)}</TableCell>}
-                      <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleOpenSheet(transaction)}
-                        >
-                          Ver/Editar
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(transaction.id)}
-                        >
-                          ❌
-                        </Button>
-                      </TableCell>
+                      {visibleColumns.data && <TableCell>{transaction.dataHora}</TableCell>}
                     </TableRow>
                   ))}
               </TableBody>
@@ -459,180 +297,6 @@ export default function TransactionPage() {
           )}
         </div>
       </div>
-{/* --------------------------------------- */}
-{/* ------------------END------------------ */}
-{/* --------------------------------------- */}
-
-{/* --------------------------------------- */}
-{/* ----------Ver/Editar Transação--------- */}
-{/* --------------------------------------- */}
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetContent className="overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Detalhes da Transação</SheetTitle>
-            <SheetDescription>
-              Visualize e edite as informações da transação
-            </SheetDescription>
-          </SheetHeader>
-
-          {editedTransaction && (
-            <div className="space-y-4 p-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-idCliente">ID Cliente</Label>
-                <Input
-                  id="edit-idCliente"
-                  value={editedTransaction.idCliente}
-                  onChange={(e) =>
-                    setEditedTransaction({ ...editedTransaction, idCliente: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-tipo">Tipo</Label>
-                <NativeSelect
-                  id="edit-tipo"
-                  value={editedTransaction.tipo}
-                  onChange={(e) =>
-                    setEditedTransaction({
-                      ...editedTransaction,
-                      tipo: e.target.value as Transaction["tipo"],
-                    })
-                  }
-                >
-                  <NativeSelectOption value="Depósito">
-                    Depósito
-                  </NativeSelectOption>
-                  <NativeSelectOption value="Saque">
-                    Saque
-                  </NativeSelectOption>
-                  <NativeSelectOption value="Transferência">
-                    Transferência
-                  </NativeSelectOption>
-                </NativeSelect>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-valor">Valor</Label>
-                <Input
-                  id="edit-valor"
-                  type="number"
-                  step="0.01"
-                  value={editedTransaction.valor}
-                  onChange={(e) =>
-                    setEditedTransaction({
-                      ...editedTransaction,
-                      valor: e.target.value ? parseFloat(e.target.value) : 0,
-                    })
-                  }
-                  placeholder="0.00"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-moeda">Moeda</Label>
-                <NativeSelect
-                  id="edit-moeda"
-                  value={editedTransaction.moeda}
-                  onChange={(e) =>
-                    setEditedTransaction({ ...editedTransaction, moeda: e.target.value as Currency })
-                  }
-                >
-                  <NativeSelectOption value="BRL">BRL - Real Brasileiro</NativeSelectOption>
-                  <NativeSelectOption value="USD">USD - Dólar Americano</NativeSelectOption>
-                  <NativeSelectOption value="EUR">EUR - Euro</NativeSelectOption>
-                  <NativeSelectOption value="CHF">CHF - Franco Suíço</NativeSelectOption>
-                </NativeSelect>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-contraparte">CPF/CNPJ da Contraparte</Label>
-                <Input
-                  id="edit-contraparte"
-                  value={editedTransaction.contraparte}
-                  onChange={(e) =>
-                    setEditedTransaction({ ...editedTransaction, contraparte: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-data">Data</Label>
-                  <Input
-                    id="edit-data"
-                    type="date"
-                    value={editedTransaction.data || ""}
-                    onChange={(e) =>
-                      setEditedTransaction({ ...editedTransaction, data: e.target.value as DateString })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit-hora">Hora</Label>
-                  <Input
-                    id="edit-hora"
-                    type="time"
-                    step="1"
-                    value={editedTransaction.hora ? formatTime(editedTransaction.hora) : ""}
-                    onChange={(e) =>
-                      setEditedTransaction({ ...editedTransaction, hora: e.target.value as TimeString })
-                    }
-                  />
-
-                </div>
-              </div>
-
-              <div className="flex justify-center">
-                <Button
-                  variant="outline"
-                  className="h-20 w-40"
-                  onClick={() => handleViewClientById(editedTransaction.idCliente)}
-                >
-                  Ver Cliente
-                </Button>
-              </div>
-
-              <div className="flex justify-center">
-                <Button
-                  variant="outline"
-                  className="h-22 w-40"
-                  onClick={() => {handleViewClient(editedTransaction.contraparte)}}
-                >
-                  Ver Contraparte
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <SheetFooter className="flex justify-between">
-            <Button onClick={handleSave} disabled={isLoading}>
-              {isLoading ? "Salvando..." : "Salvar alterações"}
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-              disabled={isLoading}
-            >
-              Cancelar
-            </Button>
-
-            <Button
-              variant="destructive"
-              onClick={() => {
-                if (editedTransaction) {
-                  handleDelete(editedTransaction.id);
-                  setIsOpen(false);
-                }
-              }}
-              disabled={isLoading}
-            >
-              Remover Transação
-            </Button>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
 {/* --------------------------------------- */}
 {/* ------------------END------------------ */}
 {/* --------------------------------------- */}
@@ -728,32 +392,6 @@ export default function TransactionPage() {
                 <NativeSelectOption value="CHF">CHF - Franco Suíço</NativeSelectOption>
               </NativeSelect>
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="new-data">Data *</Label>
-                <Input
-                  id="new-data"
-                  type="date"
-                  value={newTransaction.data || ""}
-                  onChange={(e) =>
-                    setNewTransaction({ ...newTransaction, data: e.target.value as DateString })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="new-hora">Hora *</Label>
-                <Input
-                  id="new-hora"
-                  type="time"
-                  step="1"
-                  value={newTransaction.hora ? formatTime(newTransaction.hora) : ""}
-                  onChange={(e) =>
-                    setNewTransaction({ ...newTransaction, hora: e.target.value as TimeString })
-                  }
-                />
-              </div>
-            </div>
           </div>
 
           <DialogFooter>
@@ -773,27 +411,6 @@ export default function TransactionPage() {
 {/* --------------------------------------- */}
 {/* ------------------END------------------ */}
 {/* --------------------------------------- */}
-
-{/* -------------------------------------------------------------- */}
-{/* ---------------- Delete Confirmation Dialogue ---------------- */}
-{/* -------------------------------------------------------------- */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remover transação</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja deletar esta transação? Esta ação não pode
-              ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>
-              Deletar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
 {/* ---------------------------------------------------------- */}
 {/* -------------------- FILTER AND SEARCH ------------------- */}
@@ -828,11 +445,15 @@ export default function TransactionPage() {
 
             <div>
               <h3 className="mb-3 text-sm font-semibold">Filtrar por Tipo</h3>
-              <Input
-                placeholder="Digite o tipo..."
+              <NativeSelect
                 value={transactionFilters.tipo}
                 onChange={(e) => setTransactionFilter('tipo', e.target.value)}
-              />
+              >
+                <NativeSelectOption value="">Todos</NativeSelectOption>
+                <NativeSelectOption value="Depósito">Depósito</NativeSelectOption>
+                <NativeSelectOption value="Saque">Saque</NativeSelectOption>
+                <NativeSelectOption value="Transferência">Transferência</NativeSelectOption>
+              </NativeSelect>
             </div>
 
             <div>
@@ -846,11 +467,16 @@ export default function TransactionPage() {
 
             <div>
               <h3 className="mb-3 text-sm font-semibold">Filtrar por Moeda</h3>
-              <Input
-                placeholder="Digite a moeda..."
+              <NativeSelect
                 value={transactionFilters.moeda}
                 onChange={(e) => setTransactionFilter('moeda', e.target.value)}
-              />
+              >
+                <NativeSelectOption value="">Todas</NativeSelectOption>
+                <NativeSelectOption value="BRL">BRL - Real Brasileiro</NativeSelectOption>
+                <NativeSelectOption value="USD">USD - Dólar Americano</NativeSelectOption>
+                <NativeSelectOption value="EUR">EUR - Euro</NativeSelectOption>
+                <NativeSelectOption value="CHF">CHF - Franco Suíço</NativeSelectOption>
+              </NativeSelect>
             </div>
 
             <div>
