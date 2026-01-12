@@ -31,7 +31,7 @@ namespace Bran.Domain.Entities
         }
         public override string ToString()
         {
-            return $"Alert - ID: {Id}, ClientID: {ClientId}, TransactionID: {TransactionId}, Name: {Name}, Severity: {Severity}, Status: {Status}, CreatedAt: {CreatedAt}";
+            return $"Alert - ID: {Id}, ClientID: {ClientId}, TransactionID: {TransactionId}, Ruke: {Name}, Severity: {Severity}, Status: {Status}, CreatedAt: {CreatedAt}";
         }
     }
 }

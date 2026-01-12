@@ -10,18 +10,24 @@ namespace Bran.Domain.ComplianceRules
 {
     public class TransactionRiskCountryRule : IComplianceRule
     {
-        private readonly HashSet<string> _riskCountries;
-        public string Name => "Transfer to Risk Country";
+        private readonly IQueryable<Country> _countries;
+        public string Name => "Transfer to High Risk Country";
 
-        public TransactionRiskCountryRule(IEnumerable<string> riskCountries)
+        public TransactionRiskCountryRule(IQueryable<Country> countries)
         {
-            _riskCountries = new HashSet<string>(riskCountries, StringComparer.OrdinalIgnoreCase);
+            _countries = countries;
         }
 
         public Alert? Validate(ComplianceContext complianceContext)
         {
-            if (_riskCountries.Contains(complianceContext.OriginCountry) ||
-                _riskCountries.Contains(complianceContext.DestinationCountry))
+            // pega todos os códigos de países com risco alto
+            var highRiskCodes = _countries
+                .Where(c => c.RiskLevel == CountryRiskLevel.High)
+                .Select(c => c.CountryCode)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            if (highRiskCodes.Contains(complianceContext.OriginCountry) ||
+                highRiskCodes.Contains(complianceContext.DestinationCountry))
             {
                 var lastTransaction = complianceContext.RecentTransactions
                     .Where(t => t.ClientId == complianceContext.ClientId)
@@ -41,5 +47,6 @@ namespace Bran.Domain.ComplianceRules
 
             return null;
         }
+
     }
 }

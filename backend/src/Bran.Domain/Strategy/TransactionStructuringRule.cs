@@ -15,11 +15,11 @@ namespace Bran.Domain.ComplianceRules
 
         public string Name => "Structuring Detected";
 
-        public TransactionStructuringRule(decimal thresholdAmount, int minTransactionCount, int daysWindow)
+        public TransactionStructuringRule(IEnumerable<ComplianceConfigs> configs)
         {
-            _thresholdAmount = thresholdAmount;
-            _minTransactionCount = minTransactionCount;
-            _daysWindow = daysWindow;
+            _thresholdAmount = decimal.Parse(configs.First(c => c.Key == "ThresholdAmount").Value);
+            _minTransactionCount = int.Parse(configs.First(c => c.Key == "MinTransactionCount").Value);
+            _daysWindow = int.Parse(configs.First(c => c.Key == "DaysWindow").Value);
         }
 
         public Alert? Validate(ComplianceContext complianceContext)

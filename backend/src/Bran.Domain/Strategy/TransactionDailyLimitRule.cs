@@ -15,9 +15,9 @@ namespace Bran.Domain.Strategy
         private readonly decimal _dailyLimit;
         public string Name => "Daily Limit Surpassed";
 
-        public TransactionDailyLimitRule(decimal dailyLimit)
+        public TransactionDailyLimitRule(IEnumerable<ComplianceConfigs> configs)
         {
-            _dailyLimit = dailyLimit;
+            _dailyLimit = decimal.Parse(configs.First(c => c.Key == "DailyLimit").Value);
         }
 
         public Alert? Validate(ComplianceContext complianceContext)
