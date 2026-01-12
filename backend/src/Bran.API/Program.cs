@@ -2,6 +2,9 @@ using Bran.Application.Clients.Interfaces;
 using Bran.Application.Clients.Services;
 using Bran.Application.Countries.Interfaces;
 using Bran.Application.Countries.Services;
+using Bran.Application.Currencies.Service;
+using Bran.Application.Services;
+using Bran.Application.Transactions.Services;
 using Bran.Domain.Interfaces;
 using Bran.Infrastructure.Persistence;
 using Bran.Infrastructure.Repositories;
@@ -44,12 +47,33 @@ builder.Services.AddScoped<ICountryService, CountryService>();
 builder.Services.AddScoped<IClientsRepository, ClientRepository>();
 builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
 
+builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
+builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
+builder.Services.AddScoped<TransactionService>();
+builder.Services.AddScoped<TransactionEvaluationService>();
+builder.Services.AddScoped<ComplianceService>();
+builder.Services.AddScoped<IAlertsRepository, AlertsRepository>();
+builder.Services.AddScoped<CurrencyService>();
+builder.Services.AddScoped<ICurrencyRepository, CurrencyRepository>();
+
 // Dependency Injection/DbContext (PostgreSQL)
 builder.Services.AddDbContext<BranDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")
     )
 );
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
 
 var app = builder.Build();
 
@@ -66,17 +90,7 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowReact");
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("FrontendPolicy",
-        policy =>
-        {
-            policy
-                .WithOrigins("http://localhost:5173")
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        });
-});
+
 
 app.UseCors("FrontendPolicy");
 

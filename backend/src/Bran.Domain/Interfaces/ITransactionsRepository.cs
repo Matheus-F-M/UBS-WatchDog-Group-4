@@ -27,5 +27,7 @@ namespace Bran.Domain.Interfaces
 
         // Remove uma transação
         Task DeleteAsync(Guid transactionId);
+        
+        Task<IReadOnlyCollection<Transaction>> GetAllAsync();
     }
 }

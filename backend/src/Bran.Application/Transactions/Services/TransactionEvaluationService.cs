@@ -1,4 +1,5 @@
-﻿using Bran.Domain.ContextObjects;
+﻿using Bran.Application.Services;
+using Bran.Domain.ContextObjects;
 using Bran.Domain.Entities;
 using Bran.Domain.Interfaces;
 using System;
@@ -7,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bran.Application.Services
+namespace Bran.Application.Transactions.Services
 {
     public class TransactionEvaluationService
     {

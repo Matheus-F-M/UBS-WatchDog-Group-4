@@ -65,6 +65,13 @@ namespace Bran.Infrastructure.Repositories
                 await _dbContext.SaveChangesAsync();
             }
         }
+
+        public async Task<IReadOnlyCollection<Transaction>> GetAllAsync()
+        {
+            return await _dbContext.Transactions
+                .AsNoTracking()
+                .ToListAsync();
+        }
     }
 
 }
