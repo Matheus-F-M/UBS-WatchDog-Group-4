@@ -1,8 +1,7 @@
 ﻿using Bran.API.DTOs.Clients;
 using Bran.API.DTOs.Transactions;
-using Bran.Application.Clients.Interfaces;
-using Bran.Application.Clients.Services;
-using Bran.Application.Transactions.Services;
+//using Bran.Application.Clients.Interfaces;
+using Bran.Application.Services;
 using Bran.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

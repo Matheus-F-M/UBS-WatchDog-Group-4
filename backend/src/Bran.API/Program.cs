@@ -1,11 +1,9 @@
-using Bran.Application.Clients.Interfaces;
-using Bran.Application.Clients.Services;
-using Bran.Application.Countries.Interfaces;
-using Bran.Application.Countries.Services;
-using Bran.Application.Currencies.Service;
+//using Bran.Application.Clients.Interfaces;
+//using Bran.Application.Countries.Interfaces;
 using Bran.Application.Services;
-using Bran.Application.Transactions.Services;
+using Bran.Domain.Helpers;
 using Bran.Domain.Interfaces;
+using Bran.Domain.Rules.Clients;
 using Bran.Infrastructure.Persistence;
 using Bran.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -40,11 +38,11 @@ builder.Services.AddCors(options =>
 });
 
 //Application
-builder.Services.AddScoped<IClientService, ClientService>();
-builder.Services.AddScoped<ICountryService, CountryService>();
+builder.Services.AddScoped<ClientService>();
+//builder.Services.AddScoped<ICountryService, CountryService>();
 
 //Repositories
-builder.Services.AddScoped<IClientsRepository, ClientRepository>();
+builder.Services.AddScoped<IClientsInterface, ClientRepository>();
 builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
 
 builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
@@ -55,6 +53,9 @@ builder.Services.AddScoped<ComplianceService>();
 builder.Services.AddScoped<IAlertsRepository, AlertsRepository>();
 builder.Services.AddScoped<CurrencyService>();
 builder.Services.AddScoped<ICurrencyRepository, CurrencyRepository>();
+builder.Services.AddScoped<IClientRiskRule, ClientTypeRiskRule>();
+builder.Services.AddScoped<IClientRiskRule, CountryRiskRule>();
+builder.Services.AddScoped<ClientRiskCalculator>();
 
 // Dependency Injection/DbContext (PostgreSQL)
 builder.Services.AddDbContext<BranDbContext>(options =>

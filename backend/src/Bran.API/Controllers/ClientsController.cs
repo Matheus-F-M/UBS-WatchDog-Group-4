@@ -1,5 +1,6 @@
 ﻿using Bran.API.DTOs.Clients;
-using Bran.Application.Clients.Interfaces;
+//using Bran.Application.Clients.Interfaces;
+using Bran.Application.Services;
 using Bran.Domain.ValueObjects;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,9 +10,9 @@ namespace Bran.API.Controllers
     [Route("api/v1/clients")]
     public class ClientsController : ControllerBase
     {
-        private readonly IClientService _clientService;
+        private readonly ClientService _clientService;
 
-        public ClientsController(IClientService clientService)
+        public ClientsController(ClientService clientService)
         {
             _clientService = clientService;
         }

@@ -1,5 +1,5 @@
 ﻿using Bran.API.DTOs.Countries;
-using Bran.Application.Countries.Interfaces;
+using Bran.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bran.API.Controllers
@@ -8,9 +8,9 @@ namespace Bran.API.Controllers
     [Route("api/countries")]
     public class CountriesController : ControllerBase
     {
-        private readonly ICountryService _countryService;
+        private readonly ICountriesRepository _countryService;
 
-        public CountriesController(ICountryService countryService)
+        public CountriesController(ICountriesRepository countryService)
         {
             _countryService = countryService;
         }
