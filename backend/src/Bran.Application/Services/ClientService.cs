@@ -1,10 +1,10 @@
-﻿using Bran.Application.Clients.Interfaces;
+﻿using Bran.Application.Interfaces;
 using Bran.Domain.Entities;
 using Bran.Domain.Interfaces;
 using Bran.Domain.Strategy;
 using Bran.Domain.ValueObjects;
 
-namespace Bran.Application.Clients
+namespace Bran.Application.Services
 {
     public class ClientService : IClientService
     {

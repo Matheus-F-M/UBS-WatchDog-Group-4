@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bran.Application.Clients.Interfaces
+namespace Bran.Application.Interfaces
 {
     public interface IClientService
     {

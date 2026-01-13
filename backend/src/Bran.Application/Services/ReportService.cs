@@ -1,4 +1,5 @@
-﻿using Bran.Domain.Entities;
+﻿using Bran.Application.Interfaces;
+using Bran.Domain.Entities;
 using Bran.Domain.Interfaces;
 using System;
 using System.Collections.Generic;

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using Bran.Domain.Entities;
 
-namespace Bran.Application.Transactions.Services
+namespace Bran.Application.Services
 {
     public class TransactionService 
     {

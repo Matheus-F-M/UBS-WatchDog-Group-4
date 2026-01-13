@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bran.Domain.Interfaces
+namespace Bran.Application.Interfaces
 {
     public interface IReportService
     {

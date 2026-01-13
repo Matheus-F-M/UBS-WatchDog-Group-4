@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bran.Application.Countries.Interfaces
+namespace Bran.Application.Interfaces
 {
     public interface ICountryService
     {

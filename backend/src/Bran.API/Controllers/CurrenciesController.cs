@@ -1,7 +1,7 @@
 ﻿using Bran.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Bran.API.DTOs;
-using Bran.Application.Currencies;
+using Bran.Application.Services;
 
 namespace Bran.API.Controllers
 {
