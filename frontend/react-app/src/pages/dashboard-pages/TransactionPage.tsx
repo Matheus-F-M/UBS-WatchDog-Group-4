@@ -49,8 +49,9 @@ const initialTransactiondata: Transaction[] = [
     tipo: "Depósito",
     valor: 10000.50,
     moeda: "BRL",
-    contraparte: "000.000.000-00",
+    idContraparte: "000.000.000-00",
     dataHora: "2024-01-15 14:30:00",
+    pais: "Sudão",
   },
 ];
 
@@ -62,13 +63,12 @@ export default function TransactionPage() {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [cpfCnpjCliente, setCpfCnpjCliente] = useState<string>("");
   const [newTransaction, setNewTransaction] = useState<Partial<Transaction>>({
     idCliente: "",
     tipo: "Depósito",
     valor: undefined,
     moeda: "BRL",
-    contraparte: "",
+    idContraparte: "",
   });
 
   // Get filters and columns from Zustand store
@@ -112,7 +112,7 @@ export default function TransactionPage() {
       await Promise.all(
         uniqueClientIds.map(async (clientId) => {
           try {
-            const client = await clientsApi.getId(clientId);
+            const client = await clientsApi.getById(clientId);
             names[clientId] = client.nome;
           } catch (err) {
             names[clientId] = "Desconhecido";
@@ -160,11 +160,11 @@ export default function TransactionPage() {
       ----------------------------------------- */
   const handleAddTransaction = async () => {
     if (
-      !cpfCnpjCliente ||
+      !newTransaction.idCliente ||
       !newTransaction.tipo ||
       !newTransaction.valor ||
       !newTransaction.moeda ||
-      !newTransaction.contraparte
+      !newTransaction.idContraparte
     ) {
       alert("Preencha todos os campos obrigatórios");
       return;
@@ -173,34 +173,26 @@ export default function TransactionPage() {
     setIsLoading(true);
     setError(null);
     try {
-      // Fetch client ID from CPF/CNPJ
-      const clientId = await fetchClientIdFromCpfCnpj(cpfCnpjCliente);
-      
-      if (!clientId) {
-        alert("Cliente não encontrado com o CPF/CNPJ fornecido");
-        setIsLoading(false);
-        return;
-      }
-
       const transactionToAdd: Omit<Transaction, "id"> = {
-        idCliente: clientId,
+        idCliente: newTransaction.idCliente,
         tipo: newTransaction.tipo as Transaction["tipo"],
         valor: newTransaction.valor,
         moeda: newTransaction.moeda as Currency,
-        contraparte: newTransaction.contraparte,
-        dataHora: new Date().toISOString().slice(0, 19).replace('T', ' '), // Auto-generate timestamp
+        idContraparte: newTransaction.idContraparte,
+        dataHora: "2026-01-13T04:39:33.792Z", // backend will set current date/time   
+        pais: "string", // backend will set country based on client info
       };
 
+      console.log("Adding transaction:", transactionToAdd);
       const createdTransaction = await transactionsApi.create(transactionToAdd);
       setTransactiondata([...transactiondata, createdTransaction]);
       setAddDialogOpen(false);
-      setCpfCnpjCliente("");
       setNewTransaction({
         idCliente: "",
         tipo: "Depósito",
         valor: undefined,
         moeda: "BRL",
-        contraparte: "",
+        idContraparte: "",
       });
     } catch (err) {
       setError("Erro ao criar transação");
@@ -264,7 +256,7 @@ export default function TransactionPage() {
                   {visibleColumns.tipo && <TableHead>Tipo</TableHead>}
                   {visibleColumns.valor && <TableHead>Valor</TableHead>}
                   {visibleColumns.moeda && <TableHead>Moeda</TableHead>}
-                  {visibleColumns.contraparte && <TableHead>Contraparte</TableHead>}
+                  {visibleColumns.idContraparte && <TableHead>Contraparte</TableHead>}
                   {visibleColumns.dataHora && <TableHead>Data e Hora</TableHead>}
                 </TableRow>
               </TableHeader>
@@ -279,7 +271,7 @@ export default function TransactionPage() {
                     const tipoSearch = transactionFilters.tipo.toLowerCase();
                     const valorSearch = transactionFilters.valor.toLowerCase();
                     const moedaSearch = transactionFilters.moeda.toLowerCase();
-                    const contraparteSearch = transactionFilters.contraparte.toLowerCase();
+                    const contraparteSearch = (transactionFilters.idContraparte || "").toLowerCase();
                     const dataSearch = (transactionFilters.dataHora || "").toLowerCase();
 
                     const clientName = (clientNames[transaction.idCliente] || "").toLowerCase();
@@ -291,7 +283,7 @@ export default function TransactionPage() {
                       transaction.tipo.toLowerCase().includes(tipoSearch) &&
                       transaction.valor.toString().includes(valorSearch) &&
                       transaction.moeda.toLowerCase().includes(moedaSearch) &&
-                      transaction.contraparte.toLowerCase().includes(contraparteSearch) &&
+                      transaction.idContraparte.toLowerCase().includes(contraparteSearch) &&
                       transaction.dataHora.toLowerCase().includes(dataSearch)
                     );
                   })
@@ -307,7 +299,7 @@ export default function TransactionPage() {
                         </TableCell>
                       )}
                       {visibleColumns.moeda && <TableCell>{transaction.moeda}</TableCell>}
-                      {visibleColumns.contraparte && <TableCell>{transaction.contraparte}</TableCell>}
+                      {visibleColumns.idContraparte && <TableCell>{transaction.idContraparte}</TableCell>}
                       {visibleColumns.dataHora && <TableCell>{transaction.dataHora}</TableCell>}
                     </TableRow>
                   ))}
@@ -335,23 +327,24 @@ export default function TransactionPage() {
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="new-cpfCnpjCliente">CPF/CNPJ do Cliente *</Label>
+              <Label htmlFor="new-idCliente">ID do Cliente *</Label>
               <Input
-                id="new-cpfCnpjCliente"
-                value={cpfCnpjCliente || ""}
-                onChange={(e) => setCpfCnpjCliente(e.target.value)}
-                placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                id="new-idCliente"
+                value={newTransaction.idCliente || ""}
+                onChange={(e) => setNewTransaction({ ...newTransaction, idCliente: e.target.value })}
+                placeholder="Digite o ID do cliente..."
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="new-contraparte">CPF/CNPJ  da Contraparte *</Label>
+              <Label htmlFor="new-contraparte">ID da Contraparte *</Label>
               <Input
                 id="new-contraparte"
-                value={newTransaction.contraparte || ""}
+                value={newTransaction.idContraparte || ""}
                 onChange={(e) =>
-                  setNewTransaction({ ...newTransaction, contraparte: e.target.value })
+                  setNewTransaction({ ...newTransaction, idContraparte: e.target.value })
                 }
+                placeholder="Digite o ID da contraparte..."
               />
             </div>
 
@@ -511,8 +504,8 @@ export default function TransactionPage() {
               <h3 className="mb-3 text-sm font-semibold">Filtrar por Contraparte</h3>
               <Input
                 placeholder="Digite a contraparte..."
-                value={transactionFilters.contraparte}
-                onChange={(e) => setTransactionFilter('contraparte', e.target.value)}
+                value={transactionFilters.idContraparte}
+                onChange={(e) => setTransactionFilter('idContraparte', e.target.value)}
               />
             </div>
 
@@ -581,8 +574,8 @@ export default function TransactionPage() {
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="col-contraparte"
-                    checked={visibleColumns.contraparte}
-                    onCheckedChange={() => toggleColumn('contraparte')}
+                    checked={visibleColumns.idContraparte}
+                    onCheckedChange={() => toggleColumn('idContraparte')}
                   />
                   <label htmlFor="col-contraparte" className="text-sm cursor-pointer">
                     Contraparte

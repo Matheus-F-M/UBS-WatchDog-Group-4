@@ -8,8 +8,9 @@ interface TransactionFilters {
   tipo: string;
   valor: string;
   moeda: string;
-  contraparte: string;
+  idContraparte: string;
   dataHora: string;
+  pais: string;
 }
 
 interface TransactionVisibleColumns {
@@ -19,8 +20,9 @@ interface TransactionVisibleColumns {
   tipo: boolean;
   valor: boolean;
   moeda: boolean;
-  contraparte: boolean;
+  idContraparte: boolean;
   dataHora: boolean;
+  pais: boolean;
 }
 
 interface ClientFilters {
@@ -96,8 +98,9 @@ const initialTransactionFilters: TransactionFilters = {
   tipo: '',
   valor: '',
   moeda: '',
-  contraparte: '',
+  idContraparte: '',
   dataHora: '',
+  pais: '',
 };
 
 const initialTransactionColumns: TransactionVisibleColumns = {
@@ -107,8 +110,9 @@ const initialTransactionColumns: TransactionVisibleColumns = {
   tipo: true,
   valor: true,
   moeda: true,
-  contraparte: true,
+  idContraparte: true,
   dataHora: true,
+  pais: true,
 };
 
 const initialClientFilters: ClientFilters = {
