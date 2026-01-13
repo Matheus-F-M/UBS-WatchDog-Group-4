@@ -1,13 +1,12 @@
-﻿using Bran.Application.Countries.Interfaces;
-using Bran.Domain.Entities;
+﻿using Bran.Domain.Entities;
 using Bran.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bran.Application.Countries.Services
+namespace Bran.Application.Services
 {
-    public class CountryService : ICountryService
+    public class CountryService
     {
         private readonly ICountriesRepository _countriesRepository;
 

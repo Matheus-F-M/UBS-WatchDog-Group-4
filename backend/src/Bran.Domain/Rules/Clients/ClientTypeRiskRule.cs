@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bran.Domain.Strategy
+namespace Bran.Domain.Rules.Clients
 {
     public class ClientTypeRiskRule : IClientRiskRule
     {

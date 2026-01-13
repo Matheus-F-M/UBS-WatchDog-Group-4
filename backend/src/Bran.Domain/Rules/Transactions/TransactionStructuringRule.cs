@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using Bran.Domain.ContextObjects;
 
-namespace Bran.Domain.ComplianceRules
+namespace Bran.Domain.Rules.Transactions
 {
     public class TransactionStructuringRule : IComplianceRule
     {
@@ -15,12 +15,13 @@ namespace Bran.Domain.ComplianceRules
 
         public string Name => "Structuring Detected";
 
-        public TransactionStructuringRule(double thresholdAmount, int minTransactionCount, int daysWindow)
+        public TransactionStructuringRule(IEnumerable<ComplianceConfigs> configs)
         {
-            _thresholdAmount = thresholdAmount;
-            _minTransactionCount = minTransactionCount;
-            _daysWindow = daysWindow;
+            _thresholdAmount = double.Parse(configs.First(c => c.Key == "ThresholdAmount").Value);
+            _minTransactionCount = int.Parse(configs.First(c => c.Key == "MinTransactionCount").Value);
+            _daysWindow = int.Parse(configs.First(c => c.Key == "DaysWindow").Value);
         }
+
 
         public Alert? Validate(ComplianceContext complianceContext)
         {

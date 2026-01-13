@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Bran.Domain.Interfaces
 {
-    public interface IClientsRepository
+    public interface IClientsInterface
     {
         Task<Client?> GetByIdAsync(Guid clientId);
         Task<IReadOnlyCollection<Client>> GetAllAsync();

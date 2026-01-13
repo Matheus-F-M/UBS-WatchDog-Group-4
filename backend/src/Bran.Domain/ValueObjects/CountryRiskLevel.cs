@@ -8,6 +8,6 @@ namespace Bran.Domain.ValueObjects
     { 
         Low = 0, 
         Medium = 1,
-        High = 10
+        High = 2
     }
 }

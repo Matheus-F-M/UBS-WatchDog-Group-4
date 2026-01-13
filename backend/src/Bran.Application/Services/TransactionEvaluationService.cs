@@ -1,5 +1,4 @@
-﻿using Bran.Application.Services;
-using Bran.Domain.ContextObjects;
+﻿using Bran.Domain.ContextObjects;
 using Bran.Domain.Entities;
 using Bran.Domain.Interfaces;
 using System;
@@ -8,16 +7,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bran.Application.Transactions.Services
+namespace Bran.Application.Services
 {
     public class TransactionEvaluationService
     {
-        private readonly IClientsRepository _clientsRepository;
+        private readonly IClientsInterface _clientsRepository;
         private readonly ITransactionsRepository _transactionsRepository;
         private readonly ComplianceService _complianceService;
 
         public TransactionEvaluationService(
-            IClientsRepository clientsRepository,
+            IClientsInterface clientsRepository,
             ITransactionsRepository transactionsRepository,
             ComplianceService complianceService)
         {

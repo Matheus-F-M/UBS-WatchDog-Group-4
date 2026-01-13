@@ -8,17 +8,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bran.Domain.Strategy
+namespace Bran.Domain.Rules.Transactions
 {
     public class TransactionDailyLimitRule : IComplianceRule
     {
         private readonly double _dailyLimit;
         public string Name => "Daily Limit Surpassed";
 
-        public TransactionDailyLimitRule(double dailyLimit)
+        public TransactionDailyLimitRule(IEnumerable<ComplianceConfigs> configs)
         {
-            _dailyLimit = dailyLimit;
+            _dailyLimit = double.Parse(configs.First(c => c.Key == "DailyLimit").Value);
         }
+
 
         public Alert? Validate(ComplianceContext complianceContext)
         {

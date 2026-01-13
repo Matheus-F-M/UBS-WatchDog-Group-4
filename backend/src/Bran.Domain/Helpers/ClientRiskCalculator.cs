@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bran.Domain.Strategy
+namespace Bran.Domain.Helpers
 {
     public class ClientRiskCalculator
     {
@@ -15,9 +15,10 @@ namespace Bran.Domain.Strategy
             _rules = rules;
         }
 
-        public int Calculate(Client client)
+        public int CalculatePoints(Client client)
         {
             return _rules.Sum(rule => rule.CalculatePoints(client));
         }
     }
 }
+

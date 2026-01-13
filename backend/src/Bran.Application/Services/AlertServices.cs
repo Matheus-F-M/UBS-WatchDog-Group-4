@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bran.Application.Alerts.Services
+namespace Bran.Application.Services
 {
     public class AlertServices
     {

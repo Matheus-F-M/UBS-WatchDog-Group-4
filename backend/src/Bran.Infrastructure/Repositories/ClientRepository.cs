@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Bran.Infrastructure.Repositories
 {
-    public class ClientRepository : IClientsRepository
+    public class ClientRepository : IClientsInterface
     {
         private readonly BranDbContext _context;
 

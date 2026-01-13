@@ -1,7 +1,7 @@
 ﻿using Bran.Domain.ContextObjects;
 using Bran.Domain.Entities;
 using Bran.Domain.Interfaces;
-using Bran.Domain.Strategy;
+using Bran.Domain.Rules.Transactions;
 using System;
 using System.Collections.Generic;
 using System.Linq;

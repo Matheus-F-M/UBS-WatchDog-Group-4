@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using Bran.Domain.Entities;
 
-namespace Bran.Application.Currencies.Service
+namespace Bran.Application.Services
 {
     public class CurrencyService
     {
