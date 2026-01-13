@@ -27,7 +27,7 @@ namespace Bran.API.Controllers
                 request.Amount,
                 request.Currency,
                 request.CounterpartyId,
-                request.DateHour,
+                DateTime.UtcNow,
                 request.Country
             );
 

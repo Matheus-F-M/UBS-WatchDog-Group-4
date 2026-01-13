@@ -28,6 +28,14 @@ namespace Bran.Domain.Entities
                 throw new ArgumentNullException(nameof(currency), "Currency cannot be null or empty.");
             if (string.IsNullOrWhiteSpace(country))
                 throw new ArgumentNullException(nameof(country), "Country cannot be null or empty.");
+            if (dateHour > DateTime.UtcNow)
+                throw new ArgumentException("DateHour cannot be in the future.", nameof(dateHour));
+            if (clientId == Guid.Empty)
+                throw new ArgumentException("ClientId cannot be empty.", nameof(clientId));
+            if (counterpartyId == Guid.Empty)
+                throw new ArgumentException("CounterpartyId cannot be empty.", nameof(counterpartyId));
+            if (!Enum.IsDefined(typeof(TransactionType), transactionType))
+                throw new ArgumentException("Invalid transaction type.", nameof(transactionType));
 
             Id = Guid.NewGuid();
             ClientId = clientId;

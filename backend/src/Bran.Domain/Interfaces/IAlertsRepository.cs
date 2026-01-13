@@ -16,6 +16,7 @@ namespace Bran.Domain.Interfaces
         Task<IReadOnlyCollection<Alert>> GetByStatusAsync(AlertStatus status); 
         Task<IReadOnlyCollection<Alert>> GetBySeverityAsync(AlertSeverity severity); 
         Task<IReadOnlyCollection<Alert>> GetByDateRangeAsync(DateTime startUtc, DateTime endUtc);
+        Task<IReadOnlyCollection<Alert>> GetByClientAndPeriodAsync(Guid clientId, DateTime startDate, DateTime endDate);
         Task AddRangeAsync(IEnumerable<Alert> alerts, CancellationToken ct = default);
         Task AddAsync(Alert alert); 
         Task UpdateAsync(Alert alert); 

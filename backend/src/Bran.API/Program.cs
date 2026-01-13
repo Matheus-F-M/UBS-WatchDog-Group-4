@@ -42,7 +42,7 @@ builder.Services.AddScoped<ClientService>();
 //builder.Services.AddScoped<ICountryService, CountryService>();
 
 //Repositories
-builder.Services.AddScoped<IClientsInterface, ClientRepository>();
+builder.Services.AddScoped<IClientsRepository, ClientRepository>();
 builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
 
 builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();

@@ -9,10 +9,10 @@ namespace Bran.Application.Services
     public class ClientService
     {
         private readonly ICountriesRepository _countryRiskRepository;
-        private readonly IClientsInterface _clientInterface;
+        private readonly IClientsRepository _clientInterface;
         private readonly ClientRiskCalculator _calculator;
 
-        public ClientService(ICountriesRepository countryRiskRepository, IClientsInterface clientRepository, ClientRiskCalculator calculator)
+        public ClientService(ICountriesRepository countryRiskRepository, IClientsRepository clientRepository, ClientRiskCalculator calculator)
         {
             _countryRiskRepository = countryRiskRepository;
             _clientInterface = clientRepository;

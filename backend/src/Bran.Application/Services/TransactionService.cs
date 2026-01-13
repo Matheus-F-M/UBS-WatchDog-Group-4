@@ -9,12 +9,12 @@ namespace Bran.Application.Services
 {
     public class TransactionService 
     {
-        private readonly IClientsInterface _clientsRepository;
+        private readonly IClientsRepository _clientsRepository;
         private readonly ITransactionsRepository _transactionsRepository;
         private readonly TransactionEvaluationService _evaluationService;
         private readonly IAlertsRepository _alertsRepository;
 
-        public TransactionService(IClientsInterface clientsRepository, ITransactionsRepository transactionsRepository, TransactionEvaluationService evaluationService, IAlertsRepository alertsRepository)
+        public TransactionService(IClientsRepository clientsRepository, ITransactionsRepository transactionsRepository, TransactionEvaluationService evaluationService, IAlertsRepository alertsRepository)
         {
             _clientsRepository = clientsRepository;
             _transactionsRepository = transactionsRepository;
