@@ -17,14 +17,15 @@ export const mapBackendTransaction = (backendTransaction: any): Transaction => {
   return {
     id: backendTransaction.id || "none",
     idCliente: backendTransaction.clientId || "none",
-    tipo: backendTransaction.type === 0 ? "Depósito"
-      : backendTransaction.type === 1 ? "Saque"
-      : backendTransaction.type === 2 ? "Transferência"
+    tipo: backendTransaction.transactionType === 0 ? "Depósito"
+      : backendTransaction.transactionType === 1 ? "Saque"
+      : backendTransaction.transactionType === 2 ? "Transferência"
       : "Depósito",
     valor: backendTransaction.amount || 0,
     moeda: backendTransaction.currency || "BRL",
-    contraparte: backendTransaction.counterparty || "none",
-    dataHora: backendTransaction.dateTime || "2024-01-01 00:00:00",
+    idContraparte: backendTransaction.counterpartyId || "none",
+    dataHora: backendTransaction.dateHour || "2024-01-01 00:00:00",
+    pais: backendTransaction.country || "Brasil",
   };
 };
 
@@ -37,14 +38,15 @@ export const reverseMapBackendTransaction = (transaction: Transaction): any => {
   return {
     id: transaction.id,
     clientId: transaction.idCliente,
-    type: transaction.tipo === "Depósito" ? 0
+    transactionType: transaction.tipo === "Depósito" ? 0
       : transaction.tipo === "Saque" ? 1
       : transaction.tipo === "Transferência" ? 2
       : 0,
     amount: transaction.valor,
     currency: transaction.moeda,
-    counterparty: transaction.contraparte,
-    dateTime: transaction.dataHora,
+    counterpartyId: transaction.idContraparte,
+    dateHour: transaction.dataHora,
+    country: transaction.pais,
   };
 };
 

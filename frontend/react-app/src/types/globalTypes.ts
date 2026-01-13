@@ -95,7 +95,7 @@ export const clientSchema = z.object({
   nome: z.string().min(1, "Nome obrigatório"), // <<<< STRING: OK
   // sobrenome: z.string().min(1, "Sobrenome obrigatório"), // <<<< Remover Sobrenome
   cpfCnpj: cpfCnpjSchema, // <<<< STRING: OK
-  pais: z.string().min(1, "País obrigatório"), // <<<< STRING: OK
+  pais: z.string().min(1, "País obrigatório"), // <<<< STRING: OK USE API
   kycStatus: z.enum(["Aprovado", "Pendente", "Em Análise", "Rejeitado"]), // <<<< STRING ENUM: Remover "Em Análise"
   nivelDeRisco: z.enum(["Baixo", "Medio", "Alto"]), // <<<< STRING ENUM: OK
   income: moneyAmountSchema.optional(), // <<<< NUMBER: OK mas coletar essa informação do back ("income")
@@ -114,8 +114,9 @@ export const transactionSchema = z.object({
   tipo: z.enum(["Depósito", "Saque", "Transferência"]), // ENUM<STRING>: OK
   valor: moneyAmountSchema, // NUMBER: OK
   moeda: z.string(), // STRING: OK
-  contraparte: z.string().min(1, "Contraparte obrigatória"), // STRING (ID CONTRAPARTE): OK
+  idContraparte: z.string(), // STRING (ID CONTRAPARTE): OK
   dataHora: z.string(), // STRING: Combined date and time
+  pais: z.string().min(1, "País obrigatório"), // STRING: OK USE API
 });
 
 // Infer TypeScript type from Zod schema

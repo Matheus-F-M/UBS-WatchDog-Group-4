@@ -97,74 +97,6 @@ const initialClientData: Client[] = [
 ];
 
 
-
-
-/* -----------------------------------------
-   ---------- Currency Combobox ------------
-   ----------------------------------------- */
-
-/**
- * Creates a Currency Combobox using Popover and Command components.
- */
-function CurrencyCombobox({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between"
-        >
-          {value
-            ? currencies.find((currency) => currency.value === value)?.label
-            : "Selecione a moeda..."}
-          <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
-        <Command>
-          <CommandInput placeholder="Buscar moeda..." />
-          <CommandList>
-            <CommandEmpty>Nenhuma moeda encontrada.</CommandEmpty>
-            <CommandGroup>
-              {currencies.map((currency) => (
-                <CommandItem
-                  key={currency.value}
-                  value={currency.value}
-                  onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : currentValue);
-                    setOpen(false);
-                  }}
-                >
-                  <CheckIcon
-                    className={
-                      value === currency.value ? "opacity-100" : "opacity-0"
-                    }
-                  />
-                  {currency.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
-}
-/* -----------------------------------------
-   ------------------ END ------------------
-   ----------------------------------------- */
-
-
 /* 00000000000000000000000000000000000000000
    ---------- CLIENT PAGE START ------------
    00000000000000000000000000000000000000000 */
@@ -466,7 +398,6 @@ export default function ClientPage() {
                     const riscoMatch = nivelDeRiscoFilter === "" || client.nivelDeRisco === nivelDeRiscoFilter;
                     
                     return (
-console.log('Filtering Client:', client),
                       client.id?.toLowerCase().includes(idSearch) &&
                       client.nome?.toLowerCase().includes(nomeSearch) &&
                       client.cpfCnpj?.toLowerCase().includes(cpfCnpjSearch) &&
@@ -666,30 +597,6 @@ console.log('Filtering Client:', client),
                   </NativeSelectOption>
                   <NativeSelectOption value="Rejeitado">
                     Rejeitado
-                  </NativeSelectOption>
-                </NativeSelect>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="nivelDeRisco">Nível de Risco</Label>
-                <NativeSelect
-                  id="nivelDeRisco"
-                  value={editedClient.nivelDeRisco}
-                  onChange={(e) =>
-                    setEditedClient({
-                      ...editedClient,
-                      nivelDeRisco: e.target.value as Client["nivelDeRisco"],
-                    })
-                  }
-                >
-                  <NativeSelectOption value="Baixo">
-                    Baixo
-                  </NativeSelectOption>
-                  <NativeSelectOption value="Medio">
-                    Medio
-                  </NativeSelectOption>
-                  <NativeSelectOption value="Alto">
-                    Alto
                   </NativeSelectOption>
                 </NativeSelect>
               </div>

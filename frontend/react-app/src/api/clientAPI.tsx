@@ -12,8 +12,6 @@ export const API_CLIENT_BASE_URL = "http://localhost:5131/api/v1/clients";
  * @returns Client : the mapped client to the parameters used in the frontend
  */
 export const mapBackendClient = (backendClient: any): Client => {
-  console.log("Full Backend Client Object:", backendClient);
-  console.log("Backend Government ID:", backendClient.governmentId);
   return {
     id: backendClient.id || "none",
     nome: backendClient.name || "none",
@@ -77,16 +75,14 @@ export const clientsApi = {
     const response = await fetch(API_CLIENT_BASE_URL);
     if (!response.ok) throw new Error("Failed to fetch clients");
     const rawData = await response.json();
-    console.log("Raw API Response from getAll:", rawData);
     return rawData.map(mapBackendClient);
   },
 
   // Get client by ID
-  getId: async (id: string): Promise<Client> => {
+  getById: async (id: string): Promise<Client> => {
     const response = await fetch(`${API_CLIENT_BASE_URL}/${id}`);
     if (!response.ok) throw new Error(`Failed to fetch client with id ${id}`);
     const rawClient = await response.json();
-    console.log("Raw API Response from getId:", rawClient);
     return mapBackendClient(rawClient);
   },
 
