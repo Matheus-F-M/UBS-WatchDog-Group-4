@@ -16,18 +16,14 @@ namespace Bran.Domain.Entities
         public string Currency { get; private set; }
         public Guid CounterpartyId { get; private set; }
         public DateTime DateHour { get; private set; }
-        public string Country { get; private set; }   // <-- novo campo
-
         protected Transaction() { }
 
-        public Transaction(Guid clientId, TransactionType transactionType, double amount, string currency, Guid counterpartyId, DateTime dateHour, string country)
+        public Transaction(Guid clientId, TransactionType transactionType, double amount, string currency, Guid counterpartyId, DateTime dateHour)
         {
             if (amount <= 0)
                 throw new ArgumentException("Amount must be greater than zero.", nameof(amount));
             if (string.IsNullOrWhiteSpace(currency))
                 throw new ArgumentNullException(nameof(currency), "Currency cannot be null or empty.");
-            if (string.IsNullOrWhiteSpace(country))
-                throw new ArgumentNullException(nameof(country), "Country cannot be null or empty.");
             if (dateHour > DateTime.UtcNow)
                 throw new ArgumentException("DateHour cannot be in the future.", nameof(dateHour));
             if (clientId == Guid.Empty)
@@ -44,7 +40,6 @@ namespace Bran.Domain.Entities
             Currency = currency;
             CounterpartyId = counterpartyId;
             DateHour = dateHour;
-            Country = country;
         }
 
         public override string ToString()

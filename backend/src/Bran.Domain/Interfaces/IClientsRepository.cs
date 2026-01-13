@@ -14,7 +14,7 @@ namespace Bran.Domain.Interfaces
         Task<IReadOnlyCollection<Client>> GetAllAsync();
         Task AddAsync(Client client);
         Task UpdateAsync(Client client);
-        Task DeleteAsync(Guid clientId);
+        Task DeactivateAsync(Client client);
         Task<bool> ExistsAsync(Guid clientId);
         Task<IReadOnlyCollection<Client>> GetByKycStatusAsync(KycStatus kycStatus);
     }

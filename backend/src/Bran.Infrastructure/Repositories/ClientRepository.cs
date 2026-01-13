@@ -40,18 +40,17 @@ namespace Bran.Infrastructure.Repositories
 
         public async Task UpdateAsync(Client client)
         {
-            _context.Clients.Update(client);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteAsync(Guid clientId)
-        {
-            var client = await _context.Clients.FindAsync(clientId);
-            if (client != null)
+            if (client.IsActive)
             {
-                _context.Clients.Remove(client);
+                _context.Clients.Update(client);
                 await _context.SaveChangesAsync();
             }
+        }
+        public async Task DeactivateAsync(Client client)
+        {
+            client.GetType().GetProperty("IsActive")?.SetValue(client, false);
+            _context.Clients.Update(client);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<bool> ExistsAsync(Guid clientId)

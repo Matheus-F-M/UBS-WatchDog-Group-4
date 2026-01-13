@@ -20,10 +20,11 @@ namespace Bran.Domain.Entities
         public string GovernmentId { get; private set; }
         public ClientType Type { get; private set; }
         public double Income { get; private set; }
-        
+        public bool IsActive { get; private set; }
+
         protected Client() { }
 
-        public Client(string name, string country, string governmentId, ClientType type, double income)
+        public Client(string name, string country, string governmentId, ClientType type, double income, bool isActive)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Name cannot be null or empty.", nameof(name));
@@ -39,10 +40,11 @@ namespace Bran.Domain.Entities
             GovernmentId = governmentId;
             Type = type;
             Income = income;
+            IsActive = isActive;
         }
         public override string ToString()
         {
-            return $"Client - ID: {Id}, Name: {Name}, Country: {Country}, RiskLevel: {RiskLevel}, KycStatus: {KycStatus}, CreatedAt: {CreatedAt}, UpdatedAt: {UpdatedAt}, Type: {Type}";
+            return $"Client - ID: {Id}, Name: {Name}, Country: {Country}, RiskLevel: {RiskLevel}, KycStatus: {KycStatus}, CreatedAt: {CreatedAt}, UpdatedAt: {UpdatedAt}, Type: {Type}, IsActive: {IsActive}";
         }
 
         public void ApplyRiskPoints(int points)
@@ -62,6 +64,12 @@ namespace Bran.Domain.Entities
             Type = type;
             Income = income;
             KycStatus = kycStatus;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void Deactivate()
+        {
+            IsActive = false;
             UpdatedAt = DateTime.UtcNow;
         }
     }

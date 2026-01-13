@@ -28,8 +28,7 @@ namespace Bran.Application.Services
             double amount,
             string currency,
             Guid counterpartyId,
-            DateTime dateHour,
-            string country)
+            DateTime dateHour)
         {
             var client = await _clientsRepository.GetByIdAsync(clientId);
 
@@ -43,8 +42,7 @@ namespace Bran.Application.Services
                 amount,
                 currency,
                 counterpartyId,
-                dateHour,
-                country
+                dateHour
             );
 
             await _transactionsRepository.AddAsync(transaction);

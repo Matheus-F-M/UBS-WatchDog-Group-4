@@ -27,8 +27,7 @@ namespace Bran.API.Controllers
                 request.Amount,
                 request.Currency,
                 request.CounterpartyId,
-                DateTime.UtcNow,
-                request.Country
+                DateTime.UtcNow
             );
 
             return Ok(transaction);
@@ -48,7 +47,6 @@ namespace Bran.API.Controllers
                 Currency = transaction.Currency,
                 CounterpartyId = transaction.CounterpartyId,
                 DateHour = transaction.DateHour,
-                Country = transaction.Country
             });
 
             return Ok(response);
@@ -71,7 +69,6 @@ namespace Bran.API.Controllers
                 Currency = transaction.Currency,
                 CounterpartyId = transaction.CounterpartyId,
                 DateHour = transaction.DateHour,
-                Country = transaction.Country
             };
 
             return Ok(response);

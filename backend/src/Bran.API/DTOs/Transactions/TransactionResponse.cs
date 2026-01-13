@@ -11,6 +11,5 @@ namespace Bran.API.DTOs.Transactions
         public string Currency { get; set; }
         public Guid CounterpartyId { get; set; }
         public DateTime DateHour { get; set; }
-        public string Country { get; set; } 
     }
 }
