@@ -8,5 +8,6 @@ namespace Bran.API.DTOs.Clients
         public string Country { get; set; }
         public ClientType Type { get; set; }
         public double Income { get; set; }
+        public KycStatus KycStatus { get; set; }
     }
 }

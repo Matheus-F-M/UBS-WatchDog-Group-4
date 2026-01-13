@@ -10,7 +10,7 @@ namespace Bran.Application.Clients.Interfaces
     {
         Task<Client> CreateClientAsync(string name, string document, ClientType type, string country, double income);
 
-        Task<Client?> UpdateAsync(Guid clientId, string name, string country, ClientType type, double income);
+        Task<Client?> UpdateAsync(Guid clientId, string name, string country, ClientType type, double income, KycStatus kycStatus);
         Task<Client?> GetByIdAsync(Guid clientId);
         Task<IReadOnlyCollection<Client>> GetAllAsync();
         Task<bool> DeleteAsync(Guid clientId);

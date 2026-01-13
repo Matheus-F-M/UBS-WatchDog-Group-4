@@ -34,14 +34,14 @@ namespace Bran.Application.Clients.Services
             return client;
         }
 
-        public async Task<Client?> UpdateAsync(Guid clientId, string name, string country, ClientType type, double income)
+        public async Task<Client?> UpdateAsync(Guid clientId, string name, string country, ClientType type, double income, KycStatus kycStatus)
         {
             var client = await _clientRepository.GetByIdAsync(clientId);
 
             if (client is null)
                 return null;
 
-            client.UpdateBasicInfo(name, country, type, income);
+            client.UpdateBasicInfo(name, country, type, income, kycStatus);
 
             var rules = new List<IClientRiskRule> { new ClientTypeRiskRule() };
 

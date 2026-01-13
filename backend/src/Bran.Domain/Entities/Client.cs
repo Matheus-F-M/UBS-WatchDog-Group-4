@@ -55,12 +55,13 @@ namespace Bran.Domain.Entities
                 RiskLevel = ClientRiskLevel.High;
         }
 
-        public void UpdateBasicInfo(string name, string country, ClientType type, double income)
+        public void UpdateBasicInfo(string name, string country, ClientType type, double income, KycStatus kycStatus)
         {
             Name = name;
             Country = country;
             Type = type;
             Income = income;
+            KycStatus = kycStatus;
             UpdatedAt = DateTime.UtcNow;
         }
     }

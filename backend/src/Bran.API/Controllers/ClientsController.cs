@@ -1,5 +1,6 @@
 ﻿using Bran.API.DTOs.Clients;
 using Bran.Application.Clients.Interfaces;
+using Bran.Domain.ValueObjects;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bran.API.Controllers
@@ -32,7 +33,7 @@ namespace Bran.API.Controllers
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateClientRequest request)
         {
-            var client = await _clientService.UpdateAsync(id, request.Name, request.Country, request.Type, request.Income);
+            var client = await _clientService.UpdateAsync(id, request.Name, request.Country, request.Type, request.Income, request.KycStatus);
 
             if (client is null) return NotFound();
 
@@ -75,7 +76,8 @@ namespace Bran.API.Controllers
                 Type = client.Type,
                 Income = client.Income,
                 RiskLevel = client.RiskLevel,
-                KycStatus = client.KycStatus
+                KycStatus = client.KycStatus,
+                GovernmentId = client.GovernmentId,
             });
 
             return Ok(response);
