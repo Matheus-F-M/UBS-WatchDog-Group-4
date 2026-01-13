@@ -324,6 +324,62 @@ export default function AlertPage() {
             <DialogDescription>Filtre e Pesquise alertas</DialogDescription>
           </DialogHeader>
 
+          <div>
+            <h3 className="mb-4 text-sm font-semibold">Colunas Visíveis</h3>
+            <div className="flex flex-wrap gap-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="col-id"
+                  checked={visibleColumns.id}
+                  onCheckedChange={() => toggleColumn("id")}
+                />
+                <label htmlFor="col-id" className="text-sm cursor-pointer">
+                  ID
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="col-idCliente"
+                  checked={visibleColumns.idCliente}
+                  onCheckedChange={() => toggleColumn("idCliente")}
+                />
+                <label htmlFor="col-idCliente" className="text-sm cursor-pointer">
+                  ID Cliente
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="col-idTransacao"
+                  checked={visibleColumns.idTransacao}
+                  onCheckedChange={() => toggleColumn("idTransacao")}
+                />
+                <label htmlFor="col-idTransacao" className="text-sm cursor-pointer">
+                  ID Transação
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="col-severidade"
+                  checked={visibleColumns.severidade}
+                  onCheckedChange={() => toggleColumn("severidade")}
+                />
+                <label htmlFor="col-severidade" className="text-sm cursor-pointer">
+                  Severidade
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="col-status"
+                  checked={visibleColumns.status}
+                  onCheckedChange={() => toggleColumn("status")}
+                />
+                <label htmlFor="col-status" className="text-sm cursor-pointer">
+                  Status
+                </label>
+              </div>
+            </div>
+          </div>
+
           <div className="py-4 space-y-6 max-h-[60vh] overflow-y-auto">
             <div>
               <h3 className="mb-3 text-sm font-semibold">Filtrar por ID</h3>
@@ -398,61 +454,6 @@ export default function AlertPage() {
               </div>
             </div>
 
-            <div>
-              <h3 className="mb-4 text-sm font-semibold">Colunas Visíveis</h3>
-              <div className="flex flex-wrap gap-3">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="col-id"
-                    checked={visibleColumns.id}
-                    onCheckedChange={() => toggleColumn("id")}
-                  />
-                  <label htmlFor="col-id" className="text-sm cursor-pointer">
-                    ID
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="col-idCliente"
-                    checked={visibleColumns.idCliente}
-                    onCheckedChange={() => toggleColumn("idCliente")}
-                  />
-                  <label htmlFor="col-idCliente" className="text-sm cursor-pointer">
-                    ID Cliente
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="col-idTransacao"
-                    checked={visibleColumns.idTransacao}
-                    onCheckedChange={() => toggleColumn("idTransacao")}
-                  />
-                  <label htmlFor="col-idTransacao" className="text-sm cursor-pointer">
-                    ID Transação
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="col-severidade"
-                    checked={visibleColumns.severidade}
-                    onCheckedChange={() => toggleColumn("severidade")}
-                  />
-                  <label htmlFor="col-severidade" className="text-sm cursor-pointer">
-                    Severidade
-                  </label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="col-status"
-                    checked={visibleColumns.status}
-                    onCheckedChange={() => toggleColumn("status")}
-                  />
-                  <label htmlFor="col-status" className="text-sm cursor-pointer">
-                    Status
-                  </label>
-                </div>
-              </div>
-            </div>
           </div>
 
           <DialogFooter>
