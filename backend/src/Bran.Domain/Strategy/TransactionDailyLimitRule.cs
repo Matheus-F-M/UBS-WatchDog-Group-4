@@ -17,7 +17,7 @@ namespace Bran.Domain.Strategy
 
         public TransactionDailyLimitRule(IEnumerable<ComplianceConfigs> configs)
         {
-            _dailyLimit = decimal.Parse(configs.First(c => c.Key == "DailyLimit").Value);
+            _dailyLimit = double.Parse(configs.First(c => c.Key == "DailyLimit").Value);
         }
 
         public Alert? Validate(ComplianceContext complianceContext)

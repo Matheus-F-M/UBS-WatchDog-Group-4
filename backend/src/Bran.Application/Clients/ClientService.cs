@@ -4,7 +4,7 @@ using Bran.Domain.Interfaces;
 using Bran.Domain.Strategy;
 using Bran.Domain.ValueObjects;
 
-namespace Bran.Application.Clients.Services
+namespace Bran.Application.Clients
 {
     public class ClientService : IClientService
     {

@@ -17,7 +17,7 @@ namespace Bran.Domain.ComplianceRules
 
         public TransactionStructuringRule(IEnumerable<ComplianceConfigs> configs)
         {
-            _thresholdAmount = decimal.Parse(configs.First(c => c.Key == "ThresholdAmount").Value);
+            _thresholdAmount = double.Parse(configs.First(c => c.Key == "ThresholdAmount").Value);
             _minTransactionCount = int.Parse(configs.First(c => c.Key == "MinTransactionCount").Value);
             _daysWindow = int.Parse(configs.First(c => c.Key == "DaysWindow").Value);
         }

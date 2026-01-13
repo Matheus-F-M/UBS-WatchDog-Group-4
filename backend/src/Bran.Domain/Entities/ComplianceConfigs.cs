@@ -7,9 +7,9 @@ namespace Bran.Domain.Entities
     public class ComplianceConfigs
     {
         public Guid Id { get; private set; }
-        public string RuleName { get; private set; }   // Ex: "TransactionDailyLimitRule"
-        public string Key { get; private set; }        // Ex: "DailyLimit"
-        public string Value { get; private set; }      // Ex: "50000"
+        public string RuleName { get; private set; }
+        public string Key { get; private set; }
+        public string Value { get; private set; }
 
         protected ComplianceConfigs() { }
 

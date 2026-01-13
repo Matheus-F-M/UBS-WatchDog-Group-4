@@ -18,6 +18,9 @@ namespace Bran.Domain.Interfaces
 
         // Recupera transações em um intervalo de datas
         Task<IReadOnlyCollection<Transaction>> GetByDateRangeAsync(DateTime startDate, DateTime endDate);
+        
+        // Recupera transações de um cliente em um período específico
+        Task<IReadOnlyCollection<Transaction>> GetByClientAndPeriodAsync(Guid clientId, DateTime startDate, DateTime endDate);
 
         // Adiciona uma nova transação
         Task AddAsync(Transaction transaction);

@@ -56,23 +56,7 @@ namespace Bran.Infrastructure.Persistence
 
                 entity.Property(c => c.DailyRate)
                       .HasPrecision(18, 6);
-            });
-                new Country(
-                    Guid.Parse("11111111-1111-1111-1111-111111111111"),
-                    "BR", "Brazil", CountryRiskLevel.Low
-                ),
-                new Country(
-                    Guid.Parse("22222222-2222-2222-2222-222222222222"),
-                    "KP", "North Korea", CountryRiskLevel.High
-                ),
-                new Country(
-                    Guid.Parse("33333333-3333-3333-3333-333333333333"),
-                    "IR", "Iran", CountryRiskLevel.High
-                ),
-                new Country(
-                    Guid.Parse("44444444-4444-4444-4444-444444444444"),
-                    "MM", "Myanmar", CountryRiskLevel.High
-                )
+            }
             );
             modelBuilder.Entity<ComplianceConfigs>().HasData(
                // TransactionDailyLimitRule
