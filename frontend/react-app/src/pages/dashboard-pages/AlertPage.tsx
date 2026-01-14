@@ -39,6 +39,7 @@ const initialAlertData: Alert[] = [
     idTransacao: "T001",
     severidade: "Alta",
     status: "Novo",
+    regra: "Limite Diário",
   },
   {
     id: "2",
@@ -46,6 +47,7 @@ const initialAlertData: Alert[] = [
     idTransacao: "T002",
     severidade: "Média",
     status: "Em Análise",
+    regra: "Limite Diário",
   },
   {
     id: "3",
@@ -53,6 +55,7 @@ const initialAlertData: Alert[] = [
     idTransacao: "T003",
     severidade: "Crítico",
     status: "Novo",
+    regra: "Limite Diário",
   },
 ];
 
@@ -117,10 +120,12 @@ export default function AlertPage() {
   const handleResetFiltersAndColumns = () => {
     resetAlertFilters();
     // Ensure all columns are visible
+    console.log(visibleColumns);
     if (!visibleColumns.id) toggleAlertColumn('id');
     if (!visibleColumns.idCliente) toggleAlertColumn('idCliente');
     if (!visibleColumns.idTransacao) toggleAlertColumn('idTransacao');
     if (!visibleColumns.severidade) toggleAlertColumn('severidade');
+    if (!visibleColumns.regra) toggleAlertColumn('regra');
     if (!visibleColumns.status) toggleAlertColumn('status');
   };
   // --------------------------------------
@@ -259,6 +264,11 @@ export default function AlertPage() {
                       Severidade
                     </TableHead>
                   )}
+                  {visibleColumns.regra && (
+                    <TableHead className="font-bold bg-gradient-to-r from-[#780707] to-[#000000] bg-clip-text text-transparent">
+                      Regra
+                    </TableHead>
+                  )}
                   {visibleColumns.status && (
                     <TableHead className="font-bold bg-gradient-to-r from-[#780707] to-[#000000] bg-clip-text text-transparent">
                       Status
@@ -325,6 +335,9 @@ export default function AlertPage() {
                             {alert.severidade}
                           </span>
                         </TableCell>
+                      )}
+                      {visibleColumns.regra && (
+                        <TableCell>{alert.regra}</TableCell>
                       )}
                       {visibleColumns.status && (
                         <TableCell>
@@ -437,6 +450,19 @@ export default function AlertPage() {
                   className="text-sm cursor-pointer"
                 >
                   Severidade
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="col-regra"
+                  checked={visibleColumns.regra}
+                  onCheckedChange={() => toggleColumn("regra")}
+                />
+                <label
+                  htmlFor="col-regra"
+                  className="text-sm cursor-pointer"
+                >
+                  Regra
                 </label>
               </div>
               <div className="flex items-center space-x-2">

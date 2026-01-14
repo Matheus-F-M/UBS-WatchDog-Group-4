@@ -52,9 +52,11 @@ interface AlertFilters {
   idTransacao: string;
   severidade: string[];
   status: string[];
+  regra: string;
 }
 
 interface AlertVisibleColumns {
+  regra: boolean;
   id: boolean;
   idCliente: boolean;
   idTransacao: boolean;
@@ -143,6 +145,7 @@ const initialAlertFilters: AlertFilters = {
   idTransacao: '',
   severidade: [],
   status: [],
+  regra: '',
 };
 
 const initialAlertColumns: AlertVisibleColumns = {
@@ -151,6 +154,7 @@ const initialAlertColumns: AlertVisibleColumns = {
   idTransacao: true,
   severidade: true,
   status: true,
+  regra: true,
 };
 
 export const useFilterStore = create<FilterState>()(

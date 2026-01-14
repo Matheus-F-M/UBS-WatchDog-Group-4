@@ -1,0 +1,55 @@
+**  Aqui estão as informações dos global types e como eles estão sendo usados no frontend.
+**  Também temos informações de como as APIs do frontend funcionam
+**  Cada uma dessas classes tem parâmetros diferentes e data types que são específicados abaixo 
+
+----------------------------------------------------------------------------------------------------------------
+
+ALERT TYPE
+.id: string
+.idCliente: string
+.idTransacao: string
+.sveridade: enum string = {"Baixa", "Média", "Alta", "Crítica"}
+.status: enum string = {"Novo", "Em Análise", "Resolvido"}
+
+ALERT API
+* GET ALL = lista de todos os alertas no banco
+* UPDATE = atualiza apenas o status.
+
+----------------------------------------------------------------------------------------------------------------
+
+CLIENT TYPE
+.id: string
+.nome: string - nome completo (nome e sobrenome, ou apenas o nome da empresa)
+.cpfCnpj: string - 000.000.000-00 ou 00.000.000/0001-00
+.pais: string - nome do pais por extenso
+.kycStatus: enum string - "Aprovado", "Pendente", "Em Análise", ou "Rejeitado"
+.nivelDeRisco: enum string - "Baixo", "Medio", ou "Alto"
+.income: number - ...0000.00
+.isActive: boolean = cliente está ativo ou foi desligado do sistema?
+
+CLIENT API
+* GET ALL = lista de todos os clientes no banco de dados
+* GET BY ID = retorna um cliente a partir do ID enviado
+* CREATE = cria um cliente. Deixa de fora o Nível de Risco (determinado no back)
+* UPDATE = muda as informações de um cliente pelo ID enviado. Deixa de fora o Nível de Risco
+* DEACTIVATE = muda o valor de .isActive para false de um cliente pelo ID enviado
+
+----------------------------------------------------------------------------------------------------------------
+
+COUNTRY TYPE
+
+COUNTRY API
+
+----------------------------------------------------------------------------------------------------------------
+
+CURRENCY TYPE
+
+CURRENCY API
+
+----------------------------------------------------------------------------------------------------------------
+
+TRANSACTION TYPE
+
+TRANSACTION API
+
+----------------------------------------------------------------------------------------------------------------

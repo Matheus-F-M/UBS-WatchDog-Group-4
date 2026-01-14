@@ -34,6 +34,7 @@ export const mapBackendAlert = (backendAlert: any): Alert => {
         : backendAlert.status === 2
         ? "Resolvido"
         : "Novo",
+    regra: backendAlert.ruleName || "N/A",
   };
 };
 
@@ -65,6 +66,7 @@ export const reverseMapBackendAlert = (alert: Alert): any => {
         : alert.status === "Resolvido"
         ? 2
         : 0,
+    ruleName: alert.regra,
   };
 };
 

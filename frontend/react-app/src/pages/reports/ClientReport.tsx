@@ -429,7 +429,7 @@ export default function ClientReport() {
                     <span
                       className={
                         (() => {
-                          const confidence = 100.0 - (alerts.length / transactions.length) * 100;
+                          const confidence = Math.max(-100, Math.min(100, 100.0 - (alerts.length / transactions.length) * 100));
                           if (confidence >= 90) return "text-green-600 font-bold";
                           if (confidence >= 80) return "text-green-600";
                           if (confidence >= 60) return "text-yellow-600";
@@ -437,7 +437,7 @@ export default function ClientReport() {
                         })()
                       }
                     >
-                      {(100.0 - (alerts.length / transactions.length) * 100).toFixed(1)}%
+                      {Math.max(-100, Math.min(100, 100.0 - (alerts.length / transactions.length) * 100)).toFixed(1)}%
                     </span>
                     {" de Confiança!"}
                   </>
@@ -456,6 +456,7 @@ export default function ClientReport() {
                 <TableRow>
                   <TableHead className="w-[80px]">#</TableHead>
                   <TableHead className="w-[150px]">Severidade</TableHead>
+                  <TableHead className="w-[150px]">Regra</TableHead>
                   <TableHead className="w-[150px]">Status</TableHead>
                 </TableRow>
               </TableHeader>
@@ -463,7 +464,7 @@ export default function ClientReport() {
                 {alerts.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={3}
+                      colSpan={4}
                       className="text-center text-gray-500"
                     >
                       Nenhum alerta encontrado
@@ -490,6 +491,7 @@ export default function ClientReport() {
                           {alert.severidade}
                         </span>
                       </TableCell>
+                      <TableCell>{alert.regra}</TableCell>
                       <TableCell>
                         <span
                           className={
