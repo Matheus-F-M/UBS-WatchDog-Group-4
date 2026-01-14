@@ -12,5 +12,6 @@ namespace Bran.API.DTOs.Clients
         public ClientRiskLevel RiskLevel { get; set; }
         public KycStatus KycStatus { get; set; }
         public string GovernmentId { get; set; }
+        public bool isActive { get; set; }
     }
 }
