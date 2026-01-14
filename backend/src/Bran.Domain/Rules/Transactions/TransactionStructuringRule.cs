@@ -4,15 +4,11 @@ using Bran.Domain.Interfaces;
 using Bran.Domain.ValueObjects;
 using System;
 using System.Linq;
-using System.Transactions;
 
 namespace Bran.Domain.Rules.Transactions
 {
     public class TransactionStructuringRule : IComplianceRule
     {
-        private double _thresholdAmount;
-        private int _minTransactionCount;
-        private int _daysWindow;
         private readonly IComplianceConfigsRepository _configsRepository;
 
         public string Name => "Structuring Detected";
@@ -22,50 +18,50 @@ namespace Bran.Domain.Rules.Transactions
             _configsRepository = configsRepository;
         }
 
-        public async Task InitializeAsync()
+        public async Task<Alert?> ValidateAsync(ComplianceContext complianceContext)
         {
-            var rule = await _configsRepository.GetParameterAsync("TransactionStructuringRule", "ThresholdAmount");
-            _thresholdAmount = double.Parse(rule.Value);
+            var configDay = await _configsRepository.GetParameterAsync("TransactionStructuringRule", "DaysWindow");
+            var configThreshold = await _configsRepository.GetParameterAsync("TransactionStructuringRule", "ThresholdAmount");
+            var configCount = await _configsRepository.GetParameterAsync("TransactionStructuringRule", "MinTransactionCount");
 
-            rule = await _configsRepository.GetParameterAsync("TransactionStructuringRule", "MinTransactionCount");
-            _minTransactionCount = int.Parse(rule.Value);
+            if (configDay?.Value == null || configThreshold?.Value == null || configCount?.Value == null)
+            {
+                return null;
+            }
 
-            rule = await _configsRepository.GetParameterAsync("TransactionStructuringRule", "DaysWindow");
-            _daysWindow = int.Parse(rule.Value);
-        }
+            int daysWindowConfig = int.Parse(configDay.Value);
+            double thresholdAmount = double.Parse(configThreshold.Value);
+            int minTransactionCount = int.Parse(configCount.Value);
 
-        public async Task<Alert> ValidateAsync(ComplianceContext complianceContext)
-        {
-            await InitializeAsync();
-
-            var windowStart = DateTime.UtcNow.Date.AddDays(-_daysWindow);
+            var windowStart = DateTime.UtcNow.Date.AddDays(-daysWindowConfig);
             var now = DateTime.UtcNow;
 
             var transactionsInWindow = complianceContext.RecentTransactions
                 .Where(t => t.ClientId == complianceContext.ClientId &&
                             t.DateHour >= windowStart &&
                             t.DateHour <= now)
-                .OrderBy(t => t.DateHour).ToList();
+                .OrderBy(t => t.DateHour)
+                .ToList();
 
             transactionsInWindow.Add(complianceContext.CurrentTransaction);
 
-            if (transactionsInWindow.Count >= _minTransactionCount)
+            if (transactionsInWindow.Count >= minTransactionCount)
             {
                 var totalAmount = transactionsInWindow.Sum(t => t.Amount);
 
-                if (totalAmount >= _thresholdAmount)
+                if (totalAmount >= thresholdAmount)
                 {
                     var lastTransaction = transactionsInWindow.Last();
-                    return (new Alert(
+                    return new Alert(
                         complianceContext.ClientId,
                         lastTransaction.Id,
                         Name,
                         AlertSeverity.High
-                    ));
+                    );
                 }
             }
 
-            return (null);
+            return null;
         }
     }
 }

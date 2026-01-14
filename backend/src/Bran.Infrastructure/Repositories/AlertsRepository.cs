@@ -43,7 +43,7 @@ namespace Bran.Infrastructure.Repositories {
         { 
             return await _context.Set<Alert>().FindAsync(alertId); 
         } 
-        public async Task<IReadOnlyCollection<Alert>> GetByClientIdAsync(Guid clientId) 
+        public async Task<IReadOnlyCollection<Alert>> GetAllByClientIdAsync(Guid clientId) 
         { 
             return await _context.Set<Alert>().Where(a => a.ClientId == clientId).ToListAsync(); 
         } 

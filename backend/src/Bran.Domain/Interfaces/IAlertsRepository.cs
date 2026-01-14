@@ -11,7 +11,7 @@ namespace Bran.Domain.Interfaces
     { 
         Task<Alert?> GetByIdAsync(Guid alertId); 
         Task<IReadOnlyCollection<Alert>> GetAllAlertsAsync(); 
-        Task<IReadOnlyCollection<Alert>> GetByClientIdAsync(Guid clientId); 
+        Task<IReadOnlyCollection<Alert>> GetAllByClientIdAsync(Guid clientId); 
         Task<IReadOnlyCollection<Alert>> GetByTransactionIdAsync(Guid transactionId); 
         Task<IReadOnlyCollection<Alert>> GetByStatusAsync(AlertStatus status); 
         Task<IReadOnlyCollection<Alert>> GetBySeverityAsync(AlertSeverity severity); 
