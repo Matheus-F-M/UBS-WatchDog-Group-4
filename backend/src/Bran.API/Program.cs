@@ -45,7 +45,6 @@ builder.Services.AddScoped<ClientService>();
 //Repositories
 builder.Services.AddScoped<IClientsRepository, ClientRepository>();
 builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
-
 builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
 builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
 builder.Services.AddScoped<TransactionService>();
