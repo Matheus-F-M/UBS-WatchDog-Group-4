@@ -20,8 +20,7 @@ namespace Bran.Domain.Rules.Transactions
             _dailyLimit = double.Parse(configs.First(c => c.Key == "DailyLimit").Value);
         }
 
-
-        public Alert? Validate(ComplianceContext complianceContext)
+        public Task<Alert?> ValidateAsync(ComplianceContext complianceContext)
         {
             var today = DateTime.UtcNow.Date;
 
@@ -31,23 +30,22 @@ namespace Bran.Domain.Rules.Transactions
                 .ToList();
 
             if (!todaysTransactions.Any())
-                return null;
+                return Task.FromResult<Alert?>(null);
 
             var totalToday = todaysTransactions.Sum(t => t.Amount);
 
             if (totalToday > _dailyLimit)
             {
                 var violatingTransaction = todaysTransactions.Last();
-
-                return new Alert(
+                return Task.FromResult<Alert?>(new Alert(
                     complianceContext.ClientId,
                     violatingTransaction.Id,
                     Name,
                     AlertSeverity.High
-                );
+                ));
             }
 
-            return null;
+            return Task.FromResult<Alert?>(null);
         }
     }
 }

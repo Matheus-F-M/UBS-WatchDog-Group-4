@@ -10,6 +10,6 @@ namespace Bran.Domain.Interfaces {
     public interface IComplianceRule
     { 
         string Name { get; } 
-        Alert? Validate(ComplianceContext complianceContext); 
+        Task<Alert?> ValidateAsync(ComplianceContext complianceContext); 
     } 
 }

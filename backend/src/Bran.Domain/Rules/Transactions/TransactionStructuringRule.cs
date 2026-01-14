@@ -22,8 +22,7 @@ namespace Bran.Domain.Rules.Transactions
             _daysWindow = int.Parse(configs.First(c => c.Key == "DaysWindow").Value);
         }
 
-
-        public Alert? Validate(ComplianceContext complianceContext)
+        public Task<Alert?> ValidateAsync(ComplianceContext complianceContext)
         {
             var windowStart = DateTime.UtcNow.Date.AddDays(-_daysWindow);
             var now = DateTime.UtcNow;
@@ -42,16 +41,16 @@ namespace Bran.Domain.Rules.Transactions
                 if (totalAmount >= _thresholdAmount)
                 {
                     var lastTransaction = transactionsInWindow.Last();
-                    return new Alert(
+                    return Task.FromResult<Alert?>(new Alert(
                         complianceContext.ClientId,
                         lastTransaction.Id,
                         Name,
                         AlertSeverity.High
-                    );
+                    ));
                 }
             }
-            
-            return null;
+
+            return Task.FromResult<Alert?>(null);
         }
     }
 }

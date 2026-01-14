@@ -26,7 +26,7 @@ namespace Bran.Application.Services
             var alerts = new List<Alert>();
             foreach (var rule in _rules)
             {
-                var alert = rule.Validate(context);
+                var alert = await rule.ValidateAsync(context);
                 if (alert != null)
                 {
                     alerts.Add(alert);
@@ -36,6 +36,7 @@ namespace Bran.Application.Services
             {
                 await _alertsRepository.AddRangeAsync(alerts);
             }
+            Console.WriteLine($"ComplianceService: {alerts.Count} alerts generated");
         }
     }
 }

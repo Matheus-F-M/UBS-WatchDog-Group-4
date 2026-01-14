@@ -27,7 +27,10 @@ namespace Bran.Application.Services
 
         public async Task EvaluateTransactionAsync(Guid transactionId, CancellationToken ct = default)
         {
+            Console.WriteLine($"AVALIAÇÂO");
+
             var transaction = await _transactionsRepository.GetByIdAsync(transactionId);
+            Console.WriteLine($"PEGOU ");
             if (transaction == null)
             {
                 throw new ArgumentException("Transaction not found.", nameof(transactionId));
