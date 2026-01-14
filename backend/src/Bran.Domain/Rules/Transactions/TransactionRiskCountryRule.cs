@@ -25,10 +25,7 @@ public class TransactionRiskCountryRule : IComplianceRule
         if (highRiskCodes.Contains(complianceContext.OriginCountry) ||
             highRiskCodes.Contains(complianceContext.DestinationCountry))
         {
-            var lastTransaction = complianceContext.RecentTransactions
-                .Where(t => t.ClientId == complianceContext.ClientId)
-                .OrderByDescending(t => t.DateHour)
-                .FirstOrDefault();
+            var lastTransaction = complianceContext.CurrentTransaction;
 
             if (lastTransaction != null)
             {

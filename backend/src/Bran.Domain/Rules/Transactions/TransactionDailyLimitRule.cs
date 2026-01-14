@@ -12,40 +12,47 @@ namespace Bran.Domain.Rules.Transactions
 {
     public class TransactionDailyLimitRule : IComplianceRule
     {
-        private readonly double _dailyLimit;
-        public string Name => "Daily Limit Surpassed";
+        private readonly IComplianceConfigsRepository _configRepository;
+        public string Name => "TransactionDailyLimitRule";
 
-        public TransactionDailyLimitRule(IEnumerable<ComplianceConfigs> configs)
+        public TransactionDailyLimitRule(IComplianceConfigsRepository configRepository)
         {
-            _dailyLimit = double.Parse(configs.First(c => c.Key == "DailyLimit").Value);
+            _configRepository = configRepository;
         }
 
-        public Task<Alert?> ValidateAsync(ComplianceContext complianceContext)
+        public async Task<Alert?> ValidateAsync(ComplianceContext context)
         {
+            var config = await _configRepository.GetParameterAsync(Name, "DailyLimit");
+
+            if (config == null)
+                return null; // ou lançar exceção de config inválida
+
+            var dailyLimit = double.Parse(config.Value);
+
             var today = DateTime.UtcNow.Date;
 
-            var todaysTransactions = complianceContext.RecentTransactions
-                .Where(t => t.ClientId == complianceContext.ClientId && t.DateHour.Date == today)
+            var todaysTransactions = context.RecentTransactions
+                .Where(t => t.ClientId == context.ClientId && t.DateHour.Date == today)
                 .OrderBy(t => t.DateHour)
                 .ToList();
 
             if (!todaysTransactions.Any())
-                return Task.FromResult<Alert?>(null);
+                return null;
 
             var totalToday = todaysTransactions.Sum(t => t.Amount);
 
-            if (totalToday > _dailyLimit)
+            if (totalToday > dailyLimit)
             {
                 var violatingTransaction = todaysTransactions.Last();
-                return Task.FromResult<Alert?>(new Alert(
-                    complianceContext.ClientId,
+                return new Alert(
+                    context.ClientId,
                     violatingTransaction.Id,
                     Name,
                     AlertSeverity.High
-                ));
+                );
             }
 
-            return Task.FromResult<Alert?>(null);
+            return null;
         }
     }
 }

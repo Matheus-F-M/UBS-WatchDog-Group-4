@@ -56,6 +56,7 @@ builder.Services.AddScoped<ICurrencyRepository, CurrencyRepository>();
 builder.Services.AddScoped<IClientRiskRule, ClientTypeRiskRule>();
 builder.Services.AddScoped<IClientRiskRule, CountryRiskRule>();
 builder.Services.AddScoped<ClientRiskCalculator>();
+builder.Services.AddScoped<IComplianceConfigsRepository, ComplianceConfigsRepository>();
 builder.Services.AddScoped<IComplianceRule, TransactionDailyLimitRule>();
 builder.Services.AddScoped<IComplianceRule, TransactionStructuringRule>();
 builder.Services.AddScoped<IComplianceRule, TransactionRiskCountryRule>();

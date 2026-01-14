@@ -42,13 +42,12 @@ namespace Bran.Application.Services
                 DateTime.UtcNow.AddMonths(-1),
                 DateTime.UtcNow);
             var clientRecentTransactions = recentTransactions.ToList();
-            clientRecentTransactions.Add(transaction);
+            //clientRecentTransactions.Add(transaction);
             var complianceContext = new ComplianceContext (
-                client.Id,
-                transaction.CounterpartyId,
+                transaction,
+                clientRecentTransactions,
                 client.Country,
-                counterparty.Country,
-                clientRecentTransactions
+                counterparty.Country
             );
             await _complianceService.ValidateComplianceAsync(complianceContext);
         }

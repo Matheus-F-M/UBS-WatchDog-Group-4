@@ -36,6 +36,7 @@ namespace Bran.Application.Services
             {
                 await _alertsRepository.AddRangeAsync(alerts);
             }
+
             Console.WriteLine($"ComplianceService: {alerts.Count} alerts generated");
         }
     }
