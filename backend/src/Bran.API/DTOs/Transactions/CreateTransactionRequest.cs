@@ -9,6 +9,5 @@ namespace Bran.API.DTOs.Transactions
         public double Amount { get; set; }
         public string Currency { get; set; }
         public Guid CounterpartyId { get; set; }
-        public DateTime DateHour { get; set; }
     }
 }
