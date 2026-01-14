@@ -79,6 +79,7 @@ namespace Bran.API.Controllers
                 RiskLevel = client.RiskLevel,
                 KycStatus = client.KycStatus,
                 GovernmentId = client.GovernmentId,
+                isActive = client.IsActive,
             });
 
             return Ok(response);
