@@ -40,6 +40,8 @@ namespace Bran.Application.Services
             if (client is null)
                 return null;
 
+            client.UpdateBasicInfo(name, country, type, income, kycStatus);
+
             var points = _calculator.CalculatePoints(client);
 
             client.ApplyRiskPoints(points);
