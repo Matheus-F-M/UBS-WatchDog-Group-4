@@ -10,5 +10,7 @@ namespace Bran.API.DTOs.Alerts
         public string RuleName { get; set; }
         public AlertSeverity Severity { get; set; }
         public DateTime CreatedAt { get; set; }
+        public AlertStatus Status { get; set; }
+
     }
 }

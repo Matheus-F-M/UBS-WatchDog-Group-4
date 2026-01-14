@@ -60,6 +60,7 @@ builder.Services.AddScoped<IComplianceConfigsRepository, ComplianceConfigsReposi
 builder.Services.AddScoped<IComplianceRule, TransactionDailyLimitRule>();
 builder.Services.AddScoped<IComplianceRule, TransactionStructuringRule>();
 builder.Services.AddScoped<IComplianceRule, TransactionRiskCountryRule>();
+builder.Services.AddScoped<AlertServices>();
 
 // Dependency Injection/DbContext (PostgreSQL)
 builder.Services.AddDbContext<BranDbContext>(options =>
