@@ -25,7 +25,6 @@ export const mapBackendTransaction = (backendTransaction: any): Transaction => {
     moeda: backendTransaction.currency || "BRL",
     idContraparte: backendTransaction.counterpartyId || "none",
     dataHora: backendTransaction.dateHour || "2024-01-01 00:00:00",
-    pais: backendTransaction.country || "Brasil",
   };
 };
 
@@ -45,7 +44,6 @@ export const reverseMapBackendTransaction = (transaction: Transaction): any => {
     counterpartyId: transaction.idContraparte,
     currency: transaction.moeda,
     dateHour: transaction.dataHora,
-    country: transaction.pais,
   };
 };
 
@@ -66,7 +64,6 @@ export const transactionsApi = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(reverseMapBackendTransaction(transaction as Transaction)),
     });
-    console.log("Response from creating transaction:", reverseMapBackendTransaction(transaction as Transaction));
     if (!response.ok) throw new Error("Failed to create transaction");
     return mapBackendTransaction(await response.json());
   },

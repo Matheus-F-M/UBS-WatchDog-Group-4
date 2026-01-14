@@ -108,6 +108,7 @@ export const clientsApi = {
     });
     if (!response.ok) throw new Error("Failed to update client");
     const rawClient = await response.json();
+    console.log("CLIENT", reverseMapBackendClient(client as Client));
     return mapBackendClient(rawClient);
   },
 

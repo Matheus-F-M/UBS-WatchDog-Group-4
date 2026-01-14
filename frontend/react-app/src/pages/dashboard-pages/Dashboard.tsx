@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import useAuthStore from "@/stores/authStore";
 import {
@@ -38,7 +38,7 @@ export default function Dashboard() {
   const handleSignOut = (e: Event) => {
     e.preventDefault();
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   /**
@@ -51,33 +51,43 @@ export default function Dashboard() {
 
     deleteAccount();
     // After deleting account, send user to login page
-    navigate('/login');
+    navigate("/login");
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-UBS-black">
       {/* Top Navigation Bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="flex items-center justify-between px-6 py-3 max-w-7xl mx-auto w-full">
+      <div 
+        className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200"
+        style={{
+          boxShadow: '0 2px 2px -1px #1c1b1b, 0 3px 3px -1px #b10606, 0 4px 4px -1px #971e99, 0 5px 5px -1px #0b0198'
+        }}
+      >
+        <div className="flex items-center justify-between py-3 max-w-7xl mx-auto w-full">
           <div className="flex items-center gap-6">
-            <h1 className="text-2xl font-bold text-primary">UBS BRAN</h1>
+            <h1 className="text-2xl font-bold text-primary">
+              UBS 
+              <span className="bg-gradient-to-r from-[#b10606] via-[#971e99] to-[#0b0198] bg-clip-text text-transparent">
+                BRAN
+                </span>
+            </h1>
 
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
-                  <NavigationMenuLink href="/dashboard" className="px-2 py-1">Home</NavigationMenuLink>
+                  <Link to="/dashboard" className="px-2 py-1">Home</Link>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <NavigationMenuLink href="/dashboard/alerts" className="px-2 py-1">Alertas</NavigationMenuLink>
+                  <Link to="/dashboard/alerts" className="px-2 py-1">Alertas</Link>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <NavigationMenuLink href="/dashboard/clients" className="px-2 py-1">Clientes</NavigationMenuLink>
+                  <Link to="/dashboard/clients" className="px-2 py-1">Clientes</Link>
                 </NavigationMenuItem>
 
                 <NavigationMenuItem>
-                  <NavigationMenuLink href="/dashboard/transactions" className="px-2 py-1">Transações</NavigationMenuLink>
+                  <Link to="/dashboard/transactions" className="px-2 py-1">Transações</Link>
                 </NavigationMenuItem>
 
 
@@ -91,7 +101,6 @@ export default function Dashboard() {
                 <Button variant="ghost" size="icon" title="User menu">👤</Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem className="flex items-center gap-2">Compliance Settings</DropdownMenuItem>
                 <DropdownMenuItem variant="destructive" className="flex items-center gap-2 text-UBS-red hover:text-UBS-red" onSelect={handleSignOut}>Sign out</DropdownMenuItem>
                 <DropdownMenuSeparator />
 

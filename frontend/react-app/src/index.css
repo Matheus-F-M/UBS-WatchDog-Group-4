@@ -58,6 +58,11 @@
   --color-UBS-light-grey: var(--UBS-light-grey);
   --color-UBS-dark-grey: var(--UBS-dark-grey);
   --color-UBS-black: var(--UBS-black);
+
+  --glow-BRAN-glow: var(--BRAN-glow);
+  --glow-BRANalert-glow: var(--BRANalert-glow);
+  --glow-BRANclient-glow: var(--BRANclient-glow);
+  --shadow-BRANtrans-glow: var(--BRANtrans-glow);
 }
 /* ---break---
 */
@@ -100,6 +105,10 @@
   --UBS-light-grey: #cac7c7;
   --UBS-dark-grey: #686868;
   --UBS-black: #1c1b1b;
+  --BRAN-glow: "[0_0_30px_rgba(220,38,38,0.6)]";
+  --BRANalert-glow: "[0_0_30px_rgba(211, 15, 7,0.6)]";
+  --BRANclient-glow: "[0_0_30px_rgba(72, 36, 255,0.6)]";
+  --BRANtrans-glow: "[0_0_30px_rgba(100, 27, 162,0.6)]";
 }
 /* ---break---
 */

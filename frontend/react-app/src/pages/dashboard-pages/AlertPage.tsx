@@ -11,7 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@/components/ui/native-select";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -84,20 +87,20 @@ export default function AlertPage() {
 
   // Check for parameters coming from URL to pre-fill filters
   useEffect(() => {
-    const idParam = searchParams.get('id');
-    const idClienteParam = searchParams.get('idCliente');
-    const idTransacaoParam = searchParams.get('idTransacao');
-    
+    const idParam = searchParams.get("id");
+    const idClienteParam = searchParams.get("idCliente");
+    const idTransacaoParam = searchParams.get("idTransacao");
+
     if (idParam) {
-      setAlertFilter('id', idParam);
+      setAlertFilter("id", idParam);
     }
-    
+
     if (idClienteParam) {
-      setAlertFilter('idCliente', idClienteParam);
+      setAlertFilter("idCliente", idClienteParam);
     }
-    
+
     if (idTransacaoParam) {
-      setAlertFilter('idTransacao', idTransacaoParam);
+      setAlertFilter("idTransacao", idTransacaoParam);
     }
   }, [searchParams, setAlertFilter]);
 
@@ -106,6 +109,19 @@ export default function AlertPage() {
    */
   const toggleColumn = (column: keyof typeof visibleColumns) => {
     toggleAlertColumn(column);
+  };
+
+  /**
+   * Resets all filters and ensures all columns are visible
+   */
+  const handleResetFiltersAndColumns = () => {
+    resetAlertFilters();
+    // Ensure all columns are visible
+    if (!visibleColumns.id) toggleAlertColumn('id');
+    if (!visibleColumns.idCliente) toggleAlertColumn('idCliente');
+    if (!visibleColumns.idTransacao) toggleAlertColumn('idTransacao');
+    if (!visibleColumns.severidade) toggleAlertColumn('severidade');
+    if (!visibleColumns.status) toggleAlertColumn('status');
   };
   // --------------------------------------
   // END Column visibility state
@@ -138,7 +154,10 @@ export default function AlertPage() {
    * @param alertId String
    * @param newStatus Alert status
    */
-  const handleStatusChange = async (alertId: string, newStatus: Alert["status"]) => {
+  const handleStatusChange = async (
+    alertId: string,
+    newStatus: Alert["status"]
+  ) => {
     const alertToUpdate = alertData.find((alert) => alert.id === alertId);
     if (!alertToUpdate) return;
 
@@ -165,9 +184,7 @@ export default function AlertPage() {
       setError("Erro ao atualizar status do alerta");
       // Revert the optimistic update
       setAlertData(
-        alertData.map((alert) =>
-          alert.id === alertId ? alertToUpdate : alert
-        )
+        alertData.map((alert) => (alert.id === alertId ? alertToUpdate : alert))
       );
       alert("Erro ao atualizar status do alerta");
     }
@@ -177,22 +194,24 @@ export default function AlertPage() {
    *  ----------- Beginning of HTML -----------
       ----------------------------------------- */
   return (
-    <div className="p-8">
+    <div className="p-8 animate-in fade-in duration-1000">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Alertas</h2>
-
-          {error && (
+        {error && (
             <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-800">
-              {error}
+              {error} 
             </div>
           )}
+        <div className="bg-gray-50 rounded-lg border-2 border-red-600 p-6 shadow-[0_0_8px_#ff0a0a]">
+
+          <h2 className="mb-4 text-4xl font-bold bg-gradient-to-r from-[#780707] to-[#000000] bg-clip-text text-transparent">
+            Alertas
+          </h2>
 
           {/* --------------------------------------- */}
           {/* Filter Button and Loading Indicator */}
           {/* --------------------------------------- */}
 
-          <div className="mb-4 flex gap-2">
+          <div className="mb-2 flex gap-2">
             <Button
               onClick={() => setFilterDialogOpen(true)}
               disabled={isLoading}
@@ -216,14 +235,35 @@ export default function AlertPage() {
               Carregando alertas...
             </div>
           ) : (
+            <div className="max-h-[600px] overflow-y-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  {visibleColumns.id && <TableHead>ID</TableHead>}
-                  {visibleColumns.idCliente && <TableHead>ID Cliente</TableHead>}
-                  {visibleColumns.idTransacao && <TableHead>ID Transação</TableHead>}
-                  {visibleColumns.severidade && <TableHead>Severidade</TableHead>}
-                  {visibleColumns.status && <TableHead>Status</TableHead>}
+                  {visibleColumns.id && (
+                    <TableHead className="font-bold bg-gradient-to-r from-[#780707] to-[#000000] bg-clip-text text-transparent">
+                      ID
+                    </TableHead>
+                  )}
+                  {visibleColumns.idCliente && (
+                    <TableHead className="font-bold bg-gradient-to-r from-[#780707] to-[#000000] bg-clip-text text-transparent">
+                      ID Cliente
+                    </TableHead>
+                  )}
+                  {visibleColumns.idTransacao && (
+                    <TableHead className="font-bold bg-gradient-to-r from-[#780707] to-[#000000] bg-clip-text text-transparent">
+                      ID Transação
+                    </TableHead>
+                  )}
+                  {visibleColumns.severidade && (
+                    <TableHead className="font-bold bg-gradient-to-r from-[#780707] to-[#000000] bg-clip-text text-transparent">
+                      Severidade
+                    </TableHead>
+                  )}
+                  {visibleColumns.status && (
+                    <TableHead className="font-bold bg-gradient-to-r from-[#780707] to-[#000000] bg-clip-text text-transparent">
+                      Status
+                    </TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
 
@@ -234,79 +274,102 @@ export default function AlertPage() {
                     const idSearch = idFilter.toLowerCase();
                     const idClienteSearch = idClienteFilter.toLowerCase();
                     const idTransacaoSearch = idTransacaoFilter.toLowerCase();
-                    
+
                     // Check severidade filter
-                    const severidadeMatch = severidadeFilter === "" || 
-                      alert.severidade.toLowerCase() === severidadeFilter.toLowerCase();
-                    
+                    const severidadeMatch =
+                      severidadeFilter.length === 0 ||
+                      severidadeFilter.some(sev => sev.toLowerCase() === alert.severidade.toLowerCase());
+
                     // Check status filter
-                    const statusMatch = statusFilter === "" || 
-                      alert.status.toLowerCase() === statusFilter.toLowerCase();
-                    
+                    const statusMatch =
+                      statusFilter.length === 0 ||
+                      statusFilter.some(stat => stat.toLowerCase() === alert.status.toLowerCase());
+
                     return (
                       alert.id.toLowerCase().includes(idSearch) &&
                       alert.idCliente.toLowerCase().includes(idClienteSearch) &&
-                      alert.idTransacao.toLowerCase().includes(idTransacaoSearch) &&
+                      alert.idTransacao
+                        .toLowerCase()
+                        .includes(idTransacaoSearch) &&
                       severidadeMatch &&
                       statusMatch
                     );
                   })
-                  .map((alert) => (
-                  <TableRow key={alert.id}>
-                    {visibleColumns.id && <TableCell>{alert.id}</TableCell>}
-                    {visibleColumns.idCliente && <TableCell>{alert.idCliente}</TableCell>}
-                    {visibleColumns.idTransacao && <TableCell>{alert.idTransacao}</TableCell>}
-                    {visibleColumns.severidade && (
-                      <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          alert.severidade === "Crítico"
-                            ? "bg-red-100 text-red-800"
-                            : alert.severidade === "Alta"
-                            ? "bg-orange-100 text-orange-800"
-                            : alert.severidade === "Média"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-green-100 text-green-800"
-                        }`}
-                      >
-                        {alert.severidade}
-                      </span>
-                    </TableCell>
-                    )}
-                    {visibleColumns.status && (
-                      <TableCell>
-                      <NativeSelect
-                        value={alert.status}
-                        onChange={(e) =>
-                          handleStatusChange(alert.id, e.target.value as Alert["status"])
-                        }
-                        className={`w-full font-medium ${
-                          alert.status === "Resolvido"
-                            ? "text-green-600"
-                            : alert.status === "Em Análise"
-                            ? "text-yellow-600"
-                            : "text-blue-600"
-                        }`}     
-                      >
-                        <NativeSelectOption value="Novo" 
-                        className="text-blue-600">
-                            Novo
-                        </NativeSelectOption>
-                        <NativeSelectOption value="Em Análise"
-                        className="text-yellow-600">
-                          Em Análise
-                        </NativeSelectOption>
-                        <NativeSelectOption value="Resolvido"
-                        className="text-green-600">
-                          Resolvido
-                        </NativeSelectOption>
-                      </NativeSelect>
-                    </TableCell>
-                    )}
-                  </TableRow>
-                ))}
+                  .map((alert, index) => (
+                    <TableRow
+                      key={alert.id}
+                      className={`${
+                        index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                      }`}
+                    >
+                      {visibleColumns.id && <TableCell>{alert.id}</TableCell>}
+                      {visibleColumns.idCliente && (
+                        <TableCell>{alert.idCliente}</TableCell>
+                      )}
+                      {visibleColumns.idTransacao && (
+                        <TableCell>{alert.idTransacao}</TableCell>
+                      )}
+                      {visibleColumns.severidade && (
+                        <TableCell>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              alert.severidade === "Crítico"
+                                ? "bg-red-100 text-red-800"
+                                : alert.severidade === "Alta"
+                                ? "bg-orange-100 text-orange-800"
+                                : alert.severidade === "Média"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-green-100 text-green-800"
+                            }`}
+                          >
+                            {alert.severidade}
+                          </span>
+                        </TableCell>
+                      )}
+                      {visibleColumns.status && (
+                        <TableCell>
+                          <NativeSelect
+                            value={alert.status}
+                            onChange={(e) =>
+                              handleStatusChange(
+                                alert.id,
+                                e.target.value as Alert["status"]
+                              )
+                            }
+                            className={`w-full font-medium ${
+                              alert.status === "Resolvido"
+                                ? "text-green-600"
+                                : alert.status === "Em Análise"
+                                ? "text-yellow-600"
+                                : "text-blue-600"
+                            }`}
+                          >
+                            <NativeSelectOption
+                              value="Novo"
+                              className="text-blue-600"
+                            >
+                              Novo
+                            </NativeSelectOption>
+                            <NativeSelectOption
+                              value="Em Análise"
+                              className="text-yellow-600"
+                            >
+                              Em Análise
+                            </NativeSelectOption>
+                            <NativeSelectOption
+                              value="Resolvido"
+                              className="text-green-600"
+                            >
+                              Resolvido
+                            </NativeSelectOption>
+                          </NativeSelect>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
+            </div>
           )}
         </div>
       </div>
@@ -314,9 +377,9 @@ export default function AlertPage() {
       {/* ------------------END------------------ */}
       {/* --------------------------------------- */}
 
-{/* ---------------------------------------------------------- */}
-{/* -------------------- FILTER AND SEARCH ------------------- */}
-{/* ---------------------------------------------------------- */}
+      {/* ---------------------------------------------------------- */}
+      {/* -------------------- FILTER AND SEARCH ------------------- */}
+      {/* ---------------------------------------------------------- */}
       <Dialog open={filterDialogOpen} onOpenChange={setFilterDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -327,7 +390,7 @@ export default function AlertPage() {
           <div>
             <h3 className="mb-4 text-sm font-semibold">Colunas Visíveis</h3>
             <div className="flex flex-wrap gap-3">
-              <div className="flex items-center space-x -2">
+              <div className="flex items-center space-x-2">
                 <Checkbox
                   id="col-id"
                   checked={visibleColumns.id}
@@ -343,7 +406,10 @@ export default function AlertPage() {
                   checked={visibleColumns.idCliente}
                   onCheckedChange={() => toggleColumn("idCliente")}
                 />
-                <label htmlFor="col-idCliente" className="text-sm cursor-pointer">
+                <label
+                  htmlFor="col-idCliente"
+                  className="text-sm cursor-pointer"
+                >
                   ID Cliente
                 </label>
               </div>
@@ -353,7 +419,10 @@ export default function AlertPage() {
                   checked={visibleColumns.idTransacao}
                   onCheckedChange={() => toggleColumn("idTransacao")}
                 />
-                <label htmlFor="col-idTransacao" className="text-sm cursor-pointer">
+                <label
+                  htmlFor="col-idTransacao"
+                  className="text-sm cursor-pointer"
+                >
                   ID Transação
                 </label>
               </div>
@@ -363,7 +432,10 @@ export default function AlertPage() {
                   checked={visibleColumns.severidade}
                   onCheckedChange={() => toggleColumn("severidade")}
                 />
-                <label htmlFor="col-severidade" className="text-sm cursor-pointer">
+                <label
+                  htmlFor="col-severidade"
+                  className="text-sm cursor-pointer"
+                >
                   Severidade
                 </label>
               </div>
@@ -417,59 +489,74 @@ export default function AlertPage() {
               <h3 className="mb-3 text-sm font-semibold">Filtrar por Status</h3>
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <Label htmlFor="filter-severidade" className="py-2">Severidade</Label>
-                  <NativeSelect
-                    id="filter-severidade"
-                    value={severidadeFilter}
-                    onChange={(e) =>
-                      setAlertFilter("severidade", e.target.value)
-                    }
-                  >
-                    <NativeSelectOption value="">Todos</NativeSelectOption>
-                    <NativeSelectOption value="baixa">Baixa</NativeSelectOption>
-                    <NativeSelectOption value="média">Média</NativeSelectOption>
-                    <NativeSelectOption value="alta">Alta</NativeSelectOption>
-                    <NativeSelectOption value="crítico">
-                      Crítico
-                    </NativeSelectOption>
-                  </NativeSelect>
+                  <Label className="py-2 block mb-2">
+                    Severidade
+                  </Label>
+                  <div className="space-y-2">
+                    {['Baixa', 'Média', 'Alta', 'Crítico'].map((sev) => (
+                      <div key={sev} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`sev-${sev}`}
+                          checked={severidadeFilter.includes(sev)}
+                          onCheckedChange={(checked) => {
+                            const newFilter = checked
+                              ? [...severidadeFilter, sev]
+                              : severidadeFilter.filter(s => s !== sev);
+                            setAlertFilter('severidade', newFilter as any);
+                          }}
+                        />
+                        <label htmlFor={`sev-${sev}`} className="text-sm cursor-pointer">
+                          {sev}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <div className="flex-1">
-                  <Label htmlFor="filter-status" className="py-2">Status</Label>
-                  <NativeSelect
-                    id="filter-status"
-                    value={statusFilter}
-                    onChange={(e) => setAlertFilter("status", e.target.value)}
-                  >
-                    <NativeSelectOption value="">Todos</NativeSelectOption>
-                    <NativeSelectOption value="novo">Novo</NativeSelectOption>
-                    <NativeSelectOption value="em análise">
-                      Em Análise
-                    </NativeSelectOption>
-                    <NativeSelectOption value="resolvido">
-                      Resolvido
-                    </NativeSelectOption>
-                  </NativeSelect>
+                  <Label className="py-2 block mb-2">
+                    Status
+                  </Label>
+                  <div className="space-y-2">
+                    {['Novo', 'Em Análise', 'Resolvido'].map((stat) => (
+                      <div key={stat} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`stat-${stat}`}
+                          checked={statusFilter.includes(stat)}
+                          onCheckedChange={(checked) => {
+                            const newFilter = checked
+                              ? [...statusFilter, stat]
+                              : statusFilter.filter(s => s !== stat);
+                            setAlertFilter('status', newFilter as any);
+                          }}
+                        />
+                        <label htmlFor={`stat-${stat}`} className="text-sm cursor-pointer">
+                          {stat}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-
           </div>
 
           <DialogFooter>
-            <Button variant="secondary" onClick={() => resetAlertFilters()}>
+            <Button variant="secondary" onClick={handleResetFiltersAndColumns}>
               Restaurar Padrão
             </Button>
-            <Button variant="outline" onClick={() => setFilterDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setFilterDialogOpen(false)}
+            >
               Fechar
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-{/* --------------------------------------- */}
-{/* ------------------END------------------ */}
-{/* --------------------------------------- */}
+      {/* --------------------------------------- */}
+      {/* ------------------END------------------ */}
+      {/* --------------------------------------- */}
     </div>
   );
 }

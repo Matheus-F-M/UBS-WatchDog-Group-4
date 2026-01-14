@@ -110,7 +110,6 @@ export const transactionSchema = z.object({
   moeda: z.string(), // STRING: OK
   idContraparte: z.string(), // STRING (ID CONTRAPARTE): OK
   dataHora: z.string(), // STRING: Combined date and time
-  pais: z.string().min(1, "País obrigatório"), // STRING: OK USE API
 });
 
 // Infer TypeScript type from Zod schema
@@ -136,7 +135,6 @@ export type Alert = z.infer<typeof alertSchema>;
    ----------------------------------------- */
 
    export const countrySchema = z.object({
-    id: z.string(), // STRING: TODO backend check
     nome: z.string().min(1, "Nome obrigatório"), // STRING: TODO backend check
     codigo: z.string().min(1, "Código obrigatório"), // STRING: TODO backend check
     risco: z.enum(["Baixo", "Médio", "Alto"]), // STRING: TODO backend check

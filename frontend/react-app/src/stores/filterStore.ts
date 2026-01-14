@@ -11,6 +11,7 @@ interface TransactionFilters {
   idContraparte: string;
   dataHora: string;
   pais: string;
+  isActive: string;
 }
 
 interface TransactionVisibleColumns {
@@ -31,8 +32,8 @@ interface ClientFilters {
   cpfCnpj: string;
   pais: string;
   capital: string;
-  kycStatus: string;
-  nivelDeRisco: string;
+  kycStatus: string[];
+  nivelDeRisco: string[];
 }
 
 interface ClientVisibleColumns {
@@ -49,8 +50,8 @@ interface AlertFilters {
   id: string;
   idCliente: string;
   idTransacao: string;
-  severidade: string;
-  status: string;
+  severidade: string[];
+  status: string[];
 }
 
 interface AlertVisibleColumns {
@@ -101,6 +102,7 @@ const initialTransactionFilters: TransactionFilters = {
   idContraparte: '',
   dataHora: '',
   pais: '',
+  isActive: '',
 };
 
 const initialTransactionColumns: TransactionVisibleColumns = {
@@ -121,8 +123,8 @@ const initialClientFilters: ClientFilters = {
   cpfCnpj: '',
   pais: '',
   capital: '',
-  kycStatus: '',
-  nivelDeRisco: '',
+  kycStatus: [],
+  nivelDeRisco: [],
 };
 
 const initialClientColumns: ClientVisibleColumns = {
@@ -139,8 +141,8 @@ const initialAlertFilters: AlertFilters = {
   id: '',
   idCliente: '',
   idTransacao: '',
-  severidade: '',
-  status: '',
+  severidade: [],
+  status: [],
 };
 
 const initialAlertColumns: AlertVisibleColumns = {

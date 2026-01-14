@@ -28,6 +28,12 @@ import {
   NativeSelectOption,
 } from "@/components/ui/native-select";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Table,
   TableBody,
   TableCell,
@@ -84,7 +90,6 @@ const initialClientData: Client[] = [
   },
 ];
 
-
 /* 00000000000000000000000000000000000000000
    ---------- CLIENT PAGE START ------------
    00000000000000000000000000000000000000000 */
@@ -101,9 +106,12 @@ export default function ClientPage() {
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [countryComboboxOpen, setCountryComboboxOpen] = useState(false);
   const [editCountryComboboxOpen, setEditCountryComboboxOpen] = useState(false);
-  const [filterCountryComboboxOpen, setFilterCountryComboboxOpen] = useState(false);
-  const [filterClientComboboxOpen, setFilterClientComboboxOpen] = useState(false);
-  const [selectedClientIdFilter, setSelectedClientIdFilter] = useState<string>("");
+  const [filterCountryComboboxOpen, setFilterCountryComboboxOpen] =
+    useState(false);
+  const [filterClientComboboxOpen, setFilterClientComboboxOpen] =
+    useState(false);
+  const [selectedClientIdFilter, setSelectedClientIdFilter] =
+    useState<string>("");
   const [newClient, setNewClient] = useState<Partial<Client>>({
     nome: "",
     cpfCnpj: "" as CpfCnpj,
@@ -138,11 +146,28 @@ export default function ClientPage() {
   const toggleColumn = (column: keyof typeof visibleColumns) => {
     toggleClientColumn(column);
   };
+
+  /**
+   * Resets all filters and ensures all columns are visible
+   */
+  const handleResetFiltersAndColumns = () => {
+    resetClientFilters();
+    // Ensure all columns are visible
+    if (!visibleColumns.id) toggleClientColumn('id');
+    if (!visibleColumns.nome) toggleClientColumn('nome');
+    if (!visibleColumns.cpfCnpj) toggleClientColumn('cpfCnpj');
+    if (!visibleColumns.pais) toggleClientColumn('pais');
+    if (!visibleColumns.capital) toggleClientColumn('capital');
+    if (!visibleColumns.kycStatus) toggleClientColumn('kycStatus');
+    if (!visibleColumns.nivelDeRisco) toggleClientColumn('nivelDeRisco');
+    // Reset client ID filter from combobox
+    setSelectedClientIdFilter('');
+  };
   // --------------------------------------
   // END Column visibility state
   // --------------------------------------
 
-/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    ------- Fetch Clients from API --------
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
@@ -181,49 +206,9 @@ export default function ClientPage() {
       setError("Erro ao carregar países do banco de dados.");
     }
   };
-/* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    ------------ END FETCHING -------------
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
-
-  /**
-   * Opens the side sheet when trying to view/edit a client.
-   * @param client Client
-   */
-  const handleOpenSheet = (client: Client) => {
-    setEditedClient({ ...client });
-    setIsOpen(true);
-  };
-
-  /**
-   * Saves the edited client data within the sheet to the API and updates the table
-   */
-  const handleSave = async () => {
-    if (editedClient) {
-      const validated = validateCpfCnpj(editedClient.cpfCnpj);
-      if (!validated) {
-        alert("CPF/CNPJ inválido. Use 000.000.000-00 ou 00.000.000/0000-00");
-        return;
-      }
-
-      setIsLoading(true);
-      setError(null);
-      try {
-        const updatedClient = await clientsApi.update(editedClient.id, {
-          ...editedClient,
-          cpfCnpj: validated,
-        });
-        setClientData(
-          clientData.map((c) => (c.id === updatedClient.id ? updatedClient : c))
-        );
-        setIsOpen(false);
-      } catch (err) {
-        setError("Erro ao salvar cliente");
-        alert("Erro ao salvar cliente");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
 
   /**
    * Handles the deletion of client data
@@ -259,11 +244,7 @@ export default function ClientPage() {
    *  ------ Handles adding a new client ------ TODO CLIENT TO ADD
       ----------------------------------------- */
   const handleAddClient = async () => {
-    if (
-      !newClient.nome ||
-      !newClient.cpfCnpj ||
-      !newClient.pais
-    ) {
+    if (!newClient.nome || !newClient.cpfCnpj || !newClient.pais) {
       alert("Preencha todos os campos obrigatórios");
       return;
     }
@@ -290,6 +271,7 @@ export default function ClientPage() {
         isActive: true,
       };
 
+      console.log("Adding client:", clientToAdd);
       const createdClient = await clientsApi.create(clientToAdd);
       setClientData([...clientData, createdClient]);
       setAddDialogOpen(false);
@@ -314,26 +296,33 @@ export default function ClientPage() {
    *  ----------- Beginning of HTML -----------
       ----------------------------------------- */
   return (
-    <div className="p-8">
+    <div className="p-8 animate-in fade-in duration-1000">
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Clientes</h2>
-
+        <div className="bg-gray-50 rounded-lg border-2 border-pink-600 p-6 shadow-[0_0_8px_#ed2df0]">
           {error && (
             <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-800">
               {error}
             </div>
           )}
 
-{/* --------------------------------------- */}
-{/* Add Client Button and Loading Indicator */}
-{/* --------------------------------------- */}
+          <h2 className="text-4xl font-bold text-gray-900 mb-4 bg-gradient-to-r from-[#971e99] to-[#000000] bg-clip-text text-transparent">
+            Clientes
+          </h2>
+
+          {/* --------------------------------------- */}
+          {/* Add Client Button and Loading Indicator */}
+          {/* --------------------------------------- */}
 
           <div className="mb-4 flex gap-2">
-            <Button onClick={() => setAddDialogOpen(true)} disabled={isLoading}>
+            <Button onClick={() => setAddDialogOpen(true)} disabled={isLoading}
+              className="hover:bg-[#971e99]">
               Adicionar Cliente
             </Button>
-            <Button onClick={() => setFilterDialogOpen(true)} disabled={isLoading} variant="outline">
+            <Button
+              onClick={() => setFilterDialogOpen(true)}
+              disabled={isLoading}
+              variant="outline"
+            >
               Filtros e Pesquisa
             </Button>
             {isLoading && (
@@ -343,51 +332,94 @@ export default function ClientPage() {
             )}
           </div>
 
-{/* --------------------------------------- */}
-{/* -----------------Table----------------- */}
-{/* --------------------------------------- */}
+          {/* --------------------------------------- */}
+          {/* -----------------Table----------------- */}
+          {/* --------------------------------------- */}
 
           {isLoading && clientData.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               Carregando clientes...
             </div>
           ) : (
+            <div className="max-h-[600px] overflow-y-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  {visibleColumns.id && <TableHead>ID</TableHead>}
-                  {visibleColumns.nome && <TableHead>Nome</TableHead>}
-                  {visibleColumns.cpfCnpj && <TableHead>CPF/CNPJ</TableHead>}
-                  {visibleColumns.pais && <TableHead>País</TableHead>}
-                  {visibleColumns.capital && <TableHead>Capital</TableHead>}
-                  {visibleColumns.kycStatus && <TableHead>KYC Status</TableHead>}
-                  {visibleColumns.nivelDeRisco && <TableHead>Nível de Risco</TableHead>}
-                  <TableHead className="w-32">Ações</TableHead>
-                  <TableHead className="w-24">Remover</TableHead>
+                  {visibleColumns.id && (
+                    <TableHead className="bg-gradient-to-r from-[#971e99] to-[#000000] bg-clip-text text-transparent">
+                      ID
+                    </TableHead>
+                  )}
+                  {visibleColumns.nome && (
+                    <TableHead className="bg-gradient-to-r from-[#971e99] to-[#000000] bg-clip-text text-transparent">
+                      Nome
+                    </TableHead>
+                  )}
+                  {visibleColumns.cpfCnpj && (
+                    <TableHead className="bg-gradient-to-r from-[#971e99] to-[#000000] bg-clip-text text-transparent">
+                      CPF/CNPJ
+                    </TableHead>
+                  )}
+                  {visibleColumns.pais && (
+                    <TableHead className="bg-gradient-to-r from-[#971e99] to-[#000000] bg-clip-text text-transparent">
+                      País
+                    </TableHead>
+                  )}
+                  {visibleColumns.capital && (
+                    <TableHead className="bg-gradient-to-r from-[#971e99] to-[#000000] bg-clip-text text-transparent">
+                      Capital
+                    </TableHead>
+                  )}
+                  {visibleColumns.kycStatus && (
+                    <TableHead className="bg-gradient-to-r from-[#971e99] to-[#000000] bg-clip-text text-transparent">
+                      KYC Status
+                    </TableHead>
+                  )}
+                  {visibleColumns.nivelDeRisco && (
+                    <TableHead className="bg-gradient-to-r from-[#971e99] to-[#000000] bg-clip-text text-transparent">
+                      Nível de Risco
+                    </TableHead>
+                  )}
+                  <TableHead className="w-32 bg-gradient-to-r from-[#971e99] to-[#000000] bg-clip-text text-transparent">
+                    Ações
+                  </TableHead>
+                  <TableHead className="w-24 bg-gradient-to-r from-[#971e99] to-[#000000] bg-clip-text text-transparent">
+                    Remover
+                  </TableHead>
                 </TableRow>
               </TableHeader>
 
-{/* --------------Table Body--------------- */}
+              {/* --------------Table Body--------------- */}
               <TableBody>
                 {clientData
                   .filter((client) => {
                     const nomeSearch = nameFilter.toLowerCase();
                     const paisSearch = paisFilter.toLowerCase();
                     const capitalSearch = capitalFilter.toLowerCase();
-                    
+
                     // Check if capital filter matches income or income
-                    const capitalMatch = capitalSearch === "" || 
-                      (client.income?.toString().toLowerCase().includes(capitalSearch));
-                    
+                    const capitalMatch =
+                      capitalSearch === "" ||
+                      client.income
+                        ?.toString()
+                        .toLowerCase()
+                        .includes(capitalSearch);
+
                     // Check KYC Status filter
-                    const kycMatch = kycStatusFilter === "" || client.kycStatus === kycStatusFilter;
-                    
+                    const kycMatch =
+                      kycStatusFilter.length === 0 ||
+                      kycStatusFilter.includes(client.kycStatus);
+
                     // Check Nível de Risco filter
-                    const riscoMatch = nivelDeRiscoFilter === "" || client.nivelDeRisco === nivelDeRiscoFilter;
-                    
+                    const riscoMatch =
+                      nivelDeRiscoFilter.length === 0 ||
+                      nivelDeRiscoFilter.includes(client.nivelDeRisco);
+
                     // Check client ID filter (from ClientCombobox)
-                    const clientIdMatch = selectedClientIdFilter === "" || client.id === selectedClientIdFilter;
-                    
+                    const clientIdMatch =
+                      selectedClientIdFilter === "" ||
+                      client.id === selectedClientIdFilter;
+
                     return (
                       client.isActive === true &&
                       clientIdMatch &&
@@ -398,239 +430,102 @@ export default function ClientPage() {
                       riscoMatch
                     );
                   })
-                  .map((client) => (
-                  <TableRow key={client.id}>
-                    {visibleColumns.id && <TableCell>{client.id}</TableCell>}
-                    {visibleColumns.nome && <TableCell>{client.nome}</TableCell>}
-                    {visibleColumns.cpfCnpj && <TableCell>{client.cpfCnpj}</TableCell>}
-                    {visibleColumns.pais && <TableCell>{client.pais}</TableCell>}
-                    {visibleColumns.capital && (
+                  .map((client, index) => (
+                    <TableRow
+                      key={client.id}
+                      className={`${
+                        index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                      }`}
+                    >
+                      {visibleColumns.id && <TableCell>{client.id}</TableCell>}
+                      {visibleColumns.nome && (
+                        <TableCell>{client.nome}</TableCell>
+                      )}
+                      {visibleColumns.cpfCnpj && (
+                        <TableCell>{client.cpfCnpj}</TableCell>
+                      )}
+                      {visibleColumns.pais && (
+                        <TableCell>{client.pais}</TableCell>
+                      )}
+                      {visibleColumns.capital && (
+                        <TableCell>
+                          {isCPF(client.cpfCnpj) && client.income
+                            ? `R$${formatCurrency(client.income)}/month`
+                            : isCNPJ(client.cpfCnpj) && client.income
+                            ? `R$${formatCurrency(client.income)}`
+                            : "-"}
+                        </TableCell>
+                      )}
+                      {visibleColumns.kycStatus && (
+                        <TableCell
+                          className={
+                            client.kycStatus === "Aprovado"
+                              ? "text-green-600 font-semibold"
+                              : client.kycStatus === "Pendente"
+                              ? "text-yellow-600"
+                              : client.kycStatus === "Em Análise"
+                              ? "text-blue-600"
+                              : client.kycStatus === "Rejeitado"
+                              ? "text-red-600 font-semibold"
+                              : "text-gray-600"
+                          }
+                        >
+                          {client.kycStatus}
+                        </TableCell>
+                      )}
+                      {visibleColumns.nivelDeRisco && (
+                        <TableCell
+                          className={
+                            client.nivelDeRisco === "Baixo"
+                              ? "text-green-600 font-semibold"
+                              : client.nivelDeRisco === "Medio"
+                              ? "text-yellow-600 font-semibold"
+                              : client.nivelDeRisco === "Alto"
+                              ? "text-red-600 font-semibold"
+                              : "text-gray-600"
+                          }
+                        >
+                          {client.nivelDeRisco}
+                        </TableCell>
+                      )}
                       <TableCell>
-                        {isCPF(client.cpfCnpj) && client.income
-                          ? `R$${formatCurrency(client.income)}/month`
-                          : isCNPJ(client.cpfCnpj) && client.income
-                          ? `R$${formatCurrency(client.income)}`
-                          : '-'}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            window.open(
+                              `/dashboard/clients/${client.id}`,
+                              "_blank"
+                            )
+                          }
+                        >
+                          Ver Relatório
+                        </Button>
                       </TableCell>
-                    )}
-                    {visibleColumns.kycStatus && (
-                      <TableCell
-                        className={
-                          client.kycStatus === "Aprovado"
-                            ? "text-green-600 font-semibold"
-                            : client.kycStatus === "Pendente"
-                            ? "text-yellow-600"
-                            : client.kycStatus === "Em Análise"
-                            ? "text-blue-600"
-                            : client.kycStatus === "Rejeitado"
-                            ? "text-red-600 font-semibold"
-                            : "text-gray-600"
-                        }
-                      >
-                        {client.kycStatus}
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(client.id)}
+                        >
+                          ❌
+                        </Button>
                       </TableCell>
-                    )}
-                    {visibleColumns.nivelDeRisco && (
-                      <TableCell
-                        className={
-                          client.nivelDeRisco === "Baixo"
-                            ? "text-green-600 font-semibold"
-                            : client.nivelDeRisco === "Medio"
-                            ? "text-yellow-600 font-semibold"
-                            : client.nivelDeRisco === "Alto"
-                            ? "text-red-600 font-semibold"
-                            : "text-gray-600"
-                        }
-                      >
-                        {client.nivelDeRisco}
-                      </TableCell>
-                    )}
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleOpenSheet(client)}
-                      >
-                        Ver/Editar
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(client.id)}
-                      >
-                        ❌
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
+            </div>
           )}
         </div>
       </div>
-{/* --------------------------------------- */}
-{/* ------------------END------------------ */}
-{/* --------------------------------------- */}
+      {/* --------------------------------------- */}
+      {/* ------------------END------------------ */}
+      {/* --------------------------------------- */}
 
-{/* --------------------------------------- */}
-{/* ----------Ver/Editar Cliente----------- */}
-{/* --------------------------------------- */}
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetContent className="overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Detalhes do Cliente</SheetTitle>
-            <SheetDescription>
-              Visualize e edite as informações do cliente
-            </SheetDescription>
-          </SheetHeader>
-
-          {editedClient && (
-            <div className="space-y-4 p-4">
-              <div className="space-y-2">
-                <Label htmlFor="nome">Nome</Label>
-                <Input
-                  id="nome"
-                  value={editedClient.nome}
-                  onChange={(e) =>
-                    setEditedClient({ ...editedClient, nome: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="cpfCnpj">CPF/CNPJ</Label>
-                <Input
-                  id="cpfCnpj"
-                  value={editedClient.cpfCnpj}
-                  onChange={(e) =>
-                    setEditedClient({
-                      ...editedClient,
-                      cpfCnpj: validateCpfCnpj(e.target.value)!,
-                    })
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="pais">País</Label>
-                <CountryCombobox
-                  isOpen={editCountryComboboxOpen}
-                  setIsOpen={setEditCountryComboboxOpen}
-                  selectedCountry={editedClient.pais}
-                  onSelect={(countryName) => setEditedClient({ ...editedClient, pais: countryName })}
-                  countries={countries}
-                />
-              </div>
-
-              {isCPF(editedClient.cpfCnpj) && (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="income">Renda Mensal</Label>
-                    <Input
-                      id="income"
-                      type="number"
-                      value={editedClient.income || ""}
-                      onChange={(e) =>
-                        setEditedClient({
-                          ...editedClient,
-                          income: e.target.value
-                            ? parseFloat(e.target.value)
-                            : undefined,
-                        })
-                      }
-                      placeholder="0.00"
-                    />
-                  </div>
-                </>
-              )}
-
-              {isCNPJ(editedClient.cpfCnpj) && (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="income">Capital Social</Label>
-                    <Input
-                      id="income"
-                      type="number"
-                      value={editedClient.income || ""}
-                      onChange={(e) =>
-                        setEditedClient({
-                          ...editedClient,
-                          income: e.target.value
-                            ? parseFloat(e.target.value)
-                            : undefined,
-                        })
-                      }
-                      placeholder="0.00"
-                    />
-                  </div>
-                </>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="kycStatus">KYC Status</Label>
-                <NativeSelect
-                  id="kycStatus"
-                  value={editedClient.kycStatus}
-                  onChange={(e) =>
-                    setEditedClient({
-                      ...editedClient,
-                      kycStatus: e.target.value as Client["kycStatus"],
-                    })
-                  }
-                >
-                  <NativeSelectOption value="Aprovado">
-                    Aprovado
-                  </NativeSelectOption>
-                  <NativeSelectOption value="Pendente">
-                    Pendente
-                  </NativeSelectOption>
-                  <NativeSelectOption value="Rejeitado">
-                    Rejeitado
-                  </NativeSelectOption>
-                </NativeSelect>
-              </div>
-            </div>
-          )}
-
-          <SheetFooter className="flex justify-between">
-
-            <Button onClick={handleSave} disabled={isLoading}>
-              {isLoading ? "Salvando..." : "Salvar alterações"}
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() => setIsOpen(false)}
-              disabled={isLoading}
-            >
-              Cancelar
-            </Button>
-
-            <Button
-              variant="destructive"
-              onClick={() => {
-                if (editedClient) {
-                  handleDelete(editedClient.id);
-                  setIsOpen(false);
-                }
-              }}
-              disabled={isLoading}
-            >
-              Remover Cliente
-            </Button>
-            
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
-{/* --------------------------------------- */}
-{/* ------------------END------------------ */}
-{/* --------------------------------------- */}
-
-{/* -------------------------------------------------------------- */}
-{/* ---------------- Delete Confirmation Dialogue ---------------- */}
-{/* -------------------------------------------------------------- */}
+      {/* -------------------------------------------------------------- */}
+      {/* ---------------- Delete Confirmation Dialogue ---------------- */}
+      {/* -------------------------------------------------------------- */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -649,9 +544,9 @@ export default function ClientPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-{/* ---------------------------------------------------------- */}
-{/* --------------------- ADD NEW CLIENT --------------------- */}
-{/* ---------------------------------------------------------- */}
+      {/* ---------------------------------------------------------- */}
+      {/* --------------------- ADD NEW CLIENT --------------------- */}
+      {/* ---------------------------------------------------------- */}
 
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
         <DialogContent className="overflow-y-auto max-h-[90vh]">
@@ -695,7 +590,9 @@ export default function ClientPage() {
                 isOpen={countryComboboxOpen}
                 setIsOpen={setCountryComboboxOpen}
                 selectedCountry={newClient.pais || ""}
-                onSelect={(countryName) => setNewClient({ ...newClient, pais: countryName })}
+                onSelect={(countryName) =>
+                  setNewClient({ ...newClient, pais: countryName })
+                }
                 countries={countries}
               />
             </div>
@@ -785,184 +682,217 @@ export default function ClientPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-{/* --------------------------------------- */}
-{/* ------------------END------------------ */}
-{/* --------------------------------------- */}
+      {/* --------------------------------------- */}
+      {/* ------------------END------------------ */}
+      {/* --------------------------------------- */}
 
-{/* ---------------------------------------------------------- */}
-{/* -------------------- FILTER AND SEARCH ------------------- */}
-{/* ---------------------------------------------------------- */}
+      {/* ---------------------------------------------------------- */}
+      {/* -------------------- FILTER AND SEARCH ------------------- */}
+      {/* ---------------------------------------------------------- */}
       <Dialog open={filterDialogOpen} onOpenChange={setFilterDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Filtros e Pesquisa</DialogTitle>
-            <DialogDescription>
-              Filtre e Pesquise clientes
-            </DialogDescription>
+            <DialogDescription>Filtre e Pesquise clientes</DialogDescription>
           </DialogHeader>
 
           <div>
             <h3 className="mb-4 text-sm font-semibold">Colunas Visíveis</h3>
             <div className="flex flex-wrap gap-3">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="col-id"
-                checked={visibleColumns.id}
-                onCheckedChange={() => toggleColumn('id')}
-              />
-              <label htmlFor="col-id" className="text-sm cursor-pointer">
-                ID
-              </label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="col-nome"
-                checked={visibleColumns.nome}
-                onCheckedChange={() => toggleColumn('nome')}
-              />
-              <label htmlFor="col-nome" className="text-sm cursor-pointer">
-                Nome
-              </label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="col-cpfCnpj"
-                checked={visibleColumns.cpfCnpj}
-                onCheckedChange={() => toggleColumn('cpfCnpj')}
-              />
-              <label htmlFor="col-cpfCnpj" className="text-sm cursor-pointer">
-                CPF/CNPJ
-              </label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="col-pais"
-                checked={visibleColumns.pais}
-                onCheckedChange={() => toggleColumn('pais')}
-              />
-              <label htmlFor="col-pais" className="text-sm cursor-pointer">
-                País
-              </label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="col-capital"
-                checked={visibleColumns.capital}
-                onCheckedChange={() => toggleColumn('capital')}
-              />
-              <label htmlFor="col-capital" className="text-sm cursor-pointer">
-                Capital
-              </label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="col-kycStatus"
-                checked={visibleColumns.kycStatus}
-                onCheckedChange={() => toggleColumn('kycStatus')}
-              />
-              <label htmlFor="col-kycStatus" className="text-sm cursor-pointer">
-                KYC Status
-              </label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="col-nivelDeRisco"
-                checked={visibleColumns.nivelDeRisco}
-                onCheckedChange={() => toggleColumn('nivelDeRisco')}
-              />
-              <label htmlFor="col-nivelDeRisco" className="text-sm cursor-pointer">
-                Nível de Risco
-              </label>
-            </div>
-          </div>
-
-          <div className="py-4 space-y-6 max-h-[60vh] overflow-y-auto">
-            <div>
-              <h3 className="mb-3 text-sm font-semibold">Filtrar por Cliente</h3>
-              <ClientCombobox
-                isOpen={filterClientComboboxOpen}
-                setIsOpen={setFilterClientComboboxOpen}
-                selectedClientId={selectedClientIdFilter}
-                onSelect={(clientId) => setSelectedClientIdFilter(clientId)}
-                clients={clientData}
-                showAllOption={true}
-                placeholder="Buscar cliente..."
-              />
-            </div>
-
-            <div>
-              <h3 className="mb-3 text-sm font-semibold">Filtrar por País</h3>
-              <CountryCombobox
-                isOpen={filterCountryComboboxOpen}
-                setIsOpen={setFilterCountryComboboxOpen}
-                selectedCountry={paisFilter}
-                onSelect={(countryName) => setClientFilter('pais', countryName)}
-                countries={countries}
-                showAllOption={true}
-              />
-            </div>
-
-            <div>
-              <h3 className="mb-3 text-sm font-semibold">Filtrar por Capital</h3>
-              <Input
-                placeholder="Digite o valor do capital..."
-                value={capitalFilter}
-                onChange={(e) => setClientFilter('capital', e.target.value)}
-              />
-            </div>
-{/* Side by Side KYC Status and Nível de Risco Filters */}
-            <div>
-              <h3 className="mb-3 text-sm font-semibold">Filtrar por Status</h3>
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <Label htmlFor="kycStatusFilter" className="py-2">KYC Status</Label>
-                  <NativeSelect
-                    id="kycStatusFilter"
-                    value={kycStatusFilter}
-                    onChange={(e) => setClientFilter('kycStatus', e.target.value)}
-                  >
-                    <NativeSelectOption value="">Todos</NativeSelectOption>
-                    <NativeSelectOption value="Pendente">Pendente</NativeSelectOption>
-                    <NativeSelectOption value="Aprovado">Aprovado</NativeSelectOption>
-                    <NativeSelectOption value="Rejeitado">Rejeitado</NativeSelectOption>
-                  </NativeSelect>
-                </div>
-                <div className="flex-1">
-                  <Label htmlFor="nivelDeRiscoFilter" className="py-2">Nível de Risco</Label>
-                  <NativeSelect
-                    id="nivelDeRiscoFilter"
-                    value={nivelDeRiscoFilter}
-                    onChange={(e) => setClientFilter('nivelDeRisco', e.target.value)}
-                  >
-                    <NativeSelectOption value="">Todos</NativeSelectOption>
-                    <NativeSelectOption value="Baixo">Baixo</NativeSelectOption>
-                    <NativeSelectOption value="Medio">Medio</NativeSelectOption>
-                    <NativeSelectOption value="Alto">Alto</NativeSelectOption>
-                  </NativeSelect>
-                </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="col-id"
+                  checked={visibleColumns.id}
+                  onCheckedChange={() => toggleColumn("id")}
+                />
+                <label htmlFor="col-id" className="text-sm cursor-pointer">
+                  ID
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="col-nome"
+                  checked={visibleColumns.nome}
+                  onCheckedChange={() => toggleColumn("nome")}
+                />
+                <label htmlFor="col-nome" className="text-sm cursor-pointer">
+                  Nome
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="col-cpfCnpj"
+                  checked={visibleColumns.cpfCnpj}
+                  onCheckedChange={() => toggleColumn("cpfCnpj")}
+                />
+                <label htmlFor="col-cpfCnpj" className="text-sm cursor-pointer">
+                  CPF/CNPJ
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="col-pais"
+                  checked={visibleColumns.pais}
+                  onCheckedChange={() => toggleColumn("pais")}
+                />
+                <label htmlFor="col-pais" className="text-sm cursor-pointer">
+                  País
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="col-capital"
+                  checked={visibleColumns.capital}
+                  onCheckedChange={() => toggleColumn("capital")}
+                />
+                <label htmlFor="col-capital" className="text-sm cursor-pointer">
+                  Capital
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="col-kycStatus"
+                  checked={visibleColumns.kycStatus}
+                  onCheckedChange={() => toggleColumn("kycStatus")}
+                />
+                <label
+                  htmlFor="col-kycStatus"
+                  className="text-sm cursor-pointer"
+                >
+                  KYC Status
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="col-nivelDeRisco"
+                  checked={visibleColumns.nivelDeRisco}
+                  onCheckedChange={() => toggleColumn("nivelDeRisco")}
+                />
+                <label
+                  htmlFor="col-nivelDeRisco"
+                  className="text-sm cursor-pointer"
+                >
+                  Nível de Risco
+                </label>
               </div>
             </div>
 
+            <div className="py-4 space-y-6 max-h-[60vh] overflow-y-auto">
+              <div>
+                <h3 className="mb-3 text-sm font-semibold">
+                  Filtrar por Cliente
+                </h3>
+                <ClientCombobox
+                  isOpen={filterClientComboboxOpen}
+                  setIsOpen={setFilterClientComboboxOpen}
+                  selectedClientId={selectedClientIdFilter}
+                  onSelect={(clientId) => setSelectedClientIdFilter(clientId)}
+                  clients={clientData.filter(client => client.isActive)}
+                  showAllOption={true}
+                  placeholder="Buscar cliente..."
+                />
+              </div>
+
+              <div>
+                <h3 className="mb-3 text-sm font-semibold">Filtrar por País</h3>
+                <CountryCombobox
+                  isOpen={filterCountryComboboxOpen}
+                  setIsOpen={setFilterCountryComboboxOpen}
+                  selectedCountry={paisFilter}
+                  onSelect={(countryName) =>
+                    setClientFilter("pais", countryName)
+                  }
+                  countries={countries}
+                  showAllOption={true}
+                />
+              </div>
+
+              <div>
+                <h3 className="mb-3 text-sm font-semibold">
+                  Filtrar por Capital
+                </h3>
+                <Input
+                  placeholder="Digite o valor do capital..."
+                  value={capitalFilter}
+                  onChange={(e) => setClientFilter("capital", e.target.value)}
+                />
+              </div>
+              {/* Side by Side KYC Status and Nível de Risco Filters */}
+              <div>
+                <h3 className="mb-3 text-sm font-semibold">
+                  Filtrar por Status
+                </h3>
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <Label className="py-2 block mb-2">
+                      KYC Status (múltiplas seleções)
+                    </Label>
+                    <div className="space-y-2">
+                      {['Pendente', 'Aprovado', 'Rejeitado'].map((status) => (
+                        <div key={status} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`kyc-${status}`}
+                            checked={kycStatusFilter.includes(status)}
+                            onCheckedChange={(checked) => {
+                              const newFilter = checked
+                                ? [...kycStatusFilter, status]
+                                : kycStatusFilter.filter(s => s !== status);
+                              setClientFilter('kycStatus', newFilter as any);
+                            }}
+                          />
+                          <label htmlFor={`kyc-${status}`} className="text-sm cursor-pointer">
+                            {status}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <Label className="py-2 block mb-2">
+                      Nível de Risco (múltiplas seleções)
+                    </Label>
+                    <div className="space-y-2">
+                      {['Baixo', 'Medio', 'Alto'].map((risco) => (
+                        <div key={risco} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`risco-${risco}`}
+                            checked={nivelDeRiscoFilter.includes(risco)}
+                            onCheckedChange={(checked) => {
+                              const newFilter = checked
+                                ? [...nivelDeRiscoFilter, risco]
+                                : nivelDeRiscoFilter.filter(r => r !== risco);
+                              setClientFilter('nivelDeRisco', newFilter as any);
+                            }}
+                          />
+                          <label htmlFor={`risco-${risco}`} className="text-sm cursor-pointer">
+                            {risco}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
 
           <DialogFooter>
-            <Button 
-              variant="secondary" 
-              onClick={() => resetClientFilters()}
-            >
+            <Button variant="secondary" onClick={handleResetFiltersAndColumns}>
               Restaurar Padrão
             </Button>
-            <Button variant="outline" onClick={() => setFilterDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setFilterDialogOpen(false)}
+            >
               Fechar
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-{/* --------------------------------------- */}
-{/* ------------------END------------------ */}
-{/* --------------------------------------- */}
+      {/* --------------------------------------- */}
+      {/* ------------------END------------------ */}
+      {/* --------------------------------------- */}
     </div>
   );
 }

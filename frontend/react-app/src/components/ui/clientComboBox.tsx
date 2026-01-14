@@ -70,7 +70,7 @@ export const ClientCombobox = ({
       <PopoverContent className="w-full p-0">
         <Command>
           <CommandInput placeholder="Buscar por nome ou CPF/CNPJ..." />
-          <CommandList>
+          <CommandList className="max-h-[300px] overflow-y-auto">
             <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>
             <CommandGroup>
               {showAllOption && (
@@ -104,8 +104,14 @@ export const ClientCombobox = ({
                     }`}
                   />
                   <div className="flex flex-col">
-                    <span className="font-medium">{client.nome}</span>
-                    <span className="text-xs text-gray-500">{client.cpfCnpj}</span>
+                    <span className={`font-medium ${
+                      !client.isActive ? "text-red-600" : ""
+                    }`}>
+                      {client.nome}{!client.isActive ? " (inativo)" : ""}
+                    </span>
+                    <span className={`text-xs ${
+                      !client.isActive ? "text-red-400" : "text-gray-500"
+                    }`}>{client.cpfCnpj}</span>
                   </div>
                 </CommandItem>
               ))}

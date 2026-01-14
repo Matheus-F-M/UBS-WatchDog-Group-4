@@ -7,15 +7,10 @@
   - We will RARELY TOUCH this file after set up
   */
 
-/*
-  NOTES:
-    Check routes.txt
-      We might not need all those routes, but I put them all there 
-    for better visualization of the app structure.
-*/
+import ReactDOM from "react-dom/client";
+import React from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 
 import App from "./App.tsx";
@@ -28,22 +23,60 @@ import Home from "./pages/dashboard-pages/HomePage.tsx"; // Dashboard home page
 import ClientPage from "./pages/dashboard-pages/ClientPage.tsx"; // Client page
 import TransactionPage from "./pages/dashboard-pages/TransactionPage.tsx"; // Transaction page
 import AlertPage from "./pages/dashboard-pages/AlertPage.tsx";
+import ClientReport from "./pages/reports/ClientReport.tsx";
+import NotFoundPage from "./pages/notFoundPage.tsx";
 
-createRoot(document.getElementById("root")!).render(
-  <BrowserRouter>
-    <Routes>
-      <Route path="/" element={<App />} />
-      <Route element={<AuthLayout />}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-      </Route>
+const BRAN_router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    errorElement: <NotFoundPage />,
+  },
+  {
+    element: <AuthLayout />,
+    errorElement: <NotFoundPage />,
+    children: [
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        path: "/register",
+        element: <Register />,
+      },
+    ],
+  },
+  {
+    path: "/dashboard",
+    element: <Dashboard />,
+    errorElement: <NotFoundPage />,
+    children: [
+      {
+        index: true,
+        element: <Home />,
+      },
+      {
+        path: "clients",
+        element: <ClientPage />,
+      },
+      {
+        path: "clients/:clientId",
+        element: <ClientReport />,
+      },
+      {
+        path: "transactions",
+        element: <TransactionPage />,
+      },
+      {
+        path: "alerts",
+        element: <AlertPage />,
+      },
+    ],
+  },
+]);
 
-      <Route path="dashboard" element={<Dashboard />}>
-        <Route index element={<Home />} />
-        <Route path="clients" element={<ClientPage />} />
-        <Route path="transactions" element={<TransactionPage />} />
-        <Route path="alerts" element={<AlertPage />} />
-      </Route>
-    </Routes>
-  </BrowserRouter>
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <RouterProvider router={BRAN_router} />
+  </React.StrictMode>
 );
