@@ -34,7 +34,7 @@ namespace Bran.API.Controllers
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateClientRequest request)
         {
-            var client = await _clientService.UpdateAsync(id, request.Name, request.Country, request.Type, request.Income, request.KycStatus);
+            var client = await _clientService.UpdateAsync(id, request.Name, request.Country, request.Type, request.Income, request.KycStatus, request.GovernmentId);
 
             if (client is null) return NotFound();
 

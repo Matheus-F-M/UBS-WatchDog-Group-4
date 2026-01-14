@@ -33,14 +33,14 @@ namespace Bran.Application.Services
 
         }
 
-        public async Task<Client?> UpdateAsync(Guid clientId, string name, string country, ClientType type, double income, KycStatus kycStatus)
+        public async Task<Client?> UpdateAsync(Guid clientId, string name, string country, ClientType type, double income, KycStatus kycStatus, string governmentId)
         {
             var client = await _clientRepository.GetByIdAsync(clientId);
 
             if (client is null)
                 return null;
 
-            client.UpdateBasicInfo(name, country, type, income, kycStatus);
+            client.UpdateBasicInfo(name, country, type, income, kycStatus, governmentId);
 
             var points = _calculator.CalculatePoints(client);
 

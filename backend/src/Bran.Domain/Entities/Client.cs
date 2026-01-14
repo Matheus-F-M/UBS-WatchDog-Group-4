@@ -57,7 +57,7 @@ namespace Bran.Domain.Entities
                 RiskLevel = ClientRiskLevel.High;
         }
 
-        public void UpdateBasicInfo(string name, string country, ClientType type, double income, KycStatus kycStatus)
+        public void UpdateBasicInfo(string name, string country, ClientType type, double income, KycStatus kycStatus, string governmentId)
         {
             Name = name;
             Country = country;
@@ -65,6 +65,7 @@ namespace Bran.Domain.Entities
             Income = income;
             KycStatus = kycStatus;
             UpdatedAt = DateTime.UtcNow;
+            GovernmentId = governmentId;
         }
 
         public void Deactivate()
