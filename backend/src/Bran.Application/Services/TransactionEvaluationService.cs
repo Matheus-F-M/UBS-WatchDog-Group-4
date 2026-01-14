@@ -34,12 +34,12 @@ namespace Bran.Application.Services
             }
             var client = await _clientsRepository.GetByIdAsync(transaction.ClientId);
             var counterparty = await _clientsRepository.GetByIdAsync(transaction.CounterpartyId);
-            var recentTransactions = await _transactionsRepository.GetByDateRangeAsync(
-                DateTime.UtcNow.AddDays(-30),
+            var recentTransactions = await _transactionsRepository.GetByClientAndPeriodAsync(
+                transaction.ClientId,
+                DateTime.UtcNow.AddMonths(-1),
                 DateTime.UtcNow);
-            var clientRecentTransactions = recentTransactions
-                .Where(t => t.ClientId == client.Id)
-                .ToList();
+            var clientRecentTransactions = recentTransactions.ToList();
+            clientRecentTransactions.Add(transaction);
             var complianceContext = new ComplianceContext (
                 client.Id,
                 transaction.CounterpartyId,
