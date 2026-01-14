@@ -85,13 +85,12 @@ namespace Bran.API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Deactivate(Guid id)
         {
-            var deleted = await _clientService.DeleteAsync(id);
-
-            if (!deleted)
+            var client = await _clientService.GetByIdAsync(id);
+            if (client is null)
                 return NotFound();
-
+            await _clientService.DeactivateClientAsync(id);
             return NoContent();
         }
     }

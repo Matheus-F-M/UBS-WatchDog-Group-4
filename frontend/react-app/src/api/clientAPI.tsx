@@ -34,6 +34,7 @@ export const mapBackendClient = (backendClient: any): Client => {
         ? "Alto"
         : "Medio",
     income: backendClient.income,
+    isActive: backendClient.isActive ?? true,
   };
 };
 
@@ -65,6 +66,7 @@ export const reverseMapBackendClient = (client: Client): any => {
         ? 2
         : 1,
     income: client.income,
+    isActive: client.isActive,
   };
 };
 
@@ -83,7 +85,7 @@ export const clientsApi = {
     const response = await fetch(`${API_CLIENT_BASE_URL}/${id}`);
     if (!response.ok) throw new Error(`Failed to fetch client with id ${id}`);
     const rawClient = await response.json();
-    return mapBackendClient(rawClient);
+    return mapBackendClient(rawClient); // eu n acho q a gente precise de um map enteiro.
   },
 
   // Create new client
@@ -110,11 +112,11 @@ export const clientsApi = {
   },
 
   // Delete client
-  delete: async (id: string): Promise<void> => {
+  deactivate: async (id: string): Promise<void> => {
     const response = await fetch(`${API_CLIENT_BASE_URL}/${id}`, {
       method: "DELETE",
     });
-    if (!response.ok) throw new Error("Failed to delete client");
+    if (!response.ok) throw new Error("Failed to deactivate client");
   },
 };
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

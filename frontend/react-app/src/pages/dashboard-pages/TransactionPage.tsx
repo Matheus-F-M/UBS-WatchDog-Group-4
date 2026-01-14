@@ -1,22 +1,23 @@
-import { API_CLIENT_BASE_URL, clientsApi } from "@/api/clientAPI";
+import { clientsApi } from "@/api/clientAPI";
 import { transactionsApi } from "@/api/transactionAPI";
+import { currenciesApi } from "@/api/currencyAPI";
+import { ClientCombobox } from "@/components/ui/clientComboBox";
+import { CurrencyCombobox } from "@/components/ui/currencyComboBox";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useFilterStore } from "@/stores/filterStore";
+import { format, parseISO } from "date-fns";
 import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 import {
   type Transaction,
   type Currency,
+  type Client,
   formatCurrency,
 } from "@/types/globalTypes";
 import {
@@ -58,11 +59,21 @@ const initialTransactiondata: Transaction[] = [
 export default function TransactionPage() {
   const [transactiondata, setTransactiondata] = useState<Transaction[]>([]);
   const [clientNames, setClientNames] = useState<Record<string, string>>({});
+  const [counterpartyCpfCnpj, setCounterpartyCpfCnpj] = useState<Record<string, string>>({});
+  const [clients, setClients] = useState<Client[]>([]);
+  const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [clientComboboxOpen, setClientComboboxOpen] = useState(false);
+  const [counterpartyComboboxOpen, setCounterpartyComboboxOpen] = useState(false);
+  const [currencyComboboxOpen, setCurrencyComboboxOpen] = useState(false);
+  const [filterClientComboboxOpen, setFilterClientComboboxOpen] = useState(false);
+  const [filterCounterpartyComboboxOpen, setFilterCounterpartyComboboxOpen] = useState(false);
+  const [selectedClientIdFilter, setSelectedClientIdFilter] = useState<string>("");
+  const [selectedCounterpartyIdFilter, setSelectedCounterpartyIdFilter] = useState<string>("");
+
   const [newTransaction, setNewTransaction] = useState<Partial<Transaction>>({
     idCliente: "",
     tipo: "Depósito",
@@ -90,10 +101,80 @@ export default function TransactionPage() {
   /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
      ------ Fetch Transactions from API ----
      XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
-  // Fetch transactions on component mount
+  // Fetch transactions and clients on component mount
   useEffect(() => {
     fetchTransactions();
+    fetchClients();
+    fetchCurrencies();
   }, []);
+
+  /**
+   * Fetches all clients from the API.
+   */
+  const fetchClients = async () => {
+    try {
+      const fetchedClients = await clientsApi.getAll();
+      setClients(fetchedClients);
+    } catch (err) {
+      console.error("Erro ao carregar clientes:", err);
+    }
+  };
+
+  /**
+   * Fetches all currencies from the API.
+   */
+  const fetchCurrencies = async () => {
+    try {
+      const fetchedCurrencies = await currenciesApi.getAll();
+      setCurrencies(fetchedCurrencies);
+    } catch (err) {
+      console.error("Erro ao carregar moedas:", err);
+    }
+  };
+
+  /**
+   * Fetches client names for all transactions by their IDs.
+   * @param transactions - Array of transactions to fetch client names for
+   */
+  const fetchClientNames = async (transactions: Transaction[]) => {
+    const uniqueClientIds = [...new Set(transactions.map(t => t.idCliente))];
+    const names: Record<string, string> = {};
+    
+    await Promise.all(
+      uniqueClientIds.map(async (clientId) => {
+        try {
+          const client = await clientsApi.getById(clientId);
+          names[clientId] = client.nome;
+        } catch (err) {
+          names[clientId] = "Desconhecido";
+        }
+      })
+    );
+    
+    setClientNames(names);
+  };
+
+  /**
+   * Fetches counterparty CPF/CNPJ for all transactions by their IDs.
+   * @param transactions - Array of transactions to fetch counterparty CPF/CNPJ for
+   */
+  const fetchCounterpartyCpfCnpj = async (transactions: Transaction[]) => {
+    const uniqueCounterpartyIds = [...new Set(transactions.map(t => t.idContraparte))];
+    const cpfCnpjs: Record<string, string> = {};
+    
+    await Promise.all(
+      uniqueCounterpartyIds.map(async (counterpartyId) => {
+        try {
+          const counterparty = await clientsApi.getById(counterpartyId);
+          cpfCnpjs[counterpartyId] = counterparty.cpfCnpj;
+        } catch (err) {
+          cpfCnpjs[counterpartyId] = "Desconhecido";
+        }
+      })
+    );
+    
+    setCounterpartyCpfCnpj(cpfCnpjs);
+  };
 
   /**
    * Fetches transaction data from the API and handles loading and error states.
@@ -105,22 +186,9 @@ export default function TransactionPage() {
       const transactions = await transactionsApi.getAll();
       setTransactiondata(transactions);
       
-      // Fetch client names for all unique client IDs
-      const uniqueClientIds = [...new Set(transactions.map(t => t.idCliente))];
-      const names: Record<string, string> = {};
-      
-      await Promise.all(
-        uniqueClientIds.map(async (clientId) => {
-          try {
-            const client = await clientsApi.getById(clientId);
-            names[clientId] = client.nome;
-          } catch (err) {
-            names[clientId] = "Desconhecido";
-          }
-        })
-      );
-      
-      setClientNames(names);
+      // Fetch client names and counterparty CPF/CNPJ for all transactions
+      await fetchClientNames(transactions);
+      await fetchCounterpartyCpfCnpj(transactions);
     } catch (err) {
       setError("Erro ao carregar transações. Usando dados de exemplo.");
       // Fallback to initial data if API fails
@@ -129,28 +197,7 @@ export default function TransactionPage() {
       setIsLoading(false);
     }
   };
-    /**
-   * Fetches client ID from CPF/CNPJ by calling the clients API
-   * @param cpfCnpj string - CPF/CNPJ of the client
-   * @returns Promise<string | null> - Client ID or null if not found
-   */
-  const fetchClientIdFromCpfCnpj = async (cpfCnpj: string): Promise<string | null> => {
-    try {
-      const response = await fetch(API_CLIENT_BASE_URL);
-      if (!response.ok) throw new Error("Failed to fetch clients");
-      const clients = await response.json();
-      
-      // Find client with matching CPF/CNPJ (documentNumber in backend)
-      const matchingClient = clients.find(
-        (client: any) => client.governmentId === cpfCnpj
-      );
-      
-      return matchingClient ? matchingClient.id : null;
-    } catch (err) {
-      console.error("Error fetching client ID:", err);
-      return null;
-    }
-  };
+
   /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
      ------------ END FETCHING -------------
      XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
@@ -177,15 +224,46 @@ export default function TransactionPage() {
         idCliente: newTransaction.idCliente,
         tipo: newTransaction.tipo as Transaction["tipo"],
         valor: newTransaction.valor,
-        moeda: newTransaction.moeda as Currency,
+        moeda: newTransaction.moeda,
         idContraparte: newTransaction.idContraparte,
-        dataHora: "2026-01-13T04:39:33.792Z", // backend will set current date/time   
-        pais: "string", // backend will set country based on client info
+        dataHora: "", // backend will set current date/time   
+        pais: "", // backend will set country based on client info
       };
 
       console.log("Adding transaction:", transactionToAdd);
       const createdTransaction = await transactionsApi.create(transactionToAdd);
+      console.log("Created transaction:", createdTransaction);
       setTransactiondata([...transactiondata, createdTransaction]);
+      
+      // Fetch the client name and counterparty CPF/CNPJ for the new transaction
+      try {
+        const client = await clientsApi.getById(createdTransaction.idCliente);
+        setClientNames(prev => ({
+          ...prev,
+          [createdTransaction.idCliente]: client.nome
+        }));
+      } catch (err) {
+        console.error("Erro ao carregar nome do cliente:", err);
+        setClientNames(prev => ({
+          ...prev,
+          [createdTransaction.idCliente]: "Desconhecido"
+        }));
+      }
+      
+      try {
+        const counterparty = await clientsApi.getById(createdTransaction.idContraparte);
+        setCounterpartyCpfCnpj(prev => ({
+          ...prev,
+          [createdTransaction.idContraparte]: counterparty.cpfCnpj
+        }));
+      } catch (err) {
+        console.error("Erro ao carregar CPF/CNPJ da contraparte:", err);
+        setCounterpartyCpfCnpj(prev => ({
+          ...prev,
+          [createdTransaction.idContraparte]: "Desconhecido"
+        }));
+      }
+      
       setAddDialogOpen(false);
       setNewTransaction({
         idCliente: "",
@@ -254,8 +332,8 @@ export default function TransactionPage() {
                   {visibleColumns.idCliente && <TableHead>ID Cliente</TableHead>}
                   {visibleColumns.nomeCliente && <TableHead>Cliente</TableHead>}
                   {visibleColumns.tipo && <TableHead>Tipo</TableHead>}
-                  {visibleColumns.valor && <TableHead>Valor</TableHead>}
                   {visibleColumns.moeda && <TableHead>Moeda</TableHead>}
+                  {visibleColumns.valor && <TableHead>Valor</TableHead>}
                   {visibleColumns.idContraparte && <TableHead>Contraparte</TableHead>}
                   {visibleColumns.dataHora && <TableHead>Data e Hora</TableHead>}
                 </TableRow>
@@ -266,25 +344,33 @@ export default function TransactionPage() {
                 {transactiondata
                   .filter((transaction) => {
                     const idSearch = transactionFilters.id.toLowerCase();
-                    const idClienteSearch = transactionFilters.idCliente.toLowerCase();
-                    const nomeClienteSearch = (transactionFilters.nomeCliente || "").toLowerCase();
                     const tipoSearch = transactionFilters.tipo.toLowerCase();
                     const valorSearch = transactionFilters.valor.toLowerCase();
                     const moedaSearch = transactionFilters.moeda.toLowerCase();
-                    const contraparteSearch = (transactionFilters.idContraparte || "").toLowerCase();
                     const dataSearch = (transactionFilters.dataHora || "").toLowerCase();
 
-                    const clientName = (clientNames[transaction.idCliente] || "").toLowerCase();
+                    // Check client ID filter (from ClientCombobox)
+                    const clientIdMatch = selectedClientIdFilter === "" || transaction.idCliente === selectedClientIdFilter;
+                    
+                    // Check counterparty ID filter (from ClientCombobox)
+                    const counterpartyIdMatch = selectedCounterpartyIdFilter === "" || transaction.idContraparte === selectedCounterpartyIdFilter;
+
+                    // Format date for searching
+                    let formattedDate = "";
+                    try {
+                      formattedDate = format(parseISO(transaction.dataHora), "dd/MM/yyyy HH:mm").toLowerCase();
+                    } catch {
+                      formattedDate = transaction.dataHora.toLowerCase();
+                    }
 
                     return (
                       transaction.id.toLowerCase().includes(idSearch) &&
-                      transaction.idCliente.toLowerCase().includes(idClienteSearch) &&
-                      clientName.includes(nomeClienteSearch) &&
+                      clientIdMatch &&
+                      counterpartyIdMatch &&
                       transaction.tipo.toLowerCase().includes(tipoSearch) &&
                       transaction.valor.toString().includes(valorSearch) &&
                       transaction.moeda.toLowerCase().includes(moedaSearch) &&
-                      transaction.idContraparte.toLowerCase().includes(contraparteSearch) &&
-                      transaction.dataHora.toLowerCase().includes(dataSearch)
+                      formattedDate.includes(dataSearch)
                     );
                   })
                   .map((transaction) => (
@@ -293,14 +379,24 @@ export default function TransactionPage() {
                       {visibleColumns.idCliente && <TableCell>{transaction.idCliente}</TableCell>}
                       {visibleColumns.nomeCliente && <TableCell>{clientNames[transaction.idCliente] || "Carregando..."}</TableCell>}
                       {visibleColumns.tipo && <TableCell>{transaction.tipo}</TableCell>}
+                      {visibleColumns.moeda && <TableCell>{transaction.moeda}</TableCell>}
                       {visibleColumns.valor && (
                         <TableCell className="font-medium">
                           {formatCurrency(transaction.valor)}
                         </TableCell>
                       )}
-                      {visibleColumns.moeda && <TableCell>{transaction.moeda}</TableCell>}
-                      {visibleColumns.idContraparte && <TableCell>{transaction.idContraparte}</TableCell>}
-                      {visibleColumns.dataHora && <TableCell>{transaction.dataHora}</TableCell>}
+                      {visibleColumns.idContraparte && <TableCell>{counterpartyCpfCnpj[transaction.idContraparte] || "Carregando..."}</TableCell>}
+                      {visibleColumns.dataHora && (
+                        <TableCell>
+                          {(() => {
+                            try {
+                              return format(parseISO(transaction.dataHora), "dd/MM/yyyy HH:mm");
+                            } catch {
+                              return transaction.dataHora;
+                            }
+                          })()}
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
               </TableBody>
@@ -327,24 +423,26 @@ export default function TransactionPage() {
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="new-idCliente">ID do Cliente *</Label>
-              <Input
-                id="new-idCliente"
-                value={newTransaction.idCliente || ""}
-                onChange={(e) => setNewTransaction({ ...newTransaction, idCliente: e.target.value })}
-                placeholder="Digite o ID do cliente..."
+              <Label htmlFor="new-idCliente">Cliente *</Label>
+              <ClientCombobox
+                isOpen={clientComboboxOpen}
+                setIsOpen={setClientComboboxOpen}
+                selectedClientId={newTransaction.idCliente || ""}
+                onSelect={(clientId) => setNewTransaction({ ...newTransaction, idCliente: clientId })}
+                clients={clients}
+                placeholder="Selecione o cliente..."
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="new-contraparte">ID da Contraparte *</Label>
-              <Input
-                id="new-contraparte"
-                value={newTransaction.idContraparte || ""}
-                onChange={(e) =>
-                  setNewTransaction({ ...newTransaction, idContraparte: e.target.value })
-                }
-                placeholder="Digite o ID da contraparte..."
+              <Label htmlFor="new-contraparte">Contraparte *</Label>
+              <ClientCombobox
+                isOpen={counterpartyComboboxOpen}
+                setIsOpen={setCounterpartyComboboxOpen}
+                selectedClientId={newTransaction.idContraparte || ""}
+                onSelect={(clientId) => setNewTransaction({ ...newTransaction, idContraparte: clientId })}
+                clients={clients}
+                placeholder="Selecione a contraparte..."
               />
             </div>
 
@@ -391,18 +489,13 @@ export default function TransactionPage() {
 
             <div className="space-y-2">
               <Label htmlFor="new-moeda">Moeda *</Label>
-              <NativeSelect
-                id="new-moeda"
-                value={newTransaction.moeda || "BRL"}
-                onChange={(e) =>
-                  setNewTransaction({ ...newTransaction, moeda: e.target.value as Currency })
-                }
-              >
-                <NativeSelectOption value="BRL">BRL - Real Brasileiro</NativeSelectOption>
-                <NativeSelectOption value="USD">USD - Dólar Americano</NativeSelectOption>
-                <NativeSelectOption value="EUR">EUR - Euro</NativeSelectOption>
-                <NativeSelectOption value="CHF">CHF - Franco Suíço</NativeSelectOption>
-              </NativeSelect>
+              <CurrencyCombobox
+                isOpen={currencyComboboxOpen}
+                setIsOpen={setCurrencyComboboxOpen}
+                selectedCurrency={newTransaction.moeda || "BRL"}
+                onSelect={(currencyCode) => setNewTransaction({ ...newTransaction, moeda: currencyCode })}
+                currencies={currencies}
+              />
             </div>
           </div>
 
@@ -447,20 +540,28 @@ export default function TransactionPage() {
             </div>
 
             <div>
-              <h3 className="mb-3 text-sm font-semibold">Filtrar por ID Cliente</h3>
-              <Input
-                placeholder="Digite o ID do cliente..."
-                value={transactionFilters.idCliente}
-                onChange={(e) => setTransactionFilter('idCliente', e.target.value)}
+              <h3 className="mb-3 text-sm font-semibold">Filtrar por Cliente</h3>
+              <ClientCombobox
+                isOpen={filterClientComboboxOpen}
+                setIsOpen={setFilterClientComboboxOpen}
+                selectedClientId={selectedClientIdFilter}
+                onSelect={(clientId) => setSelectedClientIdFilter(clientId)}
+                clients={clients}
+                showAllOption={true}
+                placeholder="Buscar cliente..."
               />
             </div>
 
             <div>
-              <h3 className="mb-3 text-sm font-semibold">Filtrar por Nome do Cliente</h3>
-              <Input
-                placeholder="Digite o nome do cliente..."
-                value={transactionFilters.nomeCliente || ""}
-                onChange={(e) => setTransactionFilter('nomeCliente', e.target.value)}
+              <h3 className="mb-3 text-sm font-semibold">Filtrar por Contraparte</h3>
+              <ClientCombobox
+                isOpen={filterCounterpartyComboboxOpen}
+                setIsOpen={setFilterCounterpartyComboboxOpen}
+                selectedClientId={selectedCounterpartyIdFilter}
+                onSelect={(clientId) => setSelectedCounterpartyIdFilter(clientId)}
+                clients={clients}
+                showAllOption={true}
+                placeholder="Buscar contraparte..."
               />
             </div>
 
@@ -494,25 +595,13 @@ export default function TransactionPage() {
               >
                 <NativeSelectOption value="">Todas</NativeSelectOption>
                 <NativeSelectOption value="BRL">BRL - Real Brasileiro</NativeSelectOption>
-                <NativeSelectOption value="USD">USD - Dólar Americano</NativeSelectOption>
-                <NativeSelectOption value="EUR">EUR - Euro</NativeSelectOption>
-                <NativeSelectOption value="CHF">CHF - Franco Suíço</NativeSelectOption>
               </NativeSelect>
-            </div>
-
-            <div>
-              <h3 className="mb-3 text-sm font-semibold">Filtrar por Contraparte</h3>
-              <Input
-                placeholder="Digite a contraparte..."
-                value={transactionFilters.idContraparte}
-                onChange={(e) => setTransactionFilter('idContraparte', e.target.value)}
-              />
             </div>
 
             <div>
               <h3 className="mb-3 text-sm font-semibold">Filtrar por Data e Hora</h3>
               <Input
-                placeholder="Digite a data e hora..."
+                placeholder="Ex: 15/01/2024 ou 14:30..."
                 value={transactionFilters.dataHora}
                 onChange={(e) => setTransactionFilter('dataHora', e.target.value)}
               />
@@ -539,6 +628,16 @@ export default function TransactionPage() {
                   />
                   <label htmlFor="col-idCliente" className="text-sm cursor-pointer">
                     ID Cliente
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="col-nomeCliente"
+                    checked={visibleColumns.nomeCliente}
+                    onCheckedChange={() => toggleColumn('nomeCliente')}
+                  />
+                  <label htmlFor="col-nomeCliente" className="text-sm cursor-pointer">
+                    Cliente
                   </label>
                 </div>
                 <div className="flex items-center space-x-2">

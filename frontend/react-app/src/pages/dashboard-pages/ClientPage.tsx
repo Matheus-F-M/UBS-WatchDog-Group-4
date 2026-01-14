@@ -4,37 +4,24 @@
 */
 
 import { clientsApi } from "@/api/clientAPI";
+import { countriesApi } from "@/api/countryAPI";
+import { CountryCombobox } from "@/components/ui/countryComboBox";
+import { ClientCombobox } from "@/components/ui/clientComboBox";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useFilterStore } from "@/stores/filterStore";
 import {
   type Client,
-  type CPF,
-  type CNPJ,
+  type Country,
   type CpfCnpj,
   isCPF,
   isCNPJ,
   validateCpfCnpj,
-  currencies,
   formatCurrency,
 } from "@/types/globalTypes";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   NativeSelect,
@@ -93,6 +80,7 @@ const initialClientData: Client[] = [
     kycStatus: "Aprovado",
     nivelDeRisco: "Baixo",
     income: 5000.7,
+    isActive: true,
   },
 ];
 
@@ -104,13 +92,18 @@ const initialClientData: Client[] = [
 export default function ClientPage() {
   const [searchParams] = useSearchParams();
   const [clientData, setClientData] = useState<Client[]>([]); // Where all the information of our customers are
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [countries, setCountries] = useState<Country[]>([]);
   const [editedClient, setEditedClient] = useState<Client | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<string | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  const [countryComboboxOpen, setCountryComboboxOpen] = useState(false);
+  const [editCountryComboboxOpen, setEditCountryComboboxOpen] = useState(false);
+  const [filterCountryComboboxOpen, setFilterCountryComboboxOpen] = useState(false);
+  const [filterClientComboboxOpen, setFilterClientComboboxOpen] = useState(false);
+  const [selectedClientIdFilter, setSelectedClientIdFilter] = useState<string>("");
   const [newClient, setNewClient] = useState<Partial<Client>>({
     nome: "",
     cpfCnpj: "" as CpfCnpj,
@@ -134,26 +127,10 @@ export default function ClientPage() {
 
   // Destructure filters for easier access
   const nameFilter = clientFilters.nome;
-  const idFilter = clientFilters.id;
-  const cpfCnpjFilter = clientFilters.cpfCnpj;
   const paisFilter = clientFilters.pais;
   const capitalFilter = clientFilters.capital;
   const kycStatusFilter = clientFilters.kycStatus;
   const nivelDeRiscoFilter = clientFilters.nivelDeRisco;
-
-  // Check for parameters coming from URL to pre-fill filters
-  useEffect(() => {
-    const cpfCnpjParam = searchParams.get('cpfCnpj');
-    const idParam = searchParams.get('id');
-    
-    if (cpfCnpjParam) {
-      setClientFilter('cpfCnpj', cpfCnpjParam);
-    }
-    
-    if (idParam) {
-      setClientFilter('id', idParam);
-    }
-  }, [searchParams, setClientFilter]);
 
   /**
    * Toggles the visibility of a table column
@@ -169,9 +146,10 @@ export default function ClientPage() {
    ------- Fetch Clients from API --------
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
-  // Fetch clients on component mount
+  // Fetch clients and countries on component mount
   useEffect(() => {
     fetchClients();
+    fetchCountries();
   }, []);
 
   /**
@@ -190,6 +168,19 @@ export default function ClientPage() {
       setIsLoading(false);
     }
   };
+
+  /**
+   * Fetches all countries from the API.
+   */
+  const fetchCountries = async () => {
+    try {
+      const fetchedCountries = await countriesApi.getAll();
+      setCountries(fetchedCountries);
+    } catch (err) {
+      console.error("Erro ao carregar países:", err);
+      setError("Erro ao carregar países do banco de dados.");
+    }
+  };
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    ------------ END FETCHING -------------
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
@@ -199,7 +190,6 @@ export default function ClientPage() {
    * @param client Client
    */
   const handleOpenSheet = (client: Client) => {
-    setSelectedClient(client);
     setEditedClient({ ...client });
     setIsOpen(true);
   };
@@ -252,7 +242,7 @@ export default function ClientPage() {
       setIsLoading(true);
       setError(null);
       try {
-        await clientsApi.delete(clientToDelete);
+        await clientsApi.deactivate(clientToDelete);
         setClientData(clientData.filter((c) => c.id !== clientToDelete));
         setDeleteDialogOpen(false);
         setClientToDelete(null);
@@ -297,6 +287,7 @@ export default function ClientPage() {
           income: newClient.income,
         }),
         nivelDeRisco: newClient.nivelDeRisco || "Medio", // <<<< TODO using backend api
+        isActive: true,
       };
 
       const createdClient = await clientsApi.create(clientToAdd);
@@ -318,7 +309,6 @@ export default function ClientPage() {
   /*  -----------------------------------------
       ------------------ END ------------------
       ----------------------------------------- */
-
 
   /** -----------------------------------------
    *  ----------- Beginning of HTML -----------
@@ -382,8 +372,6 @@ export default function ClientPage() {
                 {clientData
                   .filter((client) => {
                     const nomeSearch = nameFilter.toLowerCase();
-                    const idSearch = idFilter.toLowerCase();
-                    const cpfCnpjSearch = cpfCnpjFilter.toLowerCase();
                     const paisSearch = paisFilter.toLowerCase();
                     const capitalSearch = capitalFilter.toLowerCase();
                     
@@ -397,10 +385,13 @@ export default function ClientPage() {
                     // Check Nível de Risco filter
                     const riscoMatch = nivelDeRiscoFilter === "" || client.nivelDeRisco === nivelDeRiscoFilter;
                     
+                    // Check client ID filter (from ClientCombobox)
+                    const clientIdMatch = selectedClientIdFilter === "" || client.id === selectedClientIdFilter;
+                    
                     return (
-                      client.id?.toLowerCase().includes(idSearch) &&
+                      client.isActive === true &&
+                      clientIdMatch &&
                       client.nome?.toLowerCase().includes(nomeSearch) &&
-                      client.cpfCnpj?.toLowerCase().includes(cpfCnpjSearch) &&
                       client.pais?.toLowerCase().includes(paisSearch) &&
                       capitalMatch &&
                       kycMatch &&
@@ -524,12 +515,12 @@ export default function ClientPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="pais">País</Label>
-                <Input
-                  id="pais"
-                  value={editedClient.pais}
-                  onChange={(e) =>
-                    setEditedClient({ ...editedClient, pais: e.target.value })
-                  }
+                <CountryCombobox
+                  isOpen={editCountryComboboxOpen}
+                  setIsOpen={setEditCountryComboboxOpen}
+                  selectedCountry={editedClient.pais}
+                  onSelect={(countryName) => setEditedClient({ ...editedClient, pais: countryName })}
+                  countries={countries}
                 />
               </div>
 
@@ -700,12 +691,12 @@ export default function ClientPage() {
 
             <div className="space-y-2">
               <Label htmlFor="new-pais">País *</Label>
-              <Input
-                id="new-pais"
-                value={newClient.pais || ""}
-                onChange={(e) =>
-                  setNewClient({ ...newClient, pais: e.target.value })
-                }
+              <CountryCombobox
+                isOpen={countryComboboxOpen}
+                setIsOpen={setCountryComboboxOpen}
+                selectedCountry={newClient.pais || ""}
+                onSelect={(countryName) => setNewClient({ ...newClient, pais: countryName })}
+                countries={countries}
               />
             </div>
 
@@ -810,31 +801,104 @@ export default function ClientPage() {
             </DialogDescription>
           </DialogHeader>
 
+          <div>
+            <h3 className="mb-4 text-sm font-semibold">Colunas Visíveis</h3>
+            <div className="flex flex-wrap gap-3">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="col-id"
+                checked={visibleColumns.id}
+                onCheckedChange={() => toggleColumn('id')}
+              />
+              <label htmlFor="col-id" className="text-sm cursor-pointer">
+                ID
+              </label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="col-nome"
+                checked={visibleColumns.nome}
+                onCheckedChange={() => toggleColumn('nome')}
+              />
+              <label htmlFor="col-nome" className="text-sm cursor-pointer">
+                Nome
+              </label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="col-cpfCnpj"
+                checked={visibleColumns.cpfCnpj}
+                onCheckedChange={() => toggleColumn('cpfCnpj')}
+              />
+              <label htmlFor="col-cpfCnpj" className="text-sm cursor-pointer">
+                CPF/CNPJ
+              </label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="col-pais"
+                checked={visibleColumns.pais}
+                onCheckedChange={() => toggleColumn('pais')}
+              />
+              <label htmlFor="col-pais" className="text-sm cursor-pointer">
+                País
+              </label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="col-capital"
+                checked={visibleColumns.capital}
+                onCheckedChange={() => toggleColumn('capital')}
+              />
+              <label htmlFor="col-capital" className="text-sm cursor-pointer">
+                Capital
+              </label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="col-kycStatus"
+                checked={visibleColumns.kycStatus}
+                onCheckedChange={() => toggleColumn('kycStatus')}
+              />
+              <label htmlFor="col-kycStatus" className="text-sm cursor-pointer">
+                KYC Status
+              </label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="col-nivelDeRisco"
+                checked={visibleColumns.nivelDeRisco}
+                onCheckedChange={() => toggleColumn('nivelDeRisco')}
+              />
+              <label htmlFor="col-nivelDeRisco" className="text-sm cursor-pointer">
+                Nível de Risco
+              </label>
+            </div>
+          </div>
+
           <div className="py-4 space-y-6 max-h-[60vh] overflow-y-auto">
             <div>
-              <h3 className="mb-3 text-sm font-semibold">Filtrar por ID</h3>
-              <Input
-                placeholder="Digite o ID..."
-                value={idFilter}
-                onChange={(e) => setClientFilter('id', e.target.value)}
-              />
-            </div>
-
-            <div>
-              <h3 className="mb-3 text-sm font-semibold">Filtrar por CPF/CNPJ</h3>
-              <Input
-                placeholder="Digite o CPF ou CNPJ..."
-                value={cpfCnpjFilter}
-                onChange={(e) => setClientFilter('cpfCnpj', e.target.value)}
+              <h3 className="mb-3 text-sm font-semibold">Filtrar por Cliente</h3>
+              <ClientCombobox
+                isOpen={filterClientComboboxOpen}
+                setIsOpen={setFilterClientComboboxOpen}
+                selectedClientId={selectedClientIdFilter}
+                onSelect={(clientId) => setSelectedClientIdFilter(clientId)}
+                clients={clientData}
+                showAllOption={true}
+                placeholder="Buscar cliente..."
               />
             </div>
 
             <div>
               <h3 className="mb-3 text-sm font-semibold">Filtrar por País</h3>
-              <Input
-                placeholder="Digite o país..."
-                value={paisFilter}
-                onChange={(e) => setClientFilter('pais', e.target.value)}
+              <CountryCombobox
+                isOpen={filterCountryComboboxOpen}
+                setIsOpen={setFilterCountryComboboxOpen}
+                selectedCountry={paisFilter}
+                onSelect={(countryName) => setClientFilter('pais', countryName)}
+                countries={countries}
+                showAllOption={true}
               />
             </div>
 
@@ -859,7 +923,6 @@ export default function ClientPage() {
                   >
                     <NativeSelectOption value="">Todos</NativeSelectOption>
                     <NativeSelectOption value="Pendente">Pendente</NativeSelectOption>
-                    <NativeSelectOption value="Em Análise">Em Análise</NativeSelectOption>
                     <NativeSelectOption value="Aprovado">Aprovado</NativeSelectOption>
                     <NativeSelectOption value="Rejeitado">Rejeitado</NativeSelectOption>
                   </NativeSelect>
@@ -880,91 +943,6 @@ export default function ClientPage() {
               </div>
             </div>
 
-            <div>
-              <h3 className="mb-3 text-sm font-semibold">Filtrar por Nome</h3>
-              <div className="space-y-2">
-                <Input
-                  placeholder="Digite o nome..."
-                  value={nameFilter}
-                  onChange={(e) => setClientFilter('nome', e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div>
-              <h3 className="mb-4 text-sm font-semibold">Colunas Visíveis</h3>
-              <div className="flex flex-wrap gap-3">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="col-id"
-                  checked={visibleColumns.id}
-                  onCheckedChange={() => toggleColumn('id')}
-                />
-                <label htmlFor="col-id" className="text-sm cursor-pointer">
-                  ID
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="col-nome"
-                  checked={visibleColumns.nome}
-                  onCheckedChange={() => toggleColumn('nome')}
-                />
-                <label htmlFor="col-nome" className="text-sm cursor-pointer">
-                  Nome
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="col-cpfCnpj"
-                  checked={visibleColumns.cpfCnpj}
-                  onCheckedChange={() => toggleColumn('cpfCnpj')}
-                />
-                <label htmlFor="col-cpfCnpj" className="text-sm cursor-pointer">
-                  CPF/CNPJ
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="col-pais"
-                  checked={visibleColumns.pais}
-                  onCheckedChange={() => toggleColumn('pais')}
-                />
-                <label htmlFor="col-pais" className="text-sm cursor-pointer">
-                  País
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="col-capital"
-                  checked={visibleColumns.capital}
-                  onCheckedChange={() => toggleColumn('capital')}
-                />
-                <label htmlFor="col-capital" className="text-sm cursor-pointer">
-                  Capital
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="col-kycStatus"
-                  checked={visibleColumns.kycStatus}
-                  onCheckedChange={() => toggleColumn('kycStatus')}
-                />
-                <label htmlFor="col-kycStatus" className="text-sm cursor-pointer">
-                  KYC Status
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="col-nivelDeRisco"
-                  checked={visibleColumns.nivelDeRisco}
-                  onCheckedChange={() => toggleColumn('nivelDeRisco')}
-                />
-                <label htmlFor="col-nivelDeRisco" className="text-sm cursor-pointer">
-                  Nível de Risco
-                </label>
-              </div>
-            </div>
           </div>
         </div>
 

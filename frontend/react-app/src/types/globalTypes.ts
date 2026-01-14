@@ -65,24 +65,17 @@ export function formatCurrency(value: number): string {
 }
 
 /* -----------------------------------------
-   -------------- CURRENCY -----------------    <<<< This will come from the backend later
+   -------------- CURRENCY -----------------
    ----------------------------------------- */
 
 // Define currencies array (can be exported and reused)
-export const currencies = [
-  { value: "BRL", label: "BRL - Brazilian Real" },
-  { value: "USD", label: "USD - US Dollar" },
-  { value: "EUR", label: "EUR - Euro" },
-  { value: "CHF", label: "CHF - Swiss Franc" },
-] as const; // 'as const' makes it readonly and preserves literal types
+export const currencySchema = z.object({
+  codigo: z.string().min(1, "Código obrigatório"), // <<<< STRING: OK
+  nome: z.string().min(1, "Nome obrigatório"), // <<<< STRING: OK
+  taxaDiaria: z.number().nonnegative("Taxa diária deve ser não negativa"), // <<<< NUMBER: OK
+});
 
-// Extract currency codes from the array
-const currencyValues = currencies.map((c) => c.value) as [string, ...string[]];
-
-// Currency schema using the extracted values
-export const currencySchema = z.enum(currencyValues);
-
-// Extract TypeScript type
+// Infer TypeScript type from Zod schema
 export type Currency = z.infer<typeof currencySchema>;
 
 /* -----------------------------------------
@@ -99,6 +92,7 @@ export const clientSchema = z.object({
   kycStatus: z.enum(["Aprovado", "Pendente", "Em Análise", "Rejeitado"]), // <<<< STRING ENUM: Remover "Em Análise"
   nivelDeRisco: z.enum(["Baixo", "Medio", "Alto"]), // <<<< STRING ENUM: OK
   income: moneyAmountSchema.optional(), // <<<< NUMBER: OK mas coletar essa informação do back ("income")
+  isActive: z.boolean(), // <<<< BOOLEAN: OK
 });
 
 // Infer TypeScript type from Zod schema
@@ -136,3 +130,17 @@ export const alertSchema = z.object({
 
 // Infer TypeScript type from Zod schema
 export type Alert = z.infer<typeof alertSchema>;
+
+/* -----------------------------------------
+    -------------- COUNTRY ---------------
+   ----------------------------------------- */
+
+   export const countrySchema = z.object({
+    id: z.string(), // STRING: TODO backend check
+    nome: z.string().min(1, "Nome obrigatório"), // STRING: TODO backend check
+    codigo: z.string().min(1, "Código obrigatório"), // STRING: TODO backend check
+    risco: z.enum(["Baixo", "Médio", "Alto"]), // STRING: TODO backend check
+  });
+
+// Infer TypeScript type from Zod schema
+export type Country = z.infer<typeof countrySchema>;
