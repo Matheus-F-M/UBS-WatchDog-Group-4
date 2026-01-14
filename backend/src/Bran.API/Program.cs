@@ -4,6 +4,7 @@ using Bran.Application.Services;
 using Bran.Domain.Helpers;
 using Bran.Domain.Interfaces;
 using Bran.Domain.Rules.Clients;
+using Bran.Domain.Rules.Transactions;
 using Bran.Infrastructure.Persistence;
 using Bran.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -56,6 +57,9 @@ builder.Services.AddScoped<ICurrencyRepository, CurrencyRepository>();
 builder.Services.AddScoped<IClientRiskRule, ClientTypeRiskRule>();
 builder.Services.AddScoped<IClientRiskRule, CountryRiskRule>();
 builder.Services.AddScoped<ClientRiskCalculator>();
+builder.Services.AddScoped<IComplianceRule, TransactionDailyLimitRule>();
+builder.Services.AddScoped<IComplianceRule, TransactionStructuringRule>();
+builder.Services.AddScoped<IComplianceRule, TransactionRiskCountryRule>();
 
 // Dependency Injection/DbContext (PostgreSQL)
 builder.Services.AddDbContext<BranDbContext>(options =>
