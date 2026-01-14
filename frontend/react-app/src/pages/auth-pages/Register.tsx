@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useAuthStore, { type AuthState } from "../../stores/authStore";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -66,7 +66,7 @@ export default function Register() {
       </form>
 
       <p className="text-sm text-gray-600 flex justify-center">
-        Already have an account? <a href="/login" className="text-blue-600 underline px-1"> Sign in</a>
+        Already have an account? <Link to="/login" className="text-blue-600 underline px-1"> Sign in</Link>
       </p>
     </Card>
   );

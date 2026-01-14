@@ -13,9 +13,8 @@ export const API_COUNTRY_BASE_URL = "http://localhost:5131/api/countries";
  */
 export const mapBackendCountry = (backendCountry: any): Country => {
   return {
-    id: backendCountry.code || "none",
+    codigo: backendCountry.code || "none",
     nome: backendCountry.name || "none",
-    codigo: backendCountry.countryCode || "none",
     risco:
       backendCountry.riskLevel === 0
         ? "Baixo"
@@ -34,7 +33,7 @@ export const mapBackendCountry = (backendCountry: any): Country => {
  */
 export const reverseMapBackendCountry = (country: Country): any => {
   return {
-    countryCode: country.codigo,
+    code: country.codigo,
     name: country.nome,
     riskLevel:
       country.risco === "Baixo"

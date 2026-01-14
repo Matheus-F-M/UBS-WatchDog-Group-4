@@ -40,61 +40,67 @@ export const CountryCombobox = ({
   onSelect,
   countries,
   showAllOption = false,
-}: CountryComboboxProps) => (
-  <Popover open={isOpen} onOpenChange={setIsOpen}>
-    <PopoverTrigger asChild>
-      <Button
-        variant="outline"
-        role="combobox"
-        aria-expanded={isOpen}
-        className="w-full justify-between"
-      >
-        {selectedCountry || (showAllOption ? "Todos" : "Selecione um país...")}
-        <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-      </Button>
-    </PopoverTrigger>
-    <PopoverContent className="w-full p-0">
-      <Command>
-        <CommandInput placeholder="Buscar país..." />
-        <CommandList>
-          <CommandEmpty>Nenhum país encontrado.</CommandEmpty>
-          <CommandGroup>
-            {showAllOption && (
-              <CommandItem
-                value="todos"
-                onSelect={() => {
-                  onSelect("");
-                  setIsOpen(false);
-                }}
-              >
-                <CheckIcon
-                  className={`mr-2 h-4 w-4 ${
-                    selectedCountry === "" ? "opacity-100" : "opacity-0"
-                  }`}
-                />
-                Todos
-              </CommandItem>
-            )}
-            {countries.map((country) => (
-              <CommandItem
-                key={country.id}
-                value={country.nome}
-                onSelect={() => {
-                  onSelect(country.nome);
-                  setIsOpen(false);
-                }}
-              >
-                <CheckIcon
-                  className={`mr-2 h-4 w-4 ${
-                    selectedCountry === country.nome ? "opacity-100" : "opacity-0"
-                  }`}
-                />
-                {country.nome}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </CommandList>
-      </Command>
-    </PopoverContent>
-  </Popover>
-);
+}: CountryComboboxProps) => {
+  // Find the selected country to display its name
+  const selectedCountryObj = countries.find((c) => c.codigo === selectedCountry);
+  const displayText = selectedCountryObj?.nome || (showAllOption && selectedCountry === "" ? "Todos" : "Selecione um país...");
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={isOpen}
+          className="w-full justify-between"
+        >
+          {displayText}
+          <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-0">
+        <Command>
+          <CommandInput placeholder="Buscar país..." />
+          <CommandList>
+            <CommandEmpty>Nenhum país encontrado.</CommandEmpty>
+            <CommandGroup>
+              {showAllOption && (
+                <CommandItem
+                  value="todos"
+                  onSelect={() => {
+                    onSelect("");
+                    setIsOpen(false);
+                  }}
+                >
+                  <CheckIcon
+                    className={`mr-2 h-4 w-4 ${
+                      selectedCountry === "" ? "opacity-100" : "opacity-0"
+                    }`}
+                  />
+                  Todos
+                </CommandItem>
+              )}
+              {countries.map((country) => (
+                <CommandItem
+                  key={country.codigo}
+                  value={country.nome}
+                  onSelect={() => {
+                    onSelect(country.codigo);
+                    setIsOpen(false);
+                  }}
+                >
+                  <CheckIcon
+                    className={`mr-2 h-4 w-4 ${
+                      selectedCountry === country.codigo ? "opacity-100" : "opacity-0"
+                    }`}
+                  />
+                  {country.nome}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+};

@@ -75,7 +75,6 @@ export const alertsApi = {
     const response = await fetch(API_ALERT_BASE_URL);
     if (!response.ok) throw new Error("Failed to fetch alerts");
     const rawData = await response.json();
-    console.log("Raw API Response from getAll:", rawData);
     return rawData.map(mapBackendAlert);
   },
 
