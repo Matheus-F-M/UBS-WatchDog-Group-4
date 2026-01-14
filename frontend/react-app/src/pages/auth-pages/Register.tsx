@@ -66,7 +66,7 @@ export default function Register() {
       </form>
 
       <p className="text-sm text-gray-600 flex justify-center">
-        Already have an account? <Link to="/login" className="text-blue-600 underline px-1"> Sign in</Link>
+        Already have an account? <Link to="/" className="text-blue-600 underline px-1"> Sign in</Link>
       </p>
     </Card>
   );

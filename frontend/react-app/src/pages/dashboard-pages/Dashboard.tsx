@@ -5,7 +5,6 @@ import {
   NavigationMenu,
   NavigationMenuList,
   NavigationMenuItem,
-  NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
 import {
   DropdownMenu,
@@ -38,7 +37,7 @@ export default function Dashboard() {
   const handleSignOut = (e: Event) => {
     e.preventDefault();
     logout();
-    navigate("/login");
+    navigate("/");
   };
 
   /**
@@ -51,7 +50,7 @@ export default function Dashboard() {
 
     deleteAccount();
     // After deleting account, send user to login page
-    navigate("/login");
+    navigate("/");
   }
 
   return (
@@ -65,7 +64,7 @@ export default function Dashboard() {
       >
         <div className="flex items-center justify-between py-3 max-w-7xl mx-auto w-full">
           <div className="flex items-center gap-6">
-            <h1 className="text-2xl font-bold text-primary">
+            <h1 className="text-2xl font-bold text-primary px-3">
               UBS 
               <span className="bg-gradient-to-r from-[#b10606] via-[#971e99] to-[#0b0198] bg-clip-text text-transparent">
                 BRAN

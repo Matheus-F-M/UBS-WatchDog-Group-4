@@ -13,7 +13,6 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import "./index.css";
 
-import App from "./App.tsx";
 import Login from "./pages/auth-pages/Login.tsx"; // make Login component
 import Register from "./pages/auth-pages/Register.tsx"; // make Register component
 import AuthLayout from "./pages/auth-pages/AuthLayout.tsx"; // Authlayout is for wrapping auth pages
@@ -28,16 +27,11 @@ import NotFoundPage from "./pages/notFoundPage.tsx";
 
 const BRAN_router = createBrowserRouter([
   {
-    path: "/",
-    element: <App />,
-    errorElement: <NotFoundPage />,
-  },
-  {
     element: <AuthLayout />,
     errorElement: <NotFoundPage />,
     children: [
       {
-        path: "/login",
+        path: "/",
         element: <Login />,
       },
       {

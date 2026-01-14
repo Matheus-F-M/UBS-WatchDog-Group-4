@@ -8,7 +8,6 @@ import { countriesApi } from "@/api/countryAPI";
 import { CountryCombobox } from "@/components/ui/countryComboBox";
 import { ClientCombobox } from "@/components/ui/clientComboBox";
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useFilterStore } from "@/stores/filterStore";
 import {
@@ -28,12 +27,6 @@ import {
   NativeSelectOption,
 } from "@/components/ui/native-select";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Table,
   TableBody,
   TableCell,
@@ -42,17 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Sheet,
-  SheetTrigger,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter,
-} from "@/components/ui/sheet";
-import {
   AlertDialog,
-  AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogFooter,
@@ -63,7 +46,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -95,17 +77,13 @@ const initialClientData: Client[] = [
    00000000000000000000000000000000000000000 */
 
 export default function ClientPage() {
-  const [searchParams] = useSearchParams();
   const [clientData, setClientData] = useState<Client[]>([]); // Where all the information of our customers are
   const [countries, setCountries] = useState<Country[]>([]);
-  const [editedClient, setEditedClient] = useState<Client | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<string | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [countryComboboxOpen, setCountryComboboxOpen] = useState(false);
-  const [editCountryComboboxOpen, setEditCountryComboboxOpen] = useState(false);
   const [filterCountryComboboxOpen, setFilterCountryComboboxOpen] =
     useState(false);
   const [filterClientComboboxOpen, setFilterClientComboboxOpen] =
