@@ -1,5 +1,3 @@
-//using Bran.Application.Clients.Interfaces;
-//using Bran.Application.Countries.Interfaces;
 using Bran.Application.Services;
 using Bran.Domain.Helpers;
 using Bran.Domain.Interfaces;
@@ -8,9 +6,7 @@ using Bran.Domain.Rules.Transactions;
 using Bran.Infrastructure.Persistence;
 using Bran.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 using Serilog;
-using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +18,11 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
+// ---------------- PORTA DINÂMICA ----------------
+// Railway/Render/Fly.io injetam a variável PORT
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://*:{port}");
+
 // ---------------- SERVICES ----------------
 builder.Services.AddControllers();
 
@@ -32,53 +33,51 @@ builder.Services.AddSwaggerGen();
 // CORS (React)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReact", policy =>
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod());
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:5173",       // dev local
+                "https://seu-front.vercel.app" // produção
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
 
-//Application
+// Application Services
 builder.Services.AddScoped<ClientService>();
-//builder.Services.AddScoped<ICountryService, CountryService>();
-
-//Repositories
-builder.Services.AddScoped<IClientsRepository, ClientRepository>();
-builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
-builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
-builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
 builder.Services.AddScoped<TransactionService>();
 builder.Services.AddScoped<TransactionEvaluationService>();
 builder.Services.AddScoped<ComplianceService>();
-builder.Services.AddScoped<IAlertsRepository, AlertsRepository>();
 builder.Services.AddScoped<CurrencyService>();
+builder.Services.AddScoped<ClientRiskCalculator>();
+builder.Services.AddScoped<AlertServices>();
+
+// Repositories
+builder.Services.AddScoped<IClientsRepository, ClientRepository>();
+builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
+builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
+builder.Services.AddScoped<IAlertsRepository, AlertsRepository>();
 builder.Services.AddScoped<ICurrencyRepository, CurrencyRepository>();
+builder.Services.AddScoped<IComplianceConfigsRepository, ComplianceConfigsRepository>();
+
+// Rules
 builder.Services.AddScoped<IClientRiskRule, ClientTypeRiskRule>();
 builder.Services.AddScoped<IClientRiskRule, CountryRiskRule>();
-builder.Services.AddScoped<ClientRiskCalculator>();
-builder.Services.AddScoped<IComplianceConfigsRepository, ComplianceConfigsRepository>();
 builder.Services.AddScoped<IComplianceRule, TransactionDailyLimitRule>();
 builder.Services.AddScoped<IComplianceRule, TransactionStructuringRule>();
 builder.Services.AddScoped<IComplianceRule, TransactionRiskCountryRule>();
-builder.Services.AddScoped<AlertServices>();
 
-// Dependency Injection/DbContext (PostgreSQL)
+// DbContext (PostgreSQL)
 builder.Services.AddDbContext<BranDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    )
-);
-
-builder.Services.AddCors(options =>
 {
-    options.AddPolicy("FrontendPolicy",
-        policy =>
-        {
-            policy
-                .WithOrigins("http://localhost:5173")
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        });
+    var connectionString = Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL");
+    if (string.IsNullOrEmpty(connectionString))
+    {
+        throw new InvalidOperationException("DATABASE_PUBLIC_URL não está definida nas variáveis de ambiente.");
+    }
+    options.UseNpgsql(connectionString);
 });
 
 var app = builder.Build();
@@ -91,17 +90,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseSerilogRequestLogging();
-
 app.UseHttpsRedirection();
-
-app.UseCors("AllowReact");
-
-
-
 app.UseCors("FrontendPolicy");
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
