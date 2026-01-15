@@ -8,12 +8,13 @@ ALERT TYPE
 .id: string
 .idCliente: string
 .idTransacao: string
-.sveridade: enum string = {"Baixa", "Média", "Alta", "Crítica"}
-.status: enum string = {"Novo", "Em Análise", "Resolvido"}
+.regra: string - nome da regra que gerou o alerta
+.severidade: enum string - "Baixa", "Média", "Alta", ou "Crítico"
+.status: enum string - "Novo", "Em Análise", ou "Resolvido"
 
 ALERT API
-* GET ALL = lista de todos os alertas no banco
-* UPDATE = atualiza apenas o status.
+* GET ALL = lista de todos os alertas no banco de dados
+* UPDATE = atualiza os status de um alerta
 
 ----------------------------------------------------------------------------------------------------------------
 
@@ -37,19 +38,39 @@ CLIENT API
 ----------------------------------------------------------------------------------------------------------------
 
 COUNTRY TYPE
+.nome: string - nome do país por extenso
+.codigo: string - código do país (ex: BR, US, CN)
+.risco: enum string - "Baixo", "Médio", ou "Alto"
 
 COUNTRY API
+* GET ALL = lista de todos os países no banco de dados
+* GET BY CODE = retorna um país a partir do código enviado
 
 ----------------------------------------------------------------------------------------------------------------
 
 CURRENCY TYPE
+.codigo: string - código da moeda (ex: BRL, USD, EUR)
+.nome: string - nome da moeda por extenso
+.taxaDiaria: number - taxa de conversão diária ...0000.00
 
 CURRENCY API
+* GET ALL = lista de todas as moedas no banco de dados
+* CREATE = cria uma nova moeda no sistema
+* DELETE = remove uma moeda do sistema pelo código enviado
 
 ----------------------------------------------------------------------------------------------------------------
 
 TRANSACTION TYPE
+.id: string
+.idCliente: string - ID do cliente que realizou a transação
+.tipo: enum string - "Depósito", "Saque", ou "Transferência"
+.valor: number - valor da transação ...0000.00
+.moeda: string - código da moeda utilizada (ex: BRL, USD)
+.idContraparte: string - ID do cliente contraparte na transação
+.dataHora: string - data e hora da transação no formato "YYYY-MM-DD HH:MM:SS"
 
 TRANSACTION API
+* GET ALL = lista de todas as transações no banco de dados
+* CREATE = cria uma nova transação. A data/hora é definida automaticamente no backend
 
 ----------------------------------------------------------------------------------------------------------------
