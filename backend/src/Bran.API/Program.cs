@@ -1,17 +1,3 @@
-//using Bran.Application.Clients.Interfaces;
-//using Bran.Application.Countries.Interfaces;
-using Bran.Application.Services;
-using Bran.Domain.Helpers;
-using Bran.Domain.Interfaces;
-using Bran.Domain.Rules.Clients;
-using Bran.Domain.Rules.Transactions;
-using Bran.Infrastructure.Persistence;
-using Bran.Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
-using Serilog;
-using System;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // ---------------- LOGGING (Serilog) ----------------
@@ -44,17 +30,11 @@ builder.Services.AddCors(options =>
     });
 });
 
-app.UseCors("FrontendPolicy");
-
-//Application
+// Application + Repositories + Services
 builder.Services.AddScoped<ClientService>();
-//builder.Services.AddScoped<ICountryService, CountryService>();
-
-//Repositories
 builder.Services.AddScoped<IClientsRepository, ClientRepository>();
 builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
 builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
-builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
 builder.Services.AddScoped<TransactionService>();
 builder.Services.AddScoped<TransactionEvaluationService>();
 builder.Services.AddScoped<ComplianceService>();
@@ -70,8 +50,8 @@ builder.Services.AddScoped<IComplianceRule, TransactionStructuringRule>();
 builder.Services.AddScoped<IComplianceRule, TransactionRiskCountryRule>();
 builder.Services.AddScoped<AlertServices>();
 
-// Dependency Injection/DbContext (PostgreSQL)
-builder.Services.AddDbContext<BranDbContext>(options => 
+// DbContext (PostgreSQL)
+builder.Services.AddDbContext<BranDbContext>(options =>
 {
     var connectionString = Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL");
     if (string.IsNullOrEmpty(connectionString))
@@ -94,11 +74,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseSerilogRequestLogging();
-
 app.UseHttpsRedirection();
-
+app.UseCors("FrontendPolicy");
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
