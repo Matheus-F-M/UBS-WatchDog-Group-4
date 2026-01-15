@@ -19,7 +19,6 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // ---------------- PORTA DINÂMICA ----------------
-// Railway/Render/Fly.io injetam a variável PORT
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://*:{port}");
 
@@ -94,5 +93,9 @@ app.UseHttpsRedirection();
 app.UseCors("FrontendPolicy");
 app.UseAuthorization();
 app.MapControllers();
+
+// Serve frontend React
+app.UseStaticFiles();
+app.MapFallbackToFile("index.html");
 
 app.Run();
