@@ -71,11 +71,15 @@ builder.Services.AddScoped<IComplianceRule, TransactionRiskCountryRule>();
 builder.Services.AddScoped<AlertServices>();
 
 // Dependency Injection/DbContext (PostgreSQL)
-builder.Services.AddDbContext<BranDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    )
-);
+builder.Services.AddDbContext<BranDbContext>(options => 
+{
+    var connectionString = Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL");
+    if (string.IsNullOrEmpty(connectionString))
+    {
+        throw new InvalidOperationException("DATABASE_PUBLIC_URL não está definida nas variáveis de ambiente.");
+    }
+    options.UseNpgsql(connectionString);
+});
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://*:{port}");
