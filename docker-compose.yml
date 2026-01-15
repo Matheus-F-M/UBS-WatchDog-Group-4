@@ -1,17 +1,13 @@
-version: "3.9"
-
 services:
-  postgres:
-    image: postgres:16
-    container_name: bran-postgres
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bran-app
     environment:
-      POSTGRES_DB: bran_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__Default=Host=bran-postgres;Port=5432;Database=bran_db;Username=postgres;Password=postgres
     ports:
-      - "5131:5131"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
+      - "5000:5000"
+    depends_on:
+      - postgres
