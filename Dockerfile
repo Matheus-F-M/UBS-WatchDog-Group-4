@@ -8,19 +8,20 @@ RUN npm run build
 
 # Etapa 2: Build do backend (.NET)
 # Etapa 2: Build do backend (.NET)
+# Etapa 2: Build do backend (.NET)
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend-build
 WORKDIR /src
 
 # Copia todos os .csproj para restaurar dependências
-COPY src/Bran.API/Bran.API.csproj ./Bran.API/
-COPY src/Bran.Application/Bran.Application.csproj ./Bran.Application/
-COPY src/Bran.Domain/Bran.Domain.csproj ./Bran.Domain/
-COPY src/Bran.Infrastructure/Bran.Infrastructure.csproj ./Bran.Infrastructure/
+COPY backend/src/Bran.API/Bran.API.csproj ./Bran.API/
+COPY backend/src/Bran.Application/Bran.Application.csproj ./Bran.Application/
+COPY backend/src/Bran.Domain/Bran.Domain.csproj ./Bran.Domain/
+COPY backend/src/Bran.Infrastructure/Bran.Infrastructure.csproj ./Bran.Infrastructure/
 
 RUN dotnet restore ./Bran.API/Bran.API.csproj
 
 # Copia o restante do código
-COPY src/ ./
+COPY backend/src/ ./
 RUN dotnet publish ./Bran.API/Bran.API.csproj -c Release -o /app/publish
 
 
@@ -32,5 +33,6 @@ COPY --from=backend-build /app/publish .
 COPY --from=frontend-build /app/frontend/dist ./wwwroot
 ENV ASPNETCORE_URLS=http://+:$PORT
 ENTRYPOINT ["dotnet", "Bran.API.dll"]
+
 
 
