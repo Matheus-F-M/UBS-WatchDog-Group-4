@@ -32,11 +32,19 @@ builder.Services.AddSwaggerGen();
 // CORS (React)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReact", policy =>
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod());
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:5173",
+                "https://seu-front.vercel.app"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
+
+app.UseCors("FrontendPolicy");
 
 //Application
 builder.Services.AddScoped<ClientService>();
@@ -69,17 +77,8 @@ builder.Services.AddDbContext<BranDbContext>(options =>
     )
 );
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("FrontendPolicy",
-        policy =>
-        {
-            policy
-                .WithOrigins("http://localhost:5173")
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        });
-});
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://*:{port}");
 
 var app = builder.Build();
 
@@ -93,12 +92,6 @@ if (app.Environment.IsDevelopment())
 app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
-
-app.UseCors("AllowReact");
-
-
-
-app.UseCors("FrontendPolicy");
 
 app.UseAuthorization();
 
