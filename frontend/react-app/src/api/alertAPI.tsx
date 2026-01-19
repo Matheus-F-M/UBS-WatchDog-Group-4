@@ -82,15 +82,13 @@ export const alertsApi = {
   },
 
   // Update alert
-  update: async (id: string, alert: Alert): Promise<Alert> => {
-    const response = await fetch(`${API_ALERT_BASE_URL}/${id}`, {
+  update: async (id: string, alert: status): Promise<void> => {
+    const response = await fetch(`${API_ALERT_BASE_URL}/${id}/status`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(reverseMapBackendAlert(alert)),
+      body: JSON.stringify({status}),
     });
     if (!response.ok) throw new Error("Failed to update alert");
-    const rawAlert = await response.json();
-    return mapBackendAlert(rawAlert);
   },
 };
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
