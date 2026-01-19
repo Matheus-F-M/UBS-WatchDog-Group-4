@@ -71,13 +71,33 @@ builder.Services.AddScoped<IComplianceRule, TransactionRiskCountryRule>();
 // DbContext (PostgreSQL)
 builder.Services.AddDbContext<BranDbContext>(options =>
 {
-    var connectionString = Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL");
-    if (string.IsNullOrEmpty(connectionString))
+    var rawUrl = Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL");
+    if (string.IsNullOrEmpty(rawUrl))
     {
-        throw new InvalidOperationException("DATABASE_PUBLIC_URL não está definida nas variáveis de ambiente.");
+        throw new InvalidOperationException("DATABASE_PUBLIC_URL não está definida.");
     }
-    options.UseNpgsql(connectionString);
+    if (rawUrl.StartsWith("Host="))
+    {
+        options.UseNpgsql(rawUrl);
+    }
+    else
+    {
+        // Converte de URL para key=value
+        var uri = new Uri(rawUrl);
+        var userInfo = uri.UserInfo.Split(':');
+        var username = userInfo[0];
+        var password = userInfo[1];
+        var host = uri.Host;
+        var port = uri.Port;
+        var database = uri.AbsolutePath.TrimStart('/');
+
+        var connString =
+            $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+
+        options.UseNpgsql(connString);
+    }
 });
+
 
 var app = builder.Build();
 
