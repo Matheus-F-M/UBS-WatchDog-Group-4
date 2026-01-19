@@ -36,13 +36,15 @@ builder.Services.AddCors(options =>
     {
         policy
             .WithOrigins(
-                "http://localhost:5173",       // dev local
-                "https://seu-front.vercel.app" // produção
+                "http://localhost:5173",       
+                "https://seu-front.vercel.app",
+                "https://ubs-watchdog-group-4-production.up.railway.app"
             )
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
 });
+
 
 // Application Services
 builder.Services.AddScoped<ClientService>();
