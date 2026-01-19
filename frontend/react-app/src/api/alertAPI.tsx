@@ -1,7 +1,6 @@
 import { type Alert } from "@/types/globalTypes";
 
-export const API_ALERT_BASE_URL = "http://localhost:5131/api/v1/alerts";
-
+export const API_ALERT_BASE_URL = "/api/v1/alerts";
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
        -------- ALERT API HERE --------
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
