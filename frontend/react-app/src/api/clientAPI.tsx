@@ -1,7 +1,6 @@
 import { validateCpfCnpj, type Client } from "@/types/globalTypes";
 
-export const API_CLIENT_BASE_URL = "http://localhost:5131/api/v1/clients";
-
+export const API_CLIENT_BASE_URL = "/api/v1/clients";
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
        -------- CLIENT API HERE --------
    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
