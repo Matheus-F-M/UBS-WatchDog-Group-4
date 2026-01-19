@@ -1,7 +1,7 @@
 import { type Transaction } from "@/types/globalTypes";
 
 
-export const API_TRANSACTION_BASE_URL = "http://localhost:5131/api/v1/transactions";
+export const API_TRANSACTION_BASE_URL = "/api/v1/transactions";
 
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    -------- API IMPLEMENTATION HERE --------
