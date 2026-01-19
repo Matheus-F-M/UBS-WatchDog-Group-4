@@ -159,41 +159,40 @@ export default function AlertPage() {
    * @param alertId String
    * @param newStatus Alert status
    */
-  const handleStatusChange = async (
-    alertId: string,
-    newStatus: Alert["status"]
-  ) => {
-    const alertToUpdate = alertData.find((alert) => alert.id === alertId);
-    if (!alertToUpdate) return;
+const handleStatusChange = async (
+  alertId: string,
+  newStatus: Alert["status"]
+) => {
+  const alertToUpdate = alertData.find((alert) => alert.id === alertId);
+  if (!alertToUpdate) return;
 
-    // Optimistically update the UI
+  // Atualização otimista na UI
+  setAlertData(
+    alertData.map((alert) =>
+      alert.id === alertId ? { ...alert, status: newStatus } : alert
+    )
+  );
+
+  try {
+    // Converte string para número (0=Novo, 1=Em Análise, 2=Resolvido)
+    const statusNumber =
+      newStatus === "Novo" ? 0 : newStatus === "Em Análise" ? 1 : 2;
+
+    // Chama API → grava no banco
+    await alertsApi.update(alertId, statusNumber);
+
+    // Não precisa esperar retorno, já atualizamos a UI
+  } catch (err) {
+    setError("Erro ao atualizar status do alerta");
+    // Reverte se falhar
     setAlertData(
       alertData.map((alert) =>
-        alert.id === alertId ? { ...alert, status: newStatus } : alert
+        alert.id === alertId ? alertToUpdate : alert
       )
     );
-
-    // Update via API
-    try {
-      const updatedAlert = await alertsApi.update(alertId, {
-        ...alertToUpdate,
-        status: newStatus,
-      });
-      // Update with the response from the server
-      setAlertData(
-        alertData.map((alert) =>
-          alert.id === updatedAlert.id ? updatedAlert : alert
-        )
-      );
-    } catch (err) {
-      setError("Erro ao atualizar status do alerta");
-      // Revert the optimistic update
-      setAlertData(
-        alertData.map((alert) => (alert.id === alertId ? alertToUpdate : alert))
-      );
-      alert("Erro ao atualizar status do alerta");
-    }
-  };
+    alert("Erro ao atualizar status do alerta");
+  }
+};
 
   /** -----------------------------------------
    *  ----------- Beginning of HTML -----------
