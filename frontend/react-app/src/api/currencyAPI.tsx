@@ -1,6 +1,6 @@
 import { type Currency } from "@/types/globalTypes";
 
-export const API_CURRENCY_BASE_URL = "http://localhost:5131/api/v1/currencies";
+export const API_CURRENCY_BASE_URL = "/api/v1/currencies";
 
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
        -------- CURRENCY API HERE --------
