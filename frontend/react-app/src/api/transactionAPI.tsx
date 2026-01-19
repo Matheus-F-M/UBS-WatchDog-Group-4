@@ -43,7 +43,6 @@ export const reverseMapBackendTransaction = (transaction: Transaction): any => {
     amount: transaction.valor,
     counterpartyId: transaction.idContraparte,
     currency: transaction.moeda,
-    dateHour: transaction.dataHora,
   };
 };
 
