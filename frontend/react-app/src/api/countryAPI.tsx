@@ -1,6 +1,6 @@
 import { type Country } from "@/types/globalTypes";
 
-export const API_COUNTRY_BASE_URL = "http://localhost:5131/api/countries";
+export const API_COUNTRY_BASE_URL = "/api/countries";
 
 /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
        -------- COUNTRY API HERE --------
