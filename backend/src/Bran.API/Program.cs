@@ -91,6 +91,8 @@ builder.Services.AddDbContext<BranDbContext>(options =>
         var port = uri.Port;
         var database = uri.AbsolutePath.TrimStart('/');
 
+        Console.WriteLine($"[DB] Host={host};Port={port};Database={database};User={username}");
+
         var connString =
             $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
 
