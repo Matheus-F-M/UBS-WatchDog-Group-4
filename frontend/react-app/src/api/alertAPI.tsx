@@ -82,7 +82,7 @@ export const alertsApi = {
   },
 
   // Update alert
-  update: async (id: string, alert: status): Promise<void> => {
+  update: async (id: string, status: status): Promise<void> => {
     const response = await fetch(`${API_ALERT_BASE_URL}/${id}/status`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
