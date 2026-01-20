@@ -55,14 +55,16 @@ export const reverseMapBackendAlert = (alert: Alert): any => {
         : alert.severidade === "Alta"
         ? 2
         : alert.severidade === "Crítico"
-        ? 3,
+        ? 3
+        : 1,
     status:
       alert.status === "Novo"
         ? 0
         : alert.status === "Em Análise"
         ? 1
         : alert.status === "Resolvido"
-        ? 2,
+        ? 2
+        : 0,
     ruleName: alert.regra,
   };
 };
