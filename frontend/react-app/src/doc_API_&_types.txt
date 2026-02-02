@@ -1,0 +1,76 @@
+**  Aqui estão as informações dos global types e como eles estão sendo usados no frontend.
+**  Também temos informações de como as APIs do frontend funcionam
+**  Cada uma dessas classes tem parâmetros diferentes e data types que são específicados abaixo 
+
+----------------------------------------------------------------------------------------------------------------
+
+ALERT TYPE
+.id: string
+.idCliente: string
+.idTransacao: string
+.regra: string - nome da regra que gerou o alerta
+.severidade: enum string - "Baixa", "Média", "Alta", ou "Crítico"
+.status: enum string - "Novo", "Em Análise", ou "Resolvido"
+
+ALERT API
+* GET ALL = lista de todos os alertas no banco de dados
+* UPDATE = atualiza os status de um alerta
+
+----------------------------------------------------------------------------------------------------------------
+
+CLIENT TYPE
+.id: string
+.nome: string - nome completo (nome e sobrenome, ou apenas o nome da empresa)
+.cpfCnpj: string - 000.000.000-00 ou 00.000.000/0001-00
+.pais: string - nome do pais por extenso
+.kycStatus: enum string - "Aprovado", "Pendente", "Em Análise", ou "Rejeitado"
+.nivelDeRisco: enum string - "Baixo", "Medio", ou "Alto"
+.income: number - ...0000.00
+.isActive: boolean = cliente está ativo ou foi desligado do sistema?
+
+CLIENT API
+* GET ALL = lista de todos os clientes no banco de dados
+* GET BY ID = retorna um cliente a partir do ID enviado
+* CREATE = cria um cliente. Deixa de fora o Nível de Risco (determinado no back)
+* UPDATE = muda as informações de um cliente pelo ID enviado. Deixa de fora o Nível de Risco
+* DEACTIVATE = muda o valor de .isActive para false de um cliente pelo ID enviado
+
+----------------------------------------------------------------------------------------------------------------
+
+COUNTRY TYPE
+.nome: string - nome do país por extenso
+.codigo: string - código do país (ex: BR, US, CN)
+.risco: enum string - "Baixo", "Médio", ou "Alto"
+
+COUNTRY API
+* GET ALL = lista de todos os países no banco de dados
+* GET BY CODE = retorna um país a partir do código enviado
+
+----------------------------------------------------------------------------------------------------------------
+
+CURRENCY TYPE
+.codigo: string - código da moeda (ex: BRL, USD, EUR)
+.nome: string - nome da moeda por extenso
+.taxaDiaria: number - taxa de conversão diária ...0000.00
+
+CURRENCY API
+* GET ALL = lista de todas as moedas no banco de dados
+* CREATE = cria uma nova moeda no sistema
+* DELETE = remove uma moeda do sistema pelo código enviado
+
+----------------------------------------------------------------------------------------------------------------
+
+TRANSACTION TYPE
+.id: string
+.idCliente: string - ID do cliente que realizou a transação
+.tipo: enum string - "Depósito", "Saque", ou "Transferência"
+.valor: number - valor da transação ...0000.00
+.moeda: string - código da moeda utilizada (ex: BRL, USD)
+.idContraparte: string - ID do cliente contraparte na transação
+.dataHora: string - data e hora da transação no formato "YYYY-MM-DD HH:MM:SS"
+
+TRANSACTION API
+* GET ALL = lista de todas as transações no banco de dados
+* CREATE = cria uma nova transação. A data/hora é definida automaticamente no backend
+
+----------------------------------------------------------------------------------------------------------------
